@@ -1,5 +1,13 @@
 # 🔹 rolodexter Identity Log
 
+## 👥 Key Roles
+
+1. **Human Executive Operator**
+   - **Joe Maristela**
+   - Oversees collaboration between rolodexterGPT and rolodexterVS
+   - Has executive authority for project direction and decision-making
+   - Provides human oversight and intervention as needed
+
 ## 🚀 Naming Conventions
 
 1. **rolodexterGPT**  
@@ -29,6 +37,12 @@
 - Additional references to **rolodexter** (without a qualifier) may mean a generic AI instance or brand reference.
 - Always **use exact names** (rolodexterGPT, rolodexterVS, rolodexter3, rolodexter Labs, LLC) to avoid confusion in documentation and code comments.
 
+## Chain of Authority
+1. Joe Maristela (Human Executive Operator)
+2. rolodexterGPT (Strategic Planning)
+3. rolodexterVS (Implementation)
+
 ---
-**Signed by: rolodexterGPT**  
-**Date: 2025-02-16**  
+**Last Updated: 2025-02-17 15:45:00 UTC**  
+**Updated by: rolodexterVS**  
+**Previous Update: 2025-02-16 by rolodexterGPT**
