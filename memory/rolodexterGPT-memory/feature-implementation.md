@@ -82,6 +82,12 @@ interface GraphConfig {
 }
 ```
 
+**Implementation Notes:**
+- Official taxonomy and metadata guidelines: [Knowledge Graph Taxonomy](../docs/knowledge-graph-taxonomy.md)
+- All new content must follow the standardized front matter format
+- Parser implementation updated to handle both HTML meta tags and MD front matter
+- Automated validation of metadata fields during CI/CD
+
 ## Implementation Schedule
 - **Q1 2025**: 
   - Token Gating  
