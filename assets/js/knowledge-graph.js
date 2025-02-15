@@ -1,4 +1,6 @@
 // Knowledge Graph Implementation
+import { graphMetadata } from './graph-metadata.js';
+
 class KnowledgeGraph {
     constructor(containerId) {
         this.container = d3.select(containerId);
@@ -15,6 +17,7 @@ class KnowledgeGraph {
             reference: { color: 'var(--text-secondary)', radius: 4 }
         };
         this.initializeGraph();
+        this.processRepository();
     }
 
     initializeGraph() {
@@ -257,6 +260,89 @@ class KnowledgeGraph {
         });
         this.simulation.force('cluster', this.forceCluster());
         this.simulation.alpha(0.3).restart();
+    }
+
+    async processRepository() {
+        try {
+            const response = await fetch('/api/repository/files');
+            const files = await response.json();
+            
+            for (const file of files) {
+                if (file.path.match(/\.(html|md)$/)) {
+                    const meta = await this.extractFileMetadata(file.path);
+                    if (meta) {
+                        this.addNode({
+                            id: file.path,
+                            name: file.name,
+                            type: this.getNodeType(file.path),
+                            metadata: meta,
+                            cluster: meta['graph-category'],
+                            tags: meta['graph-tags'].split(',').map(t => t.trim())
+                        });
+                    }
+                }
+            }
+
+            // Process connections after all nodes are added
+            this.processConnections();
+        } catch (error) {
+            console.error('Error processing repository:', error);
+        }
+    }
+
+    getNodeType(filepath) {
+        if (filepath.includes('/docs/')) return 'documentation';
+        if (filepath.includes('/research/')) return 'research';
+        if (filepath.includes('/legal/')) return 'legal';
+        if (filepath.match(/\.(md)$/)) return 'content';
+        return 'page';
+    }
+
+    async extractFileMetadata(filepath) {
+        try {
+            const response = await fetch(`/api/file/metadata?path=${filepath}`);
+            const content = await response.text();
+            
+            // Extract meta tags from HTML
+            if (filepath.endsWith('.html')) {
+                const metaTags = content.match(/<meta name="graph-[^>]+>/g) || [];
+                return this.parseMetaTags(metaTags);
+            }
+            
+            // Extract YAML frontmatter from MD
+            if (filepath.endsWith('.md')) {
+                const frontmatter = content.match(/^---\n([\s\S]*?)\n---/) || [];
+                return this.parseFrontmatter(frontmatter[1]);
+            }
+        } catch (error) {
+            console.error(`Error extracting metadata from ${filepath}:`, error);
+            return null;
+        }
+    }
+
+    async processConnections() {
+        const nodes = Array.from(this.nodes.values());
+        
+        for (const node of nodes) {
+            const connections = node.metadata['graph-connections']?.split(',').map(c => c.trim()) || [];
+            
+            for (const target of connections) {
+                this.addLink({
+                    source: node.id,
+                    target: target,
+                    type: this.getLinkType(node, target)
+                });
+            }
+        }
+
+        // Update visualization
+        this.updateData(Array.from(this.nodes.values()), Array.from(this.links.values()));
+    }
+
+    getLinkType(source, target) {
+        if (source.type === target.type) return 'related';
+        if (source.type === 'documentation' || target.type === 'documentation') return 'reference';
+        return 'connection';
     }
 }
 
