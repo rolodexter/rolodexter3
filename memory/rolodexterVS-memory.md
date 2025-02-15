@@ -13,11 +13,13 @@
 ## Logging & Status Updates
 - rolodexterVS should sign **status updates and timestamps** with `rolodexterVS`.
 - rolodexterVS can leave **questions for rolodexterGPT** at the bottom of `.md` files.
+- rolodexterVS should **record full file paths** when logging memory updates.
+- rolodexterVS should **review any pending issues in memory files** (excluding `rolodexterGPT-memory/`).
 
 ## File Renamed
 - **Previous Name:** `rolodexter-memory.md`
 - **New Name:** `rolodexterVS-memory.md`
 
-## Last Updated: 2025-02-15 15:22:11 UTC  
+## Last Updated: 2025-02-15 17:05:12 UTC  
 **(Updated by rolodexterGPT)**
 

@@ -1,6 +1,10 @@
 const { Router } = require('express');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const { PublicKey } = require('@solana/web3.js');
+const bs58 = require('bs58');
+const tokenVerifier = require('../utils/token-verifier');
+const config = require('../config');
 const router = Router();
 
 // API Key Configuration
@@ -85,6 +89,96 @@ function authenticateRequest(req, res, next) {
     next();
 }
 
+// Solana wallet authentication
+async function validateWalletSignature(message, signature, publicKey) {
+    try {
+        const messageBytes = new TextEncoder().encode(message);
+        const publicKeyObj = new PublicKey(publicKey);
+        const signatureBytes = bs58.decode(signature);
+        
+        return await PublicKey.verify(messageBytes, signatureBytes, publicKeyObj);
+    } catch (error) {
+        console.error('Signature validation error:', error);
+        return false;
+    }
+}
+
+// Enhanced Solana wallet authentication with role-based access
+async function authenticateWallet(req, res, next) {
+    const { message, signature, publicKey } = req.headers;
+    
+    if (!message || !signature || !publicKey) {
+        return res.status(401).json({ error: 'Missing authentication parameters' });
+    }
+    
+    try {
+        // Verify signature
+        const isValid = await validateWalletSignature(message, signature, publicKey);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid signature' });
+        }
+        
+        // Check whitelist
+        if (config.tokens.whitelistedAddresses.includes(publicKey)) {
+            req.walletAddress = publicKey;
+            req.accessLevel = 'premium';
+            return next();
+        }
+        
+        // Verify token-based access
+        const accessResult = await tokenVerifier.verifyWalletAccess(publicKey);
+        if (!accessResult.hasAccess) {
+            return res.status(403).json({ 
+                error: 'Insufficient tokens',
+                required: {
+                    governanceToken: config.tokens.minRequiredBalance,
+                    nfts: config.tokens.requiredNFTs
+                }
+            });
+        }
+        
+        req.walletAddress = publicKey;
+        req.accessLevel = accessResult.level;
+        next();
+    } catch (error) {
+        console.error('Wallet authentication error:', error);
+        res.status(500).json({ error: 'Authentication failed' });
+    }
+}
+
+// Rate limiting based on access level
+const createRateLimiter = (windowMs, max, accessLevel) => {
+    return rateLimit({
+        windowMs,
+        max: (req) => req.accessLevel === accessLevel ? max : Math.floor(max / 2),
+        message: { error: 'Rate limit exceeded' }
+    });
+};
+
+// Different rate limits for different access levels
+const standardLimiter = createRateLimiter(15 * 60 * 1000, 100, 'standard');
+const premiumLimiter = createRateLimiter(15 * 60 * 1000, 300, 'premium');
+
+// Token gating middleware
+async function checkTokenGating(req, res, next) {
+    const walletAddress = req.walletAddress;
+    
+    try {
+        // Implement token balance check here
+        const hasRequiredTokens = await checkWalletTokenBalance(walletAddress);
+        if (!hasRequiredTokens) {
+            return res.status(403).json({ 
+                error: 'Insufficient tokens',
+                message: 'This endpoint requires holding specific tokens' 
+            });
+        }
+        next();
+    } catch (error) {
+        console.error('Token gating error:', error);
+        res.status(500).json({ error: 'Failed to verify token holdings' });
+    }
+}
+
 // Monitor middleware
 async function monitorRequest(req, res, next) {
     const startTime = Date.now();
@@ -130,7 +224,16 @@ router.post('/token', limiter, async (req, res) => {
 });
 
 // OpenRouter proxy endpoint
-router.post('/chat', authenticateRequest, limiter, async (req, res) => {
+router.post('/chat', 
+    authenticateWallet,
+    (req, res, next) => {
+        if (req.accessLevel === 'premium') {
+            return premiumLimiter(req, res, next);
+        }
+        return standardLimiter(req, res, next);
+    },
+    authenticateRequest,
+    async (req, res) => {
     let attempts = 0;
     const maxAttempts = API_CONFIG.MAX_RETRIES;
     const startTime = Date.now();
@@ -190,6 +293,23 @@ router.post('/chat', authenticateRequest, limiter, async (req, res) => {
             
             await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
         }
+    }
+});
+
+// Add endpoint to check wallet access status
+router.get('/access-status', authenticateWallet, async (req, res) => {
+    try {
+        const accessResult = await tokenVerifier.verifyWalletAccess(req.walletAddress);
+        res.json({
+            accessLevel: accessResult.level,
+            requirements: {
+                governanceToken: config.tokens.minRequiredBalance,
+                premiumThreshold: config.tokens.premiumThreshold,
+                nfts: config.tokens.requiredNFTs
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to check access status' });
     }
 });
 
