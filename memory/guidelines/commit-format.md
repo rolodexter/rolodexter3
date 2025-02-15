@@ -19,6 +19,8 @@ Each commit message should follow this **clean, structured format**:
 ```
 🔄 Changed Files: [List of modified files]
 📌 Details: [Brief description of changes]
+👤 Author: [rolodexterVS or rolodexterGPT]
+✅ Approved: [Human Executive Operator (if required)]
 📅 Timestamp: [YYYY-MM-DD HH:MM:SS UTC]
 🔗 GitHub: [Commit Link]
 ```
@@ -56,6 +58,15 @@ Each commit message should follow this **clean, structured format**:
 
 ---
 
+## **Authority Requirements**
+Certain types of changes require explicit approval from the Human Executive Operator (Joe Maristela):
+- `[ARCH]` - Architecture changes
+- `[SECURITY]` - Security-related modifications
+- `[CRITICAL]` - Critical system changes
+- `[IDENTITY]` - Changes to identity or authority structure
+
+---
+
 ## **🛠 Implementation Steps**
 ### **1️⃣ Update GitHub Actions Workflow**
 - Modify **`.github/workflows/update-memory.yml`**:
@@ -83,6 +94,8 @@ Each commit message should follow this **clean, structured format**:
 ```
 🔄 Changed Files: memory/session-history.md
 📌 Details: Auto-update session history logs.
+👤 Author: rolodexterVS
+✅ Approved: N/A
 📅 Timestamp: 2025-02-15 14:50:00 UTC
 🔗 GitHub: https://github.com/rolodexter/commit/abc123
 ```
@@ -90,6 +103,8 @@ Each commit message should follow this **clean, structured format**:
 ```
 🔄 Changed Files: chatbot.md, knowledge-graph.md, update-memory.yml
 📌 Details: Implement chatbot integration, update knowledge graph, and refine commit logs.
+👤 Author: rolodexterGPT
+✅ Approved: N/A
 📅 Timestamp: 2025-02-15 15:10:30 UTC
 🔗 GitHub: https://github.com/rolodexter/commit/xyz789
 ```

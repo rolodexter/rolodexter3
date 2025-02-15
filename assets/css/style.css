@@ -421,3 +421,64 @@ input, textarea {
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
+
+/* Overlay Panel */
+.bottom-overlay {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid var(--border-color);
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.overlay-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.overlay-toggle {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.overlay-content {
+    padding: 0.5rem 1rem 1rem 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.hidden {
+    display: none;
+}
+
+.overlay-section-title {
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.overlay-info {
+    margin: 0;
+    padding: 0 0 0 1.2rem;
+    list-style-type: disc;
+}
+
+/* Dark mode support for overlay */
+[data-theme="dark"] .bottom-overlay {
+    background-color: rgba(26, 26, 26, 0.95);
+}
