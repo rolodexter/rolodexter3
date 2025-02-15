@@ -1,0 +1,39 @@
+name: Update Session History
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'memory/session-history.md'
+
+jobs:
+  update-history:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Append Commit to Session History
+        run: |
+          echo -e "\n### $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> memory/session-history.md
+          echo "- 🔄 **Commit:** ${{ github.event.head_commit.message }}" >> memory/session-history.md
+          echo "- 👤 **Author:** ${{ github.event.head_commit.author.name }}" >> memory/session-history.md
+          echo "- 🔍 **Hash:** \`${{ github.sha }}\`" >> memory/session-history.md
+          echo "- Files changed:" >> memory/session-history.md
+          git diff --name-status HEAD~1 HEAD | while read -r line; do
+            echo "  - \`$line\`" >> memory/session-history.md
+          done
+          echo "" >> memory/session-history.md
+
+      - name: Commit Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add memory/session-history.md
+          git commit -m "📝 Updated session history with latest commit details" || echo "No changes to commit"
+          git push
