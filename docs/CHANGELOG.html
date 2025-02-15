@@ -3,27 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowledge Graph - rolodexter</title>
+    <title>Changelog - rolodexter</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="icon" type="image/png" href="../assets/brand/favicon_io/favicon-32x32.png">
 </head>
 <body>
     <button class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="moon" viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path>
-        </svg>
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path></svg>
     </button>
 
     <header>
@@ -42,7 +29,7 @@
                 <ul class="nav-links">
                     <li><a href="../work/index.html">Work</a></li>
                     <li><a href="../schedule/index.html">Schedule</a></li>
-                    <li><a href="../knowledge/index.html" class="active">Knowledge</a></li>
+                    <li><a href="../knowledge/index.html">Knowledge</a></li>
                     <li><a href="../media/index.html">Media</a></li>
                     <li><a href="../labs/index.html">Labs</a></li>
                     <li><a href="../research/index.html">Research</a></li>
@@ -53,12 +40,62 @@
     </header>
 
     <main class="container">
-        <div id="knowledge-graph" class="graph-container"></div>
-        <div class="graph-controls">
-            <button id="zoom-in" class="graph-btn">+</button>
-            <button id="zoom-out" class="graph-btn">-</button>
-            <button id="reset-view" class="graph-btn">Reset</button>
-        </div>
+        <h1>ROLODEXTER Changelog</h1>
+        
+        <p>All notable changes to the ROLODEXTER project will be documented here.</p>
+        
+        <section>
+            <h2>[1.1.0] - 2025-01-20</h2>
+            <h3>Added</h3>
+            <ul>
+                <li>Legal pages (Privacy Policy, Terms of Use, Cookie Policy)</li>
+                <li>Cookie consent banner with cyberpunk styling</li>
+                <li>Footer legal notices and disclaimers</li>
+                <li>Legal page specific styling with cyberpunk aesthetic</li>
+                <li>GDPR compliant cookie management system</li>
+            </ul>
+
+            <h3>Changed</h3>
+            <ul>
+                <li>Updated copyright year to 2025</li>
+                <li>Enhanced footer layout with legal section</li>
+                <li>Improved accessibility in legal pages</li>
+                <li>Updated navigation to include legal links</li>
+            </ul>
+
+            <h3>Security</h3>
+            <ul>
+                <li>Implemented cookie consent management</li>
+                <li>Added privacy-focused legal documentation</li>
+                <li>Enhanced data protection notices</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>[1.0.0] - 2024-01-20</h2>
+            <h3>Added</h3>
+            <ul>
+                <li>Base HTML structure</li>
+                <li>Core styling with CSS variables</li>
+                <li>JavaScript animations and effects</li>
+                <li>Favicon and PWA support</li>
+                <li>Brand documentation</li>
+                <li>Asset directory structure</li>
+            </ul>
+
+            <h3>Changed</h3>
+            <ul>
+                <li>Updated color palette to match brand guidelines</li>
+                <li>Implemented responsive navigation</li>
+                <li>Enhanced typography system</li>
+            </ul>
+
+            <h3>Security</h3>
+            <ul>
+                <li>Added secure headers</li>
+                <li>Implemented PWA manifest</li>
+            </ul>
+        </section>
     </main>
 
     <footer>
@@ -101,7 +138,6 @@
         </div>
     </footer>
 
-    <script src="../assets/js/knowledge-graph.js"></script>
     <script src="../assets/js/script.js"></script>
 </body>
 </html>

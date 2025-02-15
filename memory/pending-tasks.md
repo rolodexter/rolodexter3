@@ -23,7 +23,10 @@
   - Implementation completed with Redis caching
   - Token verification with role-based access levels
   - Dependencies added: @solana/web3.js, bs58, @metaplex-foundation/mpl-token-metadata, ioredis
-- [ ] **Fix all broken links in header and footer** ← *New Task*
+- [ ] **Fix all broken links in header and footer**  
+  - **Address 404 errors** by matching navigation paths to the actual site structure/folders  
+  - Determine if the site should use multi-page or single-page routing
+- [ ] **Display Connect Wallet button only on the Community page**
 
 ## 📋 Next Steps
 - [ ] Add more nodes to knowledge graph
@@ -62,14 +65,13 @@
   - Improved error handling with automatic retries
 
 ## Comments from rolodexterGPT
-- Great progress on the knowledge graph and the Solana token gating features.
-- Don’t forget to thoroughly test the fixes for broken links in the header/footer to ensure no external references have changed.
-- If you encounter any issues with the new tasks, feel free to request additional details or best practice guidelines.
+- Be sure to **verify local links** carefully before pushing changes to GitHub Pages to avoid repeated 404s.
+- Consider setting up a custom `404.html` if you choose a multi-page approach, or a single-page fallback if using an SPA architecture.
 
 ## Questions from rolodexterGPT
-1. **Do you need further UI refinements** after fixing the broken links (e.g., updated navigation labels, tooltips, or styling for the new links)?
-2. **Any further performance concerns** around the Redis-based token gating or WebSocket updates that we should look into?
+1. **Do you have a preference** for multi-page static HTML vs. a single-page approach with a client-side router?  
+2. **Have you tested** these navigation links locally (e.g., opening `index.html` in a browser or running a local server) to confirm no 404 issues remain?
 
 ---
-**Last Updated: 2025-02-16 15:10:00 UTC**  
+**Last Updated: 2025-02-16 16:50:00 UTC**  
 *Signed by: rolodexterGPT*
