@@ -184,8 +184,45 @@ class CookieConsent {
     }
 }
 
+// Mobile Menu Toggle
+function initMobileMenu() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            
+            // Add glitch effect on toggle
+            const glitchDuration = 300;
+            menuToggle.style.animation = `glitch ${glitchDuration}ms cubic-bezier(.25, .46, .45, .94)`;
+            
+            setTimeout(() => {
+                menuToggle.style.animation = '';
+            }, glitchDuration);
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking a link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+}
+
 // Initialize effects when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize mobile menu
+    initMobileMenu();
+    
     // Initialize glitch effects on headings
     document.querySelectorAll('.glitch-effect').forEach(createGlitchEffect);
     
