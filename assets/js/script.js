@@ -1,9 +1,98 @@
-// Import performance tracker
-import { performanceTracker } from './performance-tracker.js';
+// Import performance monitor
+import { performanceMonitor } from './performance-tracker.js';
 
 // Add smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Website loaded successfully!');
+    
+    // Theme handling
+    const themeToggle = document.querySelector('.theme-toggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Load saved theme or use system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.dataset.theme = savedTheme;
+    } else {
+        document.documentElement.dataset.theme = prefersDark.matches ? 'dark' : 'light';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.dataset.theme;
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = newTheme;
+        localStorage.setItem('theme', newTheme);
+        
+        performanceMonitor.logSessionEvent({
+            type: 'theme_change',
+            theme: newTheme,
+            timestamp: Date.now()
+        });
+    });
+
+    // Mobile menu handling
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    
+    menuToggle?.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        performanceMonitor.logSessionEvent({
+            type: 'menu_toggle',
+            state: navLinks.classList.contains('active'),
+            timestamp: Date.now()
+        });
+    });
+
+    // Track navigation interactions
+    document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            performanceMonitor.logSessionEvent({
+                type: 'navigation',
+                target: link.href,
+                text: link.textContent,
+                timestamp: Date.now()
+            });
+        });
+    });
+
+    // Session persistence check
+    const checkSession = () => {
+        const sessionStart = sessionStorage.getItem('sessionStart');
+        if (!sessionStart) {
+            sessionStorage.setItem('sessionStart', Date.now().toString());
+            performanceMonitor.logSessionEvent({
+                type: 'session_start',
+                timestamp: Date.now()
+            });
+        }
+    };
+    checkSession();
+
+    // Performance marks for key interactions
+    const markInteraction = (name) => {
+        performance.mark(`${name}_start`);
+        return () => {
+            performance.mark(`${name}_end`);
+            performance.measure(name, `${name}_start`, `${name}_end`);
+        };
+    };
+
+    // Track scroll performance
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        if (!scrollTimeout) {
+            const endMark = markInteraction('scroll');
+            scrollTimeout = setTimeout(() => {
+                endMark();
+                scrollTimeout = null;
+            }, 150);
+        }
+    }, { passive: true });
+
+    // Cleanup on page unload
+    window.addEventListener('unload', () => {
+        performanceMonitor.cleanup();
+    });
 });
 
 // Glitch Text Effect

@@ -1,32 +1,22 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROLODEXTER</title>
+    <title>rolodexter</title>
     
-    <!-- Favicon and PWA Support -->
+    <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/favicon_io/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon_io/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon_io/favicon-16x16.png">
-    <link rel="shortcut icon" href="/assets/brand/favicon_io/favicon.ico">
     <link rel="manifest" href="/assets/brand/favicon_io/site.webmanifest">
-    <meta name="theme-color" content="#0A0A0A">
     
-    <!-- Font Preloading -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" as="style">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" as="style">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600&display=swap" as="style">
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600&display=swap">
+    <!-- Font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="assets/css/style.css">
-    
-    <meta name="theme-color" content="#0A0A0A">
 </head>
-<body class="neural-bg">
+<body>
     <button class="theme-toggle" aria-label="Toggle theme">
         <svg class="sun" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="5"></circle>
@@ -46,95 +36,84 @@
 
     <header>
         <nav class="header-nav">
-            <div class="nav-logo">
-                <h1 class="glitch-effect">ROLODEXTER</h1>
+            <div class="nav-content">
+                <div class="nav-logo">
+                    <h1>rolodexter</h1>
+                </div>
+                <button class="menu-toggle" aria-label="Toggle navigation menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M3 12H21" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 6H21" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 18H21" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#systems">Systems</a></li>
+                    <li><a href="/knowledge">Knowledge</a></li>
+                    <li><a href="/media">Media</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
             </div>
-            <button class="menu-toggle" aria-label="Toggle navigation menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 12H21" stroke="currentColor" stroke-width="2"/>
-                    <path d="M3 6H21" stroke="currentColor" stroke-width="2"/>
-                    <path d="M3 18H21" stroke="currentColor" stroke-width="2"/>
-                </svg>
-            </button>
-            <ul class="nav-links">
-                <li><a href="#home" class="glitch-effect">Home</a></li>
-                <li><a href="#systems" class="glitch-effect">Systems</a></li>
-                <li><a href="#neural-hub" class="glitch-effect">Neural Hub</a></li>
-                <li><a href="#about" class="glitch-effect">About</a></li>
-                <li><a href="/knowledge" class="glitch-effect">Knowledge</a></li>
-                <li><a href="/media" class="glitch-effect">Media</a></li>
-            </ul>
         </nav>
-        <p class="subheading data-flow">Neo-noir cybernetics meets digital chaos</p>
     </header>
     
-    <main>
-        <section class="holo-card">
+    <main class="container">
+        <section>
             <h2>System Interface</h2>
-            <p>Accessing neural network protocols...</p>
-            <code class="monospace">STATUS: ONLINE</code>
+            <p>Welcome to rolodexter, an advanced AI system for knowledge management and interaction.</p>
         </section>
 
-        <section class="holo-card">
-            <h2>Neural Patterns</h2>
-            <p>Biomechanical integration complete.</p>
-            <div class="data-flow">Processing quantum algorithms...</div>
+        <section>
+            <h2>Features</h2>
+            <ul>
+                <li>Interactive Knowledge Graph</li>
+                <li>Media Library</li>
+                <li>AI-Powered Chatbot</li>
+                <li>Token-Gated Access</li>
+            </ul>
         </section>
 
-        <section class="holo-card labs-section">
-            <h2>ROLODEXTER Labs</h2>
-            <div class="labs-timeline">
-                <div class="phase">
-                    <h3>Phase 1 - Q2 2025</h3>
-                    <div class="phase-content">
-                        <p>Initial launch of ROLODEXTER Labs research and development facility.</p>
-                    </div>
-                </div>
-                <div class="phase">
-                    <h3>Phase 2 - Q3 2025</h3>
-                    <div class="phase-content">
-                        <p>Expansion of neural network capabilities and quantum computing integration.</p>
-                    </div>
-                </div>
-                <div class="phase">
-                    <h3>Phase 3 - Q4 2025</h3>
-                    <div class="phase-content">
-                        <p>Advanced AI systems deployment and cross-chain infrastructure development.</p>
-                    </div>
-                </div>
-                <div class="phase">
-                    <h3>Phase 4 - 2026</h3>
-                    <div class="phase-content">
-                        <p>Full-scale implementation of decentralized autonomous systems.</p>
-                    </div>
-                </div>
+        <section class="chatbot-section">
+            <h2>AI Assistant</h2>
+            <div class="chatbot-auth">
+                <button id="connect-wallet" class="btn">Connect Wallet</button>
+                <div id="wallet-status" class="status-text"></div>
+            </div>
+            <div class="chatbot-container">
+                <!-- Chatbot interface will be dynamically loaded -->
             </div>
         </section>
 
-        <div class="chatbot-auth">
-            <button id="connect-wallet" class="btn btn-primary">
-                Connect Wallet
-            </button>
-            <div id="wallet-status" class="status-text"></div>
-        </div>
-
-        <div class="chatbot-container">
-            <!-- existing chatbot container code -->
-        </div>
+        <section class="timeline-section">
+            <h2>Development Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>Q2 2025</h3>
+                    <p>Initial launch of rolodexter Labs research facility.</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>Q3 2025</h3>
+                    <p>Expansion of neural network capabilities.</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>Q4 2025</h3>
+                    <p>Advanced AI systems deployment.</p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
-        <nav class="footer-nav">
+        <div class="footer-content">
             <div class="footer-grid">
                 <div class="footer-section">
                     <h3>Navigate</h3>
                     <ul>
                         <li><a href="#home">Home</a></li>
-                        <li><a href="#systems">Systems</a></li>
-                        <li><a href="#neural-hub">Neural Hub</a></li>
-                        <li><a href="#about">About</a></li>
                         <li><a href="/knowledge">Knowledge</a></li>
                         <li><a href="/media">Media</a></li>
+                        <li><a href="#about">About</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -142,23 +121,7 @@
                     <ul>
                         <li><a href="/docs/changelog.md">Changelog</a></li>
                         <li><a href="/docs/versions.md">Version History</a></li>
-                        <li><a href="https://github.com/yourusername/rolodexter">GitHub</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Connect</h3>
-                    <ul class="social-links">
-                        <li><a href="https://x.com/rolodexter_ai" target="_blank" rel="noopener">Twitter</a></li>
-                        <li><a href="https://t.me/rolo_dexter" target="_blank" rel="noopener">Telegram</a></li>
-                        <li><a href="https://linktr.ee/rolodexter" target="_blank" rel="noopener">Linktree</a></li>
-                        <li><a href="https://www.reddit.com/r/rolodexter/" target="_blank" rel="noopener">Reddit</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Trading</h3>
-                    <ul>
-                        <li><a href="https://dexscreener.com/solana/2ewknu2dcnpadcknsbqp1ywf16nssx62h4lwebibgay8" target="_blank" rel="noopener">DexScreener</a></li>
-                        <li><a href="https://jup.ag/swap/SOL-9hYWua8e8YFDJdDmQML4RVqVZaFFR3hXs9HJjpMUpumpi" target="_blank" rel="noopener">Jupiter</a></li>
+                        <li><a href="https://github.com/rolodexter">GitHub</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -171,21 +134,9 @@
                     </ul>
                 </div>
             </div>
-        </nav>
-
-        <div class="footer-legal">
-            <p class="glitch-effect">© 2025 ROLODEXTER LABS, LLC</p>
-            <div class="legal-notices">
-                <p class="disclaimer">All trademarks, logos, and brand names are the property of their respective owners. All company, product, and service names used in this website are for identification purposes only. Use of these names, trademarks, and brands does not imply endorsement.</p>
+            <div class="footer-legal">
+                <p>© 2025 rolodexter Labs. All rights reserved.</p>
                 <p class="legal-text">By using this site, you agree to our <a href="/legal/privacy.html">Privacy Policy</a> and <a href="/legal/terms.html">Terms of Use</a>.</p>
-                <p class="rights-reserved">All rights reserved. No part of this website may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of ROLODEXTER LABS, LLC.</p>
-                <div class="company-info">
-                    <p>ROLODEXTER LABS, LLC</p>
-                    <p>92 Brighton Ct</p>
-                    <p>Daly City, CA 94015</p>
-                    <p>Phone: (650) 918-6796</p>
-                    <p>Registered in the State of California</p>
-                </div>
             </div>
         </div>
     </footer>
