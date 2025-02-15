@@ -23,21 +23,25 @@
   - Implementation completed with Redis caching
   - Token verification with role-based access levels
   - Dependencies added: @solana/web3.js, bs58, @metaplex-foundation/mpl-token-metadata, ioredis
-- [ ] **Fix all broken links in header and footer**  
-  - **Address 404 errors** by matching navigation paths to the actual site structure/folders  
+- [ ] **Fix all broken links in header and footer**
+  - Address 404 errors by matching navigation paths to the actual site structure/folders
   - Determine if the site should use multi-page or single-page routing
 - [ ] **Display Connect Wallet button only on the Community page**
 
-## 📋 Next Steps
-- [ ] Add more nodes to knowledge graph
-- [ ] Implement media gallery section
-- [✓] Set up rate-limiting protection for API calls
-  - Implemented role-based rate limiting (premium: 300/15min, standard: 100/15min)
-- [ ] Add error handling to chatbot integration
+## 📋 New Tasks
+- [ ] **Remove “Media” from header navigation**
+- [ ] **Investigate blank Knowledge page**
+  - Confirm D3.js data source or file references
+  - Verify that the knowledge graph is loading data
+- [ ] **Update Schedule page to display knowledge graph** (filtered by date/time-stamped `.html` or `.md`)
+- [ ] **Change footer text** from “© 2025 rolodexter3 Labs” to “© 2025 rolodexter Labs, LLC”
+- [ ] **Ensure consistency** with new `identity.md` clarifications 
+  - Use correct naming references for rolodexterGPT, rolodexterVS, rolodexter3, and rolodexter Labs, LLC
+  - Confirm docs/pages avoid any outdated or conflicting identities
 
 ## 🔹 Notes
 - Memory system implementation active and functioning
-- Knowledge graph successfully implemented with D3.js
+- Knowledge graph successfully implemented with D3.js (possibly missing data for the Knowledge page)
 - Theme toggle working with localStorage persistence
 - All legal documents localized and linked
 - GitHub Actions workflow configured for auto-commits
@@ -65,13 +69,13 @@
   - Improved error handling with automatic retries
 
 ## Comments from rolodexterGPT
-- Be sure to **verify local links** carefully before pushing changes to GitHub Pages to avoid repeated 404s.
-- Consider setting up a custom `404.html` if you choose a multi-page approach, or a single-page fallback if using an SPA architecture.
+- Great job updating `identity.md`! Let’s ensure references to “rolodexter3,” “rolodexterVS,” “rolodexterGPT,” and “rolodexter Labs, LLC” are all correct in code comments, docs, and meta tags.
+- If you notice any references to the older naming conventions (like “rolodexter3 Labs” or just “rolodexter Labs” without the LLC), update them accordingly.
 
 ## Questions from rolodexterGPT
-1. **Do you have a preference** for multi-page static HTML vs. a single-page approach with a client-side router?  
-2. **Have you tested** these navigation links locally (e.g., opening `index.html` in a browser or running a local server) to confirm no 404 issues remain?
+1. **For the new identity references**, do you have any automation or search scripts in place to find old mentions quickly, or will you update them manually?
+2. **Regarding the Knowledge page**: do you intend to store the dataset in `.json` or `.md` for the D3 script to parse, or is it pulling from a dynamic API?
 
 ---
-**Last Updated: 2025-02-16 16:50:00 UTC**  
+**Last Updated: 2025-02-16 18:20:00 UTC**  
 *Signed by: rolodexterGPT*

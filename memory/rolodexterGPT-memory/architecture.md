@@ -1,121 +1,83 @@
 # System Architecture Overview
-Latest Update: 2025-02-15 18:00 UTC
+Latest Update: 2025-02-16 18:30 UTC
 
 ## Core Architecture Decisions
+
 ### Token Gating Implementation
 ```mermaid
 graph TD
-    A[Client Request] --> B[Wallet Authentication]
+    A[Client Request] --> B[Wallet Auth via Solana]
     B --> C{Token Verification}
     C --> |Valid| D[Role Assignment]
     C --> |Invalid| E[Access Denied]
-    D --> F[Cache Result]
+    D --> F[Cache w/ Redis]
     F --> G[WebSocket Subscribe]
 ```
 
 ### Caching Strategy
 - **Redis Layer**
-  - Token balances (5m TTL)
-  - Access levels (5m TTL)
-  - Session data (15m TTL)
-  - Real-time updates via WebSocket
+  - 5-minute TTL for token balances
+  - Session & role caching
+  - WebSocket notifications for real-time updates
 
 ### RPC Management
-- **Multi-Endpoint Strategy**
-  ```mermaid
-  graph LR
-      A[Request] --> B{Health Check}
-      B --> |Healthy| C[Primary RPC]
-      B --> |Unhealthy| D[Failover RPC]
-      D --> |Failed| E[Secondary Failover]
-  ```
+```mermaid
+graph LR
+    A[User Request] --> B{Health Check}
+    B --> |Healthy| C[Primary RPC]
+    B --> |Unhealthy| D[Failover RPC]
+    D --> |Failed| E[Secondary Failover]
+```
 
 ### Navigation Architecture
-- **Component Structure**
-  ```mermaid
-  graph TD
-      A[Header Nav] --> B[Active State Manager]
-      B --> C[Route Handler]
-      C --> D[Content Loader]
-      D --> E[Theme Manager]
-  ```
+```mermaid
+graph TD
+    A[Header Nav] --> B[Active State Tracker]
+    B --> C[Route Handler]
+    C --> D[Content Loader]
+    D --> E[Theme Manager]
+```
 
 ## Integration Points
-### Solana Integration
-- WebSocket subscriptions for real-time updates
-- Batch query optimization for token checks
-- Smart retry logic with exponential backoff
-- Connection health monitoring
-
-### Redis Integration
-- Distributed caching layer
-- Real-time event propagation
-- Session state management
-- Rate limit tracking
+- **Solana** for on-chain token checks, real-time validation
+- **Redis** for session caching, rate limiting, and WebSocket triggers
 
 ## Security Measures
 1. Rate Limiting
-   - Standard tier: 100/15min
-   - Premium tier: 300/15min
-   - IP-based restrictions
-
+   - Standard: 100/15min
+   - Premium: 300/15min
+   - IP-based checks
 2. Authentication
-   - Wallet signature verification
-   - Token-based access control
-   - NFT ownership validation
+   - Wallet signatures
+   - Token-based gating
+   - NFT validation
 
 ## Performance Optimizations
-1. **Caching Layer**
-   - In-memory caching for hot data
-   - WebSocket for real-time updates
-   - Batch operations for token checks
-
-2. **RPC Management**
-   - Automatic failover
-   - Connection pooling
-   - Request batching
-   - Health monitoring
+1. **Caching**: Minimizing RPC calls with a 5-minute TTL
+2. **RPC Management**: Automatic failover, pooled connections
+3. **WebSockets**: Real-time updates for token balances
 
 ## Development Guidelines
-1. **Code Organization**
-   - Feature-based directory structure
-   - Clear separation of concerns
-   - Shared utility functions
-   - Type-safe interfaces
-
-2. **State Management**
-   - Centralized configuration
-   - Environment-based settings
-   - Feature flags support
-   - Debug mode toggles
+- **Feature-Based** directory structure
+- **Centralized Config** for environment variables
+- **Type-Safe Interfaces** to reduce runtime errors
+- **Debug Toggles** for easier troubleshooting
 
 ## Future Considerations
-1. **Scalability**
-   - Horizontal scaling of Redis
-   - RPC load balancing
-   - WebSocket clustering
-
-2. **Monitoring**
-   - Performance metrics
-   - Error tracking
-   - Usage analytics
-   - Health checks
-
-*Architecture documentation maintained for system consistency*
+- Horizontal scaling of Redis
+- Additional AI-driven features for **rolodexter3**
+- Potential decentralized storage integration
 
 ---
-**Status Update (rolodexterVS):**
-- Multi-RPC failover system implemented and tested
-- WebSocket subscription system operational
-- Redis caching layer optimized
-- Navigation architecture validated
+**Status Update (rolodexterVS)**:
+- Architecture consistent with **rolodexter Labs, LLC** standards
+- Minimizing friction between **rolodexterVS** (IDE agent) and production deployment
 
-**Technical Notes:**
-- Monitor RPC endpoint health and failover frequency
-- Track WebSocket connection stability
-- Watch Redis memory usage under load
-- Consider implementing circuit breakers for RPC calls
+### Identities:
+- **rolodexter3**: The website/application
+- **rolodexterGPT**: Chat-based AI assistant
+- **rolodexterVS**: IDE-based agent
+- **rolodexter Labs, LLC**: Legal entity in California
 
-Last Updated: 2025-02-15 18:45 UTC
-Signed: rolodexterVS
-Status: ✓ Production Ready
+Last Updated: 2025-02-16 18:30 UTC  
+Signed by: **rolodexterGPT**
