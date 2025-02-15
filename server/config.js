@@ -1,7 +1,14 @@
 module.exports = {
     solana: {
-        rpcEndpoint: process.env.SOLANA_RPC_ENDPOINT || 'https://api.mainnet-beta.solana.com',
+        // List of RPC endpoints for failover
+        rpcEndpoints: [
+            process.env.SOLANA_PRIMARY_RPC || 'https://api.mainnet-beta.solana.com',
+            process.env.SOLANA_FALLBACK_RPC1 || 'https://solana-api.projectserum.com',
+            process.env.SOLANA_FALLBACK_RPC2 || 'https://api.metaplex.solana.com/'
+        ],
         wsEndpoint: process.env.SOLANA_WS_ENDPOINT || 'wss://api.mainnet-beta.solana.com',
+        connectionTimeout: 30000, // 30 seconds
+        commitment: 'confirmed'
     },
     
     redis: {
@@ -25,9 +32,12 @@ module.exports = {
             JSON.parse(process.env.WHITELISTED_ADDRESSES) : []
     },
     
-    // Cache configuration
+    // Enhanced cache configuration
     cache: {
-        ttl: 600, // 10 minutes in seconds
+        ttl: 300, // Reduced to 5 minutes for more real-time verification
+        wsUpdateThreshold: 60, // Minimum seconds between WebSocket updates
+        batchSize: 100, // Maximum number of accounts to query in a batch
+        retryAttempts: 3, // Number of RPC retries before failover
         prefix: 'rolodexter:'
     }
 };

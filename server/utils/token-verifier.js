@@ -1,30 +1,24 @@
-const { Connection, PublicKey, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } = require('@solana/web3.js');
+const { PublicKey, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } = require('@solana/web3.js');
 const { Metadata } = require('@metaplex-foundation/mpl-token-metadata');
 const Redis = require('ioredis');
 const config = require('../config');
-
-// Redis client for server-side caching
-const redis = new Redis(config.redis);
-
-// Solana connection
-const connection = new Connection(config.solana.rpcEndpoint);
-
-// Cache TTL in seconds (10 minutes)
-const CACHE_TTL = 600;
+const solanaConnection = require('./solana-connection');
 
 class TokenVerifier {
     constructor() {
+        this.redis = new Redis(config.redis);
         this.requiredTokens = {
             governance: new PublicKey(config.tokens.governanceToken),
             nfts: config.tokens.requiredNFTs.map(mint => new PublicKey(mint))
         };
+        this.activeSubscriptions = new Set();
     }
 
     async verifyWalletAccess(walletAddress) {
-        const cacheKey = `wallet:${walletAddress}:access`;
+        const cacheKey = `${config.cache.prefix}wallet:${walletAddress}:access`;
         
         // Check cache first
-        const cachedResult = await redis.get(cacheKey);
+        const cachedResult = await this.redis.get(cacheKey);
         if (cachedResult) {
             return JSON.parse(cachedResult);
         }
@@ -32,21 +26,21 @@ class TokenVerifier {
         try {
             const publicKey = new PublicKey(walletAddress);
             
-            // Check governance token balance
-            const tokenBalance = await this.getGovernanceTokenBalance(publicKey);
-            const hasRequiredBalance = tokenBalance >= config.tokens.minRequiredBalance;
+            // Setup WebSocket subscription for real-time updates if not already active
+            if (!this.activeSubscriptions.has(walletAddress)) {
+                await this.setupWalletSubscription(publicKey);
+            }
 
-            // Check NFT holdings in parallel
-            const nftHoldings = await this.checkNFTHoldings(publicKey);
+            // Perform initial verification
+            const [tokenBalance, nftHoldings] = await Promise.all([
+                this.getGovernanceTokenBalance(publicKey),
+                this.checkNFTHoldings(publicKey)
+            ]);
+
+            const accessResult = this.calculateAccessLevel(tokenBalance, nftHoldings);
             
-            const accessResult = {
-                hasAccess: hasRequiredBalance || nftHoldings.some(holds => holds),
-                level: this.determineAccessLevel(tokenBalance, nftHoldings),
-                timestamp: Date.now()
-            };
-
-            // Cache the result
-            await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(accessResult));
+            // Cache with reduced TTL since we have real-time updates
+            await this.redis.setex(cacheKey, config.cache.ttl, JSON.stringify(accessResult));
             
             return accessResult;
         } catch (error) {
@@ -55,24 +49,71 @@ class TokenVerifier {
         }
     }
 
+    async setupWalletSubscription(publicKey) {
+        const walletStr = publicKey.toString();
+        if (this.activeSubscriptions.has(walletStr)) return;
+
+        try {
+            await solanaConnection.subscribeToAccountChanges(
+                publicKey,
+                async (account, timestamp) => {
+                    await this.handleAccountUpdate(publicKey, account, timestamp);
+                }
+            );
+            this.activeSubscriptions.add(walletStr);
+        } catch (error) {
+            console.error('Failed to setup wallet subscription:', error);
+        }
+    }
+
+    async handleAccountUpdate(publicKey, account, timestamp) {
+        const cacheKey = `${config.cache.prefix}wallet:${publicKey.toString()}:access`;
+        const lastUpdate = await this.redis.get(`${cacheKey}:lastUpdate`);
+
+        // Throttle updates based on configured threshold
+        if (lastUpdate && (timestamp - parseInt(lastUpdate)) < (config.cache.wsUpdateThreshold * 1000)) {
+            return;
+        }
+
+        try {
+            // Re-verify access on account change
+            const [tokenBalance, nftHoldings] = await Promise.all([
+                this.getGovernanceTokenBalance(publicKey),
+                this.checkNFTHoldings(publicKey)
+            ]);
+
+            const accessResult = this.calculateAccessLevel(tokenBalance, nftHoldings);
+            
+            // Update cache
+            await Promise.all([
+                this.redis.setex(cacheKey, config.cache.ttl, JSON.stringify(accessResult)),
+                this.redis.setex(`${cacheKey}:lastUpdate`, config.cache.ttl, timestamp.toString())
+            ]);
+        } catch (error) {
+            console.error('Failed to handle account update:', error);
+        }
+    }
+
     async getGovernanceTokenBalance(publicKey) {
-        const cacheKey = `wallet:${publicKey.toString()}:balance`;
+        const cacheKey = `${config.cache.prefix}wallet:${publicKey.toString()}:balance`;
         
         // Check cache
-        const cachedBalance = await redis.get(cacheKey);
+        const cachedBalance = await this.redis.get(cacheKey);
         if (cachedBalance) {
             return parseFloat(cachedBalance);
         }
 
         try {
-            const balance = await connection.getTokenAccountBalance(
+            const tokenAccounts = await solanaConnection.batchGetAccountInfo([
                 await this.findAssociatedTokenAddress(publicKey, this.requiredTokens.governance)
-            );
+            ]);
+            
+            const balance = tokenAccounts[0] ? this.parseTokenBalance(tokenAccounts[0]) : 0;
             
             // Cache the result
-            await redis.setex(cacheKey, CACHE_TTL, balance.value.uiAmount.toString());
+            await this.redis.setex(cacheKey, config.cache.ttl, balance.toString());
             
-            return balance.value.uiAmount;
+            return balance;
         } catch (error) {
             console.error('Error fetching token balance:', error);
             return 0;
@@ -80,27 +121,27 @@ class TokenVerifier {
     }
 
     async checkNFTHoldings(publicKey) {
-        const cacheKey = `wallet:${publicKey.toString()}:nfts`;
+        const cacheKey = `${config.cache.prefix}wallet:${publicKey.toString()}:nfts`;
         
         // Check cache
-        const cachedNFTs = await redis.get(cacheKey);
+        const cachedNFTs = await this.redis.get(cacheKey);
         if (cachedNFTs) {
             return JSON.parse(cachedNFTs);
         }
 
         try {
-            // Batch query for NFT holdings
+            // Get all NFT token accounts in one batch
             const nftAddresses = await Promise.all(
                 this.requiredTokens.nfts.map(nft => 
                     this.findAssociatedTokenAddress(publicKey, nft)
                 )
             );
 
-            const accountInfos = await connection.getMultipleAccountsInfo(nftAddresses);
+            const accountInfos = await solanaConnection.batchGetAccountInfo(nftAddresses);
             const holdings = accountInfos.map(info => info !== null);
 
             // Cache the result
-            await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(holdings));
+            await this.redis.setex(cacheKey, config.cache.ttl, JSON.stringify(holdings));
 
             return holdings;
         } catch (error) {
@@ -109,13 +150,25 @@ class TokenVerifier {
         }
     }
 
-    determineAccessLevel(tokenBalance, nftHoldings) {
-        if (tokenBalance >= config.tokens.premiumThreshold) {
-            return 'premium';
-        } else if (tokenBalance >= config.tokens.minRequiredBalance || nftHoldings.some(holds => holds)) {
-            return 'standard';
-        }
-        return 'none';
+    calculateAccessLevel(tokenBalance, nftHoldings) {
+        const hasAccess = tokenBalance >= config.tokens.minRequiredBalance || 
+                         nftHoldings.some(holds => holds);
+        
+        return {
+            hasAccess,
+            level: tokenBalance >= config.tokens.premiumThreshold ? 'premium' : 
+                   hasAccess ? 'standard' : 'none',
+            balance: tokenBalance,
+            nftCount: nftHoldings.filter(Boolean).length,
+            timestamp: Date.now()
+        };
+    }
+
+    parseTokenBalance(accountInfo) {
+        if (!accountInfo) return 0;
+        // Parse token account data to get balance
+        // Implementation depends on token program version
+        return accountInfo.amount?.toNumber() || 0;
     }
 
     async findAssociatedTokenAddress(walletAddress, tokenMint) {
@@ -128,6 +181,17 @@ class TokenVerifier {
             ASSOCIATED_TOKEN_PROGRAM_ID
         );
         return associatedTokenAddress;
+    }
+
+    async cleanup() {
+        // Cleanup WebSocket subscriptions
+        for (const wallet of this.activeSubscriptions) {
+            await solanaConnection.unsubscribeFromAccount(new PublicKey(wallet));
+        }
+        this.activeSubscriptions.clear();
+        
+        // Close Redis connection
+        await this.redis.quit();
     }
 }
 
