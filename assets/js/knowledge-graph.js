@@ -4,6 +4,19 @@ import { graphMetadata } from './graph-metadata.js';
 class KnowledgeGraph {
     constructor(containerId) {
         this.container = d3.select(containerId);
+        // Add loading indicator
+        this.loadingIndicator = this.container
+            .append('div')
+            .attr('class', 'loading-indicator')
+            .style('display', 'none')
+            .text('Loading knowledge graph...');
+            
+        // Add error message container
+        this.errorContainer = this.container
+            .append('div')
+            .attr('class', 'error-container')
+            .style('display', 'none');
+            
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.simulation = null;
@@ -264,8 +277,19 @@ class KnowledgeGraph {
 
     async processRepository() {
         try {
+            // Show loading indicator
+            this.loadingIndicator.style('display', 'block');
+            this.errorContainer.style('display', 'none');
+            
             const response = await fetch('/api/repository/files');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const files = await response.json();
+            
+            // Clear existing nodes and links
+            this.nodes = [];
+            this.links = [];
             
             for (const file of files) {
                 if (file.path.match(/\.(html|md)$/)) {
@@ -277,16 +301,31 @@ class KnowledgeGraph {
                             type: this.getNodeType(file.path),
                             metadata: meta,
                             cluster: meta['graph-category'],
-                            tags: meta['graph-tags'].split(',').map(t => t.trim())
+                            tags: meta['graph-tags']?.split(',').map(t => t.trim()) || []
                         });
                     }
                 }
             }
 
             // Process connections after all nodes are added
-            this.processConnections();
+            await this.processConnections();
+            
+            // Hide loading indicator on success
+            this.loadingIndicator.style('display', 'none');
+            
         } catch (error) {
             console.error('Error processing repository:', error);
+            // Show error message to user
+            this.loadingIndicator.style('display', 'none');
+            this.errorContainer
+                .style('display', 'block')
+                .html(`
+                    <div class="error-message">
+                        <h3>Error loading knowledge graph</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()">Retry</button>
+                    </div>
+                `);
         }
     }
 
