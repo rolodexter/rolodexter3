@@ -151,7 +151,11 @@ class CookieConsent {
     setConsent(accepted) {
         localStorage.setItem(this.cookieName, accepted);
         if (this.consentBanner) {
-            this.consentBanner.remove();
+            this.consentBanner.classList.remove('visible');
+            setTimeout(() => {
+                this.consentBanner.remove();
+                this.consentBanner = null;
+            }, 300); // Match the transition duration from CSS
         }
         // Trigger event for analytics
         const event = new CustomEvent('cookieConsentUpdate', { detail: { accepted } });
@@ -159,6 +163,12 @@ class CookieConsent {
     }
 
     showBanner() {
+        // Remove any existing banner first
+        const existingBanner = document.querySelector('.cookie-banner');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
+
         const banner = document.createElement('div');
         banner.className = 'cookie-banner holo-card';
         banner.innerHTML = `
@@ -176,11 +186,21 @@ class CookieConsent {
         this.consentBanner = banner;
 
         // Add event listeners
-        banner.querySelector('.accept-btn').addEventListener('click', () => this.setConsent(true));
-        banner.querySelector('.reject-btn').addEventListener('click', () => this.setConsent(false));
+        const acceptBtn = banner.querySelector('.accept-btn');
+        const rejectBtn = banner.querySelector('.reject-btn');
 
-        // Add animation
-        setTimeout(() => banner.classList.add('visible'), 100);
+        acceptBtn.addEventListener('click', () => {
+            this.setConsent(true);
+        });
+
+        rejectBtn.addEventListener('click', () => {
+            this.setConsent(false);
+        });
+
+        // Add animation after a small delay to ensure transition works
+        requestAnimationFrame(() => {
+            banner.classList.add('visible');
+        });
     }
 }
 
