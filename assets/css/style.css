@@ -1,18 +1,265 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Mono&family=Rajdhani:wght@600&display=swap');
+
+:root {
+    /* Primary Colors */
+    --deep-void-black: #0A0A0A;
+    --hyperglow-cyan: #00FFFF;
+    --liminal-purple: #8A2BE2;
+    --neural-gold: #FFD700;
+
+    /* Secondary Colors */
+    --datastream-blue: #0066FF;
+    --glitch-magenta: #FF00FF;
+    --infrared-red: #FF3131;
+    --holo-white: #F5F5F5;
+
+    /* Tertiary Colors */
+    --dark-graphite: #1C1C1C;
+    --synthwave-teal: #2EE8BB;
+    --neon-amber: #FFA500;
+    --dimmed-carbon: #2E2E2E;
+}
+
+@keyframes scanline {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
+}
+
+/* Typography System */
+h1, h2, h3, h4 {
+    font-family: 'Orbitron', sans-serif; /* Primary Font - Futuristic replacement for Interstellar Bold */
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+code, .monospace {
+    font-family: 'Space Mono', monospace; /* Secondary Font - Synaptic Mono replacement */
+    color: var(--synthwave-teal);
+}
+
+.subheading {
+    font-family: 'Rajdhani', sans-serif; /* Tertiary Font - Noir Gothic replacement */
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Enhanced UI Elements */
+.glitch-container {
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+    }
+    60% {
+        transform: translate(2px, 2px);
+    }
+    80% {
+        transform: translate(2px, -2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+.glitch-effect:hover {
+    animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+    color: var(--glitch-magenta);
+    text-shadow: 
+        2px 0 var(--hyperglow-cyan),
+        -2px 0 var(--infrared-red);
+}
+
+/* Neural Pattern Background */
+.neural-bg {
+    background: linear-gradient(45deg, 
+        var(--dark-graphite) 25%, 
+        var(--dimmed-carbon) 25%, 
+        var(--dimmed-carbon) 50%, 
+        var(--dark-graphite) 50%, 
+        var(--dark-graphite) 75%, 
+        var(--dimmed-carbon) 75%, 
+        var(--dimmed-carbon));
+    background-size: 10px 10px;
+    position: relative;
+}
+
+.neural-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(138, 43, 226, 0.1) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
+}
+
+/* Holographic Card Effect */
+.holo-card {
+    background: var(--dark-graphite);
+    border: 1px solid var(--hyperglow-cyan);
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.holo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(0, 255, 255, 0.1) 45%,
+        rgba(138, 43, 226, 0.1) 55%,
+        transparent 100%
+    );
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.holo-card:hover::before {
+    opacity: 1;
+}
+
+/* Data Flow Lines */
+.data-flow {
+    position: relative;
+}
+
+.data-flow::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--datastream-blue),
+        transparent
+    );
+    animation: dataFlow 2s linear infinite;
+}
+
+@keyframes dataFlow {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
 body {
-    font-family: Arial, sans-serif;
+    background-color: var(--deep-void-black);
+    color: var(--holo-white);
+    font-family: 'Rajdhani', sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        transparent 50%,
+        rgba(0, 255, 255, 0.025) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    animation: scanline 10s linear infinite;
+    z-index: 1000;
 }
 
 header {
     text-align: center;
     margin-bottom: 2rem;
+    border-bottom: 2px solid var(--hyperglow-cyan);
+    padding-bottom: 1rem;
+}
+
+h1 {
+    color: var(--neural-gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--hyperglow-cyan);
+}
+
+h2 {
+    color: var(--synthwave-teal);
+    text-transform: uppercase;
+}
+
+main {
+    background-color: var(--dark-graphite);
+    padding: 2rem;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+section {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+section::before {
+    content: "";
+    position: absolute;
+    left: -1rem;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: linear-gradient(
+        to bottom,
+        var(--hyperglow-cyan),
+        var(--liminal-purple)
+    );
 }
 
 footer {
     text-align: center;
     margin-top: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--hyperglow-cyan);
+    color: var(--holo-white);
+    text-shadow: 0 0 5px var(--hyperglow-cyan);
+}
+
+a {
+    color: var(--hyperglow-cyan);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--neural-gold);
+    text-shadow: 0 0 8px var(--hyperglow-cyan);
 }
