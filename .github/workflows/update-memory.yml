@@ -1,6 +1,8 @@
-name: Update Session History and Generate Commit Messages
+name: Auto-Update Session History
 
 on:
+  schedule:
+    - cron: "*/5 * * * *"  # Runs every 5 minutes
   push:
     branches:
       - main
@@ -18,39 +20,65 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Generate Commit Summary
-        id: summary
+      - name: Check for Changes
+        id: check-changes
         run: |
           # Get the list of changed files
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-          
-          # Generate a structured summary
-          echo "Changes detected in:" > commit_summary.txt
-          echo "$CHANGED_FILES" | while read -r file; do
-            if [[ -f "$file" ]]; then
-              echo "- $file" >> commit_summary.txt
-            fi
-          done
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD || echo "")
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "changes=true" >> $GITHUB_ENV
+            # Create a detailed change summary
+            echo "Changes detected:" > commit_summary.txt
+            echo "$CHANGED_FILES" | while read -r file; do
+              if [[ -f "$file" ]]; then
+                echo "- $file:" >> commit_summary.txt
+                git diff --unified=0 HEAD~1 HEAD -- "$file" | grep '^[+-]' | grep -v '^[+-][+-][+-]' >> commit_summary.txt
+              fi
+            done
+            # Store files for commit message
+            echo "FILES_CHANGED=$CHANGED_FILES" >> $GITHUB_ENV
+          else
+            echo "changes=false" >> $GITHUB_ENV
+            echo "No changes detected in this update cycle." > commit_summary.txt
+          fi
 
-      - name: Append Commit to Session History
+      - name: Append to Session History
+        if: env.changes == 'true' || github.event_name == 'schedule'
         run: |
           echo -e "\n### $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> memory/session-history.md
-          echo "- 🔄 **Commit:** ${{ github.event.head_commit.message }}" >> memory/session-history.md
-          echo "- 👤 **Author:** ${{ github.event.head_commit.author.name }}" >> memory/session-history.md
-          echo "- 🔍 **Hash:** \`${{ github.sha }}\`" >> memory/session-history.md
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "- 🔄 **Auto-Update Check**" >> memory/session-history.md
+          else
+            echo "- 🔄 **Commit:** ${{ github.event.head_commit.message }}" >> memory/session-history.md
+            echo "- 👤 **Author:** ${{ github.event.head_commit.author.name }}" >> memory/session-history.md
+            echo "- 🔍 **Hash:** \`${{ github.sha }}\`" >> memory/session-history.md
+          fi
           echo "- 📝 **Summary:**" >> memory/session-history.md
           cat commit_summary.txt >> memory/session-history.md
           echo "" >> memory/session-history.md
-          echo "- Files changed:" >> memory/session-history.md
-          git diff --name-status HEAD~1 HEAD | while read -r line; do
-            echo "  - \`$line\`" >> memory/session-history.md
-          done
+          if [ "${{ env.changes }}" == "true" ]; then
+            echo "- Files changed:" >> memory/session-history.md
+            git diff --stat HEAD~1 HEAD | while read -r line; do
+              echo "  - \`$line\`" >> memory/session-history.md
+            done
+          fi
           echo "" >> memory/session-history.md
 
       - name: Commit Changes
+        if: env.changes == 'true' || github.event_name == 'schedule'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add memory/session-history.md
-          git commit -m "📝 Updated session history with AI-generated summary" || echo "No changes to commit"
+          
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            COMMIT_MSG="📝 Auto-update check ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))"
+          else
+            # Create a more detailed commit message
+            LAST_AUTHOR=$(git log -1 --pretty=format:"%an")
+            FILES_LIST=$(echo "$FILES_CHANGED" | tr '\n' ', ' | sed 's/,$//')
+            COMMIT_MSG="📝 Auto-update: $FILES_LIST (by $LAST_AUTHOR)"
+          fi
+          
+          git commit -m "$COMMIT_MSG" || echo "No changes to commit"
           git push

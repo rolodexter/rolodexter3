@@ -10,7 +10,7 @@
 ## 🔄 In Progress
 - [x] Create structured memory organization with session history and task tracking
 - [ ] Generate **legal markdown files** (`privacy-policy.md`, `terms-of-use.md`, etc.)
-- [ ] Refactor **footer links** to use custom legal pages
+- [x] Refactor **footer links** to use custom legal pages
 - [ ] Connect **chatbot.js** to **OpenRouter AI API**
 - [ ] Complete implementation of interactive knowledge graph in `/knowledge/`
 
@@ -19,5 +19,6 @@
 - This file should always be referenced **at the start of a new session**
 - Memory system implementation completed and active
 - Knowledge graph implementation is in progress
+- Footer links updated to use local legal documents instead of Google's policies
 
 ## Last Updated: [Current Timestamp]
