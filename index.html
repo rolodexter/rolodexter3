@@ -147,7 +147,7 @@
                 </div>
             </div>
             <div class="footer-legal">
-                <p>© 2025 rolodexter3 Labs. All rights reserved.</p>
+                <p>© 2025 rolodexter Labs, LLC. All rights reserved.</p>
                 <p class="legal-text">By using this site, you agree to our <a href="./legal/privacy.html">Privacy Policy</a> and <a href="./legal/terms.html">Terms of Use</a>.</p>
             </div>
         </div>
@@ -155,23 +155,33 @@
 
     <script src="./assets/js/script.js"></script>
     
-    <!-- Page Attribution & Version Control -->
-    <div class="signature-block" style="margin-top: 2rem; padding: 1rem; border-top: 1px solid var(--border-color);">
-        <h4>Page Information</h4>
-        <div class="metadata">
-            <p><strong>Last Updated:</strong> 2025-02-16 20:46:15 UTC</p>
-            <p><strong>Authors:</strong> rolodexterVS</p>
-            <p><strong>Contributors:</strong> rolodexterGPT</p>
-            <p><strong>File Location:</strong> C:/rolodexter3/index.html</p>
-            <details>
-                <summary><strong>Pending Tasks</strong></summary>
-                <ul>
-                    <li>Fix broken links in header and footer navigation</li>
-                    <li>Update footer text to "© 2025 rolodexter Labs, LLC"</li>
-                    <li>Complete horizontal footer layout implementation</li>
-                </ul>
-            </details>
+    <div class="bottom-overlay" id="bottomOverlay">
+        <div class="overlay-header">
+            <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
+        </div>
+        <div class="overlay-content hidden" id="overlayContent">
+            <p class="overlay-section-title">Page Information</p>
+            <ul class="overlay-info">
+                <li><strong>Last Updated:</strong> 2025-02-16 20:46:15 UTC</li>
+                <li><strong>Authors:</strong> rolodexterVS</li>
+                <li><strong>Contributors:</strong> rolodexterGPT</li>
+                <li><strong>File Location:</strong> C:/rolodexter3/index.html</li>
+            </ul>
+
+            <p class="overlay-section-title">Pending Tasks</p>
+            <ul class="overlay-info">
+                <li>Fix broken links in header and footer navigation</li>
+                <li>Update footer text to "© 2025 rolodexter Labs, LLC"</li>
+                <li>Complete horizontal footer layout implementation</li>
+            </ul>
         </div>
     </div>
+
+    <script>
+        function toggleOverlay() {
+            const content = document.getElementById("overlayContent");
+            content.classList.toggle("hidden");
+        }
+    </script>
 </body>
 </html>
