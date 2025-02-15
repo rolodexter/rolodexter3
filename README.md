@@ -35,6 +35,30 @@ An advanced AI-powered knowledge management and interaction system.
 2. Install dependencies: `npm install`
 3. Start development server: `npm start`
 
+## Contributing
+### Commit Message Guidelines
+All commit messages must:
+- Start with an action verb (Add, Fix, Update, Remove, Refactor, Optimize, Document)
+- Use present tense
+- Be 50 characters or less
+- Not end with a period
+
+Example valid commits:
+- `Add user authentication feature`
+- `Update knowledge graph visualization`
+- `Fix broken navigation links`
+
+### Validation Workflow
+The repository includes automated validation for:
+- Commit message formatting
+- Entity naming conventions
+- Link validation
+- Code style and formatting
+
+All validation runs automatically via:
+- Pre-commit hooks (using Husky)
+- GitHub Actions CI/CD pipeline
+
 ## Documentation
 - [Changelog](./docs/CHANGELOG.md)
 - [Version Information](./docs/VERSION.md)
@@ -53,7 +77,7 @@ Visit our [Community](./community/index.html) page for support and discussions.
 
 ---
 ## Attribution & Version Control
-**Last Updated:** 2025-02-16 20:45:32 UTC  
+**Last Updated:** 2025-02-17 17:30:00 UTC  
 **Authors:** rolodexterVS  
 **Contributors:** rolodexterGPT  
 **File Location:** C:/rolodexter3/README.md

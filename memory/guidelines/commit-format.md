@@ -28,32 +28,58 @@ Each commit message should follow this **clean, structured format**:
 
 ---
 
-# Commit Message Format Guidelines
+# Commit Message Guidelines
 
-## Format Structure
+## Format
 ```
-[TYPE] Brief description
-
-- Detailed changes
-- File modifications
+<action verb> <subject> [context]
 ```
 
-## Types
-- `[UPDATE]` - General updates and improvements
-- `[FIX]` - Bug fixes and corrections
-- `[FEAT]` - New features
-- `[DOCS]` - Documentation changes
-- `[REFACTOR]` - Code restructuring
-- `[STYLE]` - UI/UX changes
-- `[TEST]` - Test-related changes
+## Guidelines
+1. Use present tense, active voice
+2. Be descriptive but concise
+3. Focus on the change, not the file
+4. Start with an action verb
 
 ## Examples
-```
-[UPDATE] Implement dark mode toggle
+✅ Good:
+- "Add Redis caching for session tokens"
+- "Fix dark mode toggle in navigation"
+- "Update knowledge graph search algorithm"
 
-- Add dark mode CSS variables
-- Create theme switcher component
-- Update localStorage persistence
+❌ Bad:
+- "AI-Generated Commit Summary"
+- "Updates to files"
+- "Fixed stuff"
+
+## Action Verbs to Use
+- Add (new features)
+- Fix (bug fixes)
+- Update (improvements)
+- Remove (deletions)
+- Refactor (code restructuring)
+- Optimize (performance)
+- Document (documentation)
+
+## Structure
+- Keep subject line under 50 characters
+- Use imperative mood ("Add" not "Added")
+- No period at end of subject line
+
+## Enforcement
+- All commits must follow these guidelines
+- Automated checks will verify format
+- Non-compliant commits will be flagged
+
+## Examples in Context
+```
+Add token validation to auth flow
+Fix broken links in footer navigation 
+Update Redis cache configuration
+Remove deprecated API endpoints
+Refactor auth flow for Solana login
+Optimize knowledge graph queries
+Document API authentication process
 ```
 
 ---

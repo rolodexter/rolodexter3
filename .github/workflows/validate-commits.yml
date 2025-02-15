@@ -1,0 +1,29 @@
+name: Validate Commit Messages
+
+on: [push, pull_request]
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Make validation script executable
+        run: chmod +x scripts/validate-commit-cli.js
+      
+      - name: Validate Commit Messages
+        run: |
+          git log --format=%s origin/main..HEAD | while read commit_msg; do
+            ./scripts/validate-commit-cli.js "$commit_msg"
+            if [ $? -ne 0 ]; then
+              echo "❌ Invalid commit message: $commit_msg"
+              exit 1
+            fi
+          done

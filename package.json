@@ -4,5 +4,24 @@
     "@solana/web3.js": "^1.98.0",
     "bs58": "^6.0.0",
     "ioredis": "^5.5.0"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "validate-commit": "node scripts/validate-commit-cli.js",
+    "pre-commit": "lint-staged",
+    "postinstall": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "npm run validate-commit"
+    }
+  },
+  "lint-staged": {
+    "*": "npm run validate-commit"
   }
 }
