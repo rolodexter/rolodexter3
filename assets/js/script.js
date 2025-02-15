@@ -63,6 +63,73 @@ function initHoloCards() {
     });
 }
 
+// Matrix Rain Effect
+function createMatrixRain() {
+    const matrixBg = document.createElement('div');
+    matrixBg.className = 'matrix-bg';
+    document.body.appendChild(matrixBg);
+
+    // Create columns
+    for (let i = 0; i < window.innerWidth / 20; i++) {
+        const column = document.createElement('div');
+        column.className = 'matrix-column';
+        column.style.left = `${i * 20}px`;
+        column.style.animationDelay = `${Math.random() * 20}s`;
+        matrixBg.appendChild(column);
+    }
+}
+
+// Neural Network Loading Animation
+function createNeuralLoader(container) {
+    const loader = document.createElement('div');
+    loader.className = 'neural-loader';
+
+    // Create nodes
+    for (let i = 0; i < 4; i++) {
+        const node = document.createElement('div');
+        node.className = 'neural-node';
+        node.style.left = `${Math.cos(i * Math.PI / 2) * 20 + 25}px`;
+        node.style.top = `${Math.sin(i * Math.PI / 2) * 20 + 25}px`;
+        node.style.animationDelay = `${i * 0.2}s`;
+        loader.appendChild(node);
+
+        // Create connections
+        const connection = document.createElement('div');
+        connection.className = 'neural-connection';
+        connection.style.transform = `rotate(${i * 90}deg)`;
+        connection.style.animationDelay = `${i * 0.2}s`;
+        loader.appendChild(connection);
+    }
+
+    container.appendChild(loader);
+}
+
+// Loading State Manager
+class LoadingStateManager {
+    static setLoading(element, isLoading) {
+        if (isLoading) {
+            element.classList.add('loading');
+            const loader = document.createElement('div');
+            loader.className = 'neural-loader';
+            createNeuralLoader(loader);
+            element.appendChild(loader);
+        } else {
+            element.classList.remove('loading');
+            const loader = element.querySelector('.neural-loader');
+            if (loader) loader.remove();
+        }
+    }
+
+    static async loadContent(element, loadingPromise) {
+        this.setLoading(element, true);
+        try {
+            await loadingPromise;
+        } finally {
+            this.setLoading(element, false);
+        }
+    }
+}
+
 // Initialize effects when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize glitch effects on headings
@@ -74,5 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize holographic card effects
     initHoloCards();
     
-    console.log('ROLODEXTER interface initialized');
+    // Initialize matrix rain effect
+    createMatrixRain();
+    
+    // Add loading states to dynamic content sections
+    document.querySelectorAll('.holo-card').forEach(card => {
+        card.addEventListener('click', async () => {
+            await LoadingStateManager.loadContent(card, new Promise(resolve => setTimeout(resolve, 2000)));
+        });
+    });
+
+    console.log('ROLODEXTER interface initialized with cyberpunk effects');
 });
