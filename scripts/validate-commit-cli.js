@@ -3,7 +3,7 @@ const validateCommitMessage = require('./validate-commit');
 const fs = require('fs');
 const path = require('path');
 
-// Support both direct message input and file path
+// Support both direct message input and file path for GitHub Desktop compatibility
 let commitMsg;
 const input = process.argv[2];
 
@@ -22,8 +22,8 @@ try {
         commitMsg = input;
     }
 } catch (err) {
-    // Fallback to direct input if file reading fails
-    commitMsg = input;
+    console.error('❌ Error reading commit message file:', err.message);
+    process.exit(1);
 }
 
 // Run validation
@@ -35,9 +35,10 @@ if (!result.isValid) {
         console.error(`   - ${violation}`);
     });
     console.error('\nValid examples:');
-    console.error('✅ Add user authentication');
-    console.error('✅ Knowledge graph updates');
+    console.error('✅ Add user authentication feature');
+    console.error('✅ Knowledge graph visualization update');
     console.error('✅ Manual: Implementation review');
+    console.error('✅ Fix broken navigation links\n');
     process.exit(1);
 }
 
