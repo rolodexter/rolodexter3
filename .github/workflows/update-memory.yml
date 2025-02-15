@@ -10,16 +10,22 @@ on:
 jobs:
   update-memory:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
+      
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Check for Changes
       id: check_changes
       run: |
+        # Ensure we have the latest changes
+        git fetch origin
         git diff --quiet HEAD~1 HEAD ./memory/ || echo "changes=true" >> $GITHUB_OUTPUT
+      continue-on-error: true
     
     - name: Update Session History
       if: steps.check_changes.outputs.changes == 'true'
@@ -28,19 +34,66 @@ jobs:
         COMMIT_HASH=$(git rev-parse HEAD)
         CHANGED_FILES=$(git diff --name-status HEAD~1 HEAD ./memory/)
         
-        echo "### $TIMESTAMP" >> memory/session-history.md
-        echo "- 🔄 **Commit:** $(git log -1 --pretty=%B)" >> memory/session-history.md
-        echo "- 👤 **Author:** $(git log -1 --pretty=%an)" >> memory/session-history.md
-        echo "- 🔍 **Hash:** \`$COMMIT_HASH\`" >> memory/session-history.md
-        echo "- Files changed:" >> memory/session-history.md
-        echo "  $CHANGED_FILES" >> memory/session-history.md
-        echo "" >> memory/session-history.md
+        {
+          echo "### $TIMESTAMP"
+          echo "- 🔄 **Commit:** $(git log -1 --pretty=%B)"
+          echo "- 👤 **Author:** $(git log -1 --pretty=%an)"
+          echo "- 🔍 **Hash:** \`$COMMIT_HASH\`"
+          echo "- 📝 **Summary:**"
+          echo "Changes detected:"
+          git diff --stat HEAD~1 HEAD ./memory/ | while read line; do
+            echo "- $line"
+          done
+          echo ""
+          echo "- Files changed:"
+          echo "  $CHANGED_FILES"
+          echo ""
+        } >> memory/session-history.md
+      continue-on-error: true
     
-    - name: Commit Changes
+    - name: Commit Changes with Retry
       if: steps.check_changes.outputs.changes == 'true'
       run: |
-        git config --local user.email "actions@github.com"
-        git config --local user.name "GitHub Actions"
-        git add memory/session-history.md
-        git commit -m "[UPDATE] Auto-update session history" || exit 0
-        git push
+        MAX_RETRIES=3
+        RETRY_COUNT=0
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          # Configure git
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          
+          # Pull latest changes with retry
+          for i in {1..3}; do
+            if git pull origin main --rebase; then
+              break
+            fi
+            sleep 5
+          done
+          
+          # Stage and commit changes
+          git add memory/session-history.md
+          if git commit -m "[UPDATE] Auto-update session history
+
+          📝 Changes Summary:
+          $(git diff --stat HEAD~1 HEAD ./memory/)"; then
+            # Try to push with exponential backoff
+            for i in {1..3}; do
+              if git push origin HEAD; then
+                echo "✅ Successfully pushed changes on attempt $((RETRY_COUNT + 1))"
+                exit 0
+              fi
+              sleep $((5 * i))
+            done
+          fi
+          
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "🔄 Retrying commit/push (attempt $((RETRY_COUNT + 1)))"
+            sleep $((5 * RETRY_COUNT))
+          fi
+        done
+        
+        if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+          echo "❌ Failed to push changes after $MAX_RETRIES attempts"
+          exit 1
+        fi

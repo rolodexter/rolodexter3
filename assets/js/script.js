@@ -323,4 +323,31 @@ document.addEventListener('DOMContentLoaded', () => {
     new CookieConsent();
 
     console.log('ROLODEXTER interface initialized with cyberpunk effects');
+    
+    // Mobile Navigation
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    
+    menuToggle?.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        menuToggle.setAttribute('aria-expanded', 
+            menuToggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
+        );
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-links') && !e.target.closest('.menu-toggle')) {
+            navLinks.classList.remove('active');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            navLinks.classList.remove('active');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
 });

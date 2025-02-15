@@ -1185,3 +1185,236 @@ a:hover {
 [data-theme="dark"] .theme-toggle .sun {
     display: none;
 }
+
+/* Knowledge Graph Styles */
+.graph-container {
+    width: 100%;
+    height: 100vh;
+    background: var(--bg-primary);
+}
+
+.knowledge-graph {
+    width: 100%;
+    height: 100%;
+}
+
+.graph-controls {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+}
+
+.graph-btn {
+    background: var(--dark-graphite);
+    color: var(--hyperglow-cyan);
+    border: 1px solid var(--hyperglow-cyan);
+    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.graph-btn:hover {
+    background: var(--hyperglow-cyan);
+    color: var(--deep-void-black);
+}
+
+.node-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.node circle {
+    transition: r 0.3s ease, stroke-width 0.3s ease;
+}
+
+.node:hover circle {
+    r: 8;
+    stroke-width: 3;
+}
+
+.link {
+    transition: stroke-opacity 0.3s ease;
+}
+
+.link:hover {
+    stroke-opacity: 1;
+}
+
+/* Media Gallery Styles */
+.media-gallery {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.gallery-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.gallery-filter {
+    background: var(--dark-graphite);
+    color: var(--holo-white);
+    border: 1px solid var(--hyperglow-cyan);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gallery-filter:hover,
+.gallery-filter.active {
+    background: var(--hyperglow-cyan);
+    color: var(--deep-void-black);
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.gallery-item {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--dark-graphite);
+    border: 1px solid var(--border-color);
+}
+
+.gallery-item img,
+.gallery-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img,
+.gallery-item:hover video {
+    transform: scale(1.05);
+}
+
+.item-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8),
+        transparent
+    );
+    color: var(--holo-white);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .item-overlay {
+    transform: translateY(0);
+}
+
+.item-overlay h3 {
+    margin: 0;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.play-btn,
+.download-btn {
+    background: var(--hyperglow-cyan);
+    color: var(--deep-void-black);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.play-btn:hover,
+.download-btn:hover {
+    background: var(--neural-gold);
+    transform: scale(1.05);
+}
+
+.document-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: var(--dark-graphite);
+}
+
+.document-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--hyperglow-cyan);
+    mask: url('../icons/ui/document.svg') no-repeat center;
+    -webkit-mask: url('../icons/ui/document.svg') no-repeat center;
+}
+
+.gallery-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.page-prev,
+.page-next {
+    background: var(--dark-graphite);
+    color: var(--holo-white);
+    border: 1px solid var(--hyperglow-cyan);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-prev:hover,
+.page-next:hover {
+    background: var(--hyperglow-cyan);
+    color: var(--deep-void-black);
+}
+
+.page-prev:disabled,
+.page-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-info {
+    color: var(--holo-white);
+    font-family: 'Space Mono', monospace;
+}
+
+@media (max-width: 768px) {
+    .gallery-controls {
+        flex-wrap: wrap;
+    }
+    
+    .gallery-filter {
+        flex: 1;
+        text-align: center;
+        min-width: 120px;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+}
