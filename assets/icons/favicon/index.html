@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROLODEXTER Favicon Guide</title>
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--deep-void-black, #0A0A0A);
+            color: var(--holo-white, #F5F5F5);
+        }
+        .favicon-list {
+            list-style: none;
+            padding: 0;
+        }
+        .favicon-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--hyperglow-cyan, #00FFFF);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ROLODEXTER Favicon Requirements</h1>
+    
+    <section>
+        <h2>Required Favicon Files</h2>
+        <ul class="favicon-list">
+            <li class="favicon-item">
+                <h3>favicon.ico</h3>
+                <p>Multi-size ICO file containing:</p>
+                <ul>
+                    <li>16×16 pixels</li>
+                    <li>32×32 pixels</li>
+                </ul>
+            </li>
+            
+            <li class="favicon-item">
+                <h3>favicon-32x32.png</h3>
+                <p>Standard favicon for modern browsers</p>
+            </li>
+            
+            <li class="favicon-item">
+                <h3>apple-touch-icon.png</h3>
+                <p>180×180 pixels for iOS devices</p>
+            </li>
+            
+            <li class="favicon-item">
+                <h3>android-chrome-192x192.png</h3>
+                <p>192×192 pixels for Android devices</p>
+            </li>
+            
+            <li class="favicon-item">
+                <h3>android-chrome-512x512.png</h3>
+                <p>512×512 pixels for PWA requirements</p>
+            </li>
+        </ul>
+    </section>
+    
+    <section>
+        <h2>Implementation Guide</h2>
+        <pre><code>
+&lt;link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon/apple-touch-icon.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon/favicon-32x32.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon/favicon-16x16.png"&gt;
+&lt;link rel="manifest" href="/assets/icons/favicon/site.webmanifest"&gt;
+        </code></pre>
+    </section>
+    
+    <section>
+        <h2>Color Requirements</h2>
+        <ul>
+            <li>Background: #0A0A0A (Deep Void Black)</li>
+            <li>Primary: #00FFFF (Hyperglow Cyan)</li>
+            <li>Secondary: #FFD700 (Neural Gold)</li>
+        </ul>
+    </section>
+</body>
+</html>
