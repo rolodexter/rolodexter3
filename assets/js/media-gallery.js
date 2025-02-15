@@ -1,3 +1,84 @@
+class MediaGalleryMonitor {
+    constructor() {
+        this.performanceMetrics = {
+            renderTimes: [],
+            imageLoadTimes: [],
+            filterOperationTimes: [],
+            mediaErrors: []
+        };
+        this.observe();
+    }
+
+    observe() {
+        // Performance observer for timing metrics
+        this.observer = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                this.logMetric(entry);
+            }
+        });
+
+        this.observer.observe({ entryTypes: ['measure', 'resource'] });
+
+        // Intersection observer for visibility tracking
+        this.visibilityObserver = new IntersectionObserver(
+            (entries) => this.handleVisibility(entries),
+            { threshold: 0.1 }
+        );
+    }
+
+    logMetric(entry) {
+        const metrics = {
+            timestamp: Date.now(),
+            type: entry.entryType,
+            name: entry.name,
+            duration: entry.duration
+        };
+
+        // Log to debug file
+        this.logToDebug('PERFORMANCE', metrics);
+    }
+
+    handleVisibility(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                this.logMetric({
+                    entryType: 'visibility',
+                    name: entry.target.getAttribute('data-item-id'),
+                    duration: entry.intersectionRatio
+                });
+            }
+        });
+    }
+
+    async logToDebug(type, data) {
+        try {
+            const debugEntry = {
+                timestamp: new Date().toISOString(),
+                type,
+                data
+            };
+
+            await fetch('/api/debug/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(debugEntry)
+            });
+        } catch (error) {
+            console.error('Failed to log debug entry:', error);
+        }
+    }
+
+    logError(error) {
+        this.performanceMetrics.mediaErrors.push({
+            timestamp: Date.now(),
+            error: error.message,
+            stack: error.stack
+        });
+        this.logToDebug('ERROR', error);
+    }
+}
+
+// Enhance existing MediaGallery class
 class MediaGallery {
     constructor() {
         this.currentPage = 1;
@@ -11,6 +92,9 @@ class MediaGallery {
         this.prevButton = document.querySelector('.page-prev');
         this.nextButton = document.querySelector('.page-next');
         this.currentPageSpan = document.querySelector('.current-page');
+        
+        this.monitor = new MediaGalleryMonitor();
+        this.setupPerformanceMonitoring();
         
         this.initialize();
     }
@@ -29,8 +113,7 @@ class MediaGallery {
             // Initial render
             this.render();
         } catch (error) {
-            console.error('Failed to initialize media gallery:', error);
-            this.galleryGrid.innerHTML = '<p class="error">Failed to load media gallery</p>';
+            this.handleError(error);
         }
     }
 
@@ -74,7 +157,41 @@ class MediaGallery {
         }
     }
 
+    setupPerformanceMonitoring() {
+        // Mark render start
+        performance.mark('renderStart');
+
+        // Monitor image loading
+        document.addEventListener('load', (event) => {
+            if (event.target.tagName === 'IMG') {
+                performance.measure('imageLoad', 'renderStart');
+            }
+        }, true);
+
+        // Monitor filter operations
+        this.filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                performance.mark('filterStart');
+                // ...existing filter code...
+                performance.measure('filterOperation', 'filterStart');
+            });
+        });
+
+        // Monitor responsive behavior
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                this.monitor.logMetric({
+                    entryType: 'resize',
+                    name: 'galleryResize',
+                    duration: entry.contentRect.width
+                });
+            }
+        });
+        this.resizeObserver.observe(this.galleryGrid);
+    }
+
     render() {
+        performance.mark('renderStart');
         const filteredItems = this.getFilteredItems();
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
@@ -88,6 +205,7 @@ class MediaGallery {
 
         // Render items
         this.galleryGrid.innerHTML = itemsToShow.map(item => this.renderItem(item)).join('');
+        performance.measure('galleryRender', 'renderStart');
     }
 
     renderItem(item) {
@@ -106,9 +224,20 @@ class MediaGallery {
             </div>
         `;
     }
+
+    handleError(error) {
+        this.monitor.logError(error);
+        this.galleryGrid.innerHTML = '<p class="error">An error occurred while loading the gallery</p>';
+    }
 }
 
-// Initialize gallery when DOM is loaded
+// Initialize with error handling
 document.addEventListener('DOMContentLoaded', () => {
-    new MediaGallery();
+    try {
+        new MediaGallery();
+    } catch (error) {
+        console.error('Failed to initialize media gallery:', error);
+        document.querySelector('.media-gallery').innerHTML = 
+            '<p class="error">Failed to initialize media gallery</p>';
+    }
 });

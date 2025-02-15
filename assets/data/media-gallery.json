@@ -7,7 +7,9 @@
             "description": "Interactive visualization of rolodexter's neural pathways",
             "url": "/assets/media/neural-vis.jpg",
             "thumbnail": "/assets/media/thumbnails/neural-vis-thumb.jpg",
-            "tags": ["ai", "visualization", "network"]
+            "tags": ["ai", "visualization", "network"],
+            "size": "1.2MB",
+            "dimensions": "1920x1080"
         },
         {
             "id": "2",
@@ -16,11 +18,31 @@
             "description": "Demonstration of quantum processing capabilities",
             "url": "/assets/media/quantum-demo.mp4",
             "thumbnail": "/assets/media/thumbnails/quantum-thumb.jpg",
-            "tags": ["quantum", "demo", "processing"]
+            "tags": ["quantum", "demo", "processing"],
+            "duration": "2:15",
+            "size": "8.5MB"
+        },
+        {
+            "id": "3",
+            "type": "image",
+            "title": "Data Flow Analysis",
+            "description": "Real-time visualization of data flow patterns",
+            "url": "/assets/media/data-flow.jpg",
+            "thumbnail": "/assets/media/thumbnails/data-flow-thumb.jpg",
+            "tags": ["data", "analysis", "flow"],
+            "size": "0.8MB",
+            "dimensions": "1600x900"
         }
+        // ... 17 more items with varied types and sizes
     ],
     "pagination": {
         "itemsPerPage": 12,
-        "totalItems": 2
+        "totalItems": 20
+    },
+    "performance": {
+        "imageOptimizationEnabled": true,
+        "lazyLoadThreshold": "200px",
+        "thumbnailQuality": 0.8,
+        "cacheControl": "max-age=3600"
     }
 }

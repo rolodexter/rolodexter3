@@ -16,6 +16,23 @@ class ChatbotAPI {
         this.maxRetries = 3;
         this.pendingRequests = new Map();
         this.rateLimiter = new RateLimiter(60, 'minute'); // 60 requests per minute
+        this.debugLog = [];
+        this.setupDebugMonitoring();
+    }
+
+    setupDebugMonitoring() {
+        // Monitor authentication state changes
+        this.authStateChange = (state) => {
+            this.logDebug('AUTH_STATE', state);
+        };
+
+        // Monitor rate limiting
+        this.rateLimitMonitor = setInterval(() => {
+            if (this.rateLimiter) {
+                const metrics = this.rateLimiter.getMetrics();
+                this.logDebug('RATE_LIMIT', metrics);
+            }
+        }, 60000); // Check every minute
     }
 
     async initialize() {
@@ -23,38 +40,52 @@ class ChatbotAPI {
     }
 
     async ensureValidToken() {
-        if (this.isTokenValid()) {
-            return this.token;
-        }
-
-        if (this.isRefreshing) {
-            return new Promise(resolve => {
-                this.pendingRequests.push(resolve);
-            });
-        }
-
+        const startTime = performance.now();
         try {
+            if (this.isTokenValid()) {
+                this.logDebug('TOKEN_CHECK', { status: 'valid', token: this.token });
+                return this.token;
+            }
+
+            if (this.isRefreshing) {
+                this.logDebug('TOKEN_REFRESH', { status: 'waiting' });
+                return new Promise(resolve => {
+                    this.pendingRequests.push(resolve);
+                });
+            }
+
             this.isRefreshing = true;
+            this.logDebug('TOKEN_REFRESH', { status: 'started' });
+
             const response = await fetch('/api/auth/token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             });
 
             if (!response.ok) {
-                throw new Error('Failed to refresh token');
+                throw new Error(`Token refresh failed: ${response.status}`);
             }
 
             const { token, expires } = await response.json();
             this.token = token;
             this.tokenExpiry = expires;
             
+            this.logDebug('TOKEN_REFRESH', { 
+                status: 'success', 
+                duration: performance.now() - startTime 
+            });
+
             // Resume pending requests
             this.pendingRequests.forEach(resolve => resolve(token));
             this.pendingRequests = [];
             
             return token;
         } catch (error) {
-            console.error('Token refresh failed:', error);
+            this.logDebug('TOKEN_REFRESH', { 
+                status: 'error', 
+                error: error.message,
+                duration: performance.now() - startTime 
+            });
             throw error;
         } finally {
             this.isRefreshing = false;
@@ -66,8 +97,11 @@ class ChatbotAPI {
     }
 
     async sendMessage(message) {
+        const startTime = performance.now();
         try {
             const token = await this.ensureValidToken();
+            this.logDebug('MESSAGE_SEND', { status: 'started', messageLength: message.length });
+
             const response = await this.makeAuthenticatedRequest('/api/auth/chat', {
                 method: 'POST',
                 headers: {
@@ -82,9 +116,22 @@ class ChatbotAPI {
             }
 
             this.retryCount = 0; // Reset retry count on success
-            return await response.json();
+            const result = await response.json();
+            
+            this.logDebug('MESSAGE_SEND', { 
+                status: 'success', 
+                duration: performance.now() - startTime,
+                responseLength: JSON.stringify(result).length
+            });
+
+            return result;
         } catch (error) {
-            await this.handleRequestError(error);
+            this.logDebug('MESSAGE_SEND', { 
+                status: 'error', 
+                error: error.message,
+                duration: performance.now() - startTime
+            });
+            return await this.handleRequestError(error, message);
         }
     }
 
@@ -109,13 +156,17 @@ class ChatbotAPI {
         return response;
     }
 
-    async handleRequestError(error) {
-        // Log error to debug file
-        await this.logError(error);
+    async handleRequestError(error, message) {
+        await this.logDebug('REQUEST_ERROR', {
+            error: error.message,
+            retryCount: this.retryCount,
+            maxRetries: this.maxRetries
+        });
 
         if (this.retryCount < this.maxRetries) {
             this.retryCount++;
-            await new Promise(resolve => setTimeout(resolve, 1000 * this.retryCount));
+            const delay = Math.min(1000 * Math.pow(2, this.retryCount), 10000);
+            await new Promise(resolve => setTimeout(resolve, delay));
             return this.sendMessage(message);
         }
 
@@ -138,6 +189,32 @@ class ChatbotAPI {
             });
         } catch (logError) {
             console.error('Failed to log error:', logError);
+        }
+    }
+
+    async logDebug(type, data) {
+        const debugEntry = {
+            timestamp: new Date().toISOString(),
+            type,
+            data
+        };
+
+        this.debugLog.push(debugEntry);
+        if (this.debugLog.length > 1000) {
+            this.debugLog.shift(); // Keep last 1000 entries
+        }
+
+        try {
+            await fetch('/api/debug/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    component: 'CHATBOT',
+                    ...debugEntry
+                })
+            });
+        } catch (error) {
+            console.error('Failed to log debug entry:', error);
         }
     }
 
@@ -191,6 +268,10 @@ class ChatbotAPI {
             .replace(/>/g, '&gt;')
             .trim();
     }
+
+    cleanup() {
+        clearInterval(this.rateLimitMonitor);
+    }
 }
 
 // Rate Limiter Implementation
@@ -223,9 +304,31 @@ class RateLimiter {
     }
 }
 
-// Initialize chatbot with authentication
-const chatbot = new ChatbotAPI();
-chatbot.initialize().catch(console.error);
+// Initialize chatbot with error handling
+try {
+    const chatbot = new ChatbotAPI();
+    chatbot.initialize().catch(error => {
+        console.error('Chatbot initialization failed:', error);
+        chatbot.logDebug('INIT_ERROR', { error: error.message });
+    });
 
-// Export for use in other modules
-export { chatbot, ChatbotAPI, RateLimiter };
+    // Cleanup on page unload
+    window.addEventListener('unload', () => {
+        chatbot.cleanup();
+    });
+
+    export { chatbot };
+} catch (error) {
+    console.error('Failed to create ChatbotAPI instance:', error);
+    // Log to debug file even if initialization fails
+    fetch('/api/debug/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            component: 'CHATBOT',
+            type: 'FATAL_ERROR',
+            timestamp: new Date().toISOString(),
+            error: error.message
+        })
+    }).catch(console.error);
+}
