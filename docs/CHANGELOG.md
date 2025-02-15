@@ -6,13 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.0] - 2025-01-20
 ### Added
-- Initial project structure
-- Brand identity and style guide
-- Navigation system (header and footer)
-- Cyberpunk UI components and animations
-- Asset organization system
-- Changelog and versioning workflow
+- Legal pages (Privacy Policy, Terms of Use, Cookie Policy)
+- Cookie consent banner with cyberpunk styling
+- Footer legal notices and disclaimers
+- Legal page specific styling with cyberpunk aesthetic
+- GDPR compliant cookie management system
+
+### Changed
+- Updated copyright year to 2025
+- Enhanced footer layout with legal section
+- Improved accessibility in legal pages
+- Updated navigation to include legal links
+
+### Security
+- Implemented cookie consent management
+- Added privacy-focused legal documentation
+- Enhanced data protection notices
 
 ## [1.0.0] - 2024-01-20
 ### Added

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /legal/
+Allow: /assets/css/
+Allow: /assets/js/
+
+# Protect private directories
+Disallow: /scripts/
+Disallow: /docs/
+Disallow: /assets/brand/
+
+# Sitemaps
+Sitemap: https://rolodexter.com/sitemap.xml
