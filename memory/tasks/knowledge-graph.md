@@ -7,61 +7,69 @@ Here’s the complete **`knowledge-graph.md`** file for `C:\rolodexter3\memory\t
 ```markdown
 # 🌐 Interactive Knowledge Graph Implementation
 
-## **📌 Overview**
+## 📌 **Overview**
 The goal is to develop an **interactive knowledge graph** for the rolodexter website that:
-- Uses **D3.js** for data visualization.
-- Dynamically loads **Markdown-based knowledge** from `/knowledge/`.
-- Enables **graph-based search and exploration** of concepts, entities, and relationships.
-- Provides **a seamless, user-friendly experience** with interactive node expansion.
+- Uses **D3.js** for data visualization
+- Dynamically loads **Markdown-based knowledge** from `/knowledge/`
+- Enables **graph-based search and exploration** of concepts, entities, and relationships
+- Provides **a seamless, user-friendly experience** with interactive node expansion
 
 ---
 
 ## ✅ **Core Features**
+
 ### **1️⃣ Graph UI & Visualization**
-- [ ] Implement **interactive graph nodes** using **D3.js**.
-- [ ] Support **click-based node expansion** for hierarchical navigation.
-- [ ] Ensure **graph responsiveness** (adjust to different screen sizes).
-- [ ] Style nodes and links using a **cyberpunk aesthetic** to match rolodexter’s branding.
-- [ ] Implement **hover tooltips** with contextual info on each node.
-- [ ] Provide a **search bar** to filter and highlight nodes.
+- [x] Define standardized taxonomy in `/docs/knowledge-graph-taxonomy.md`
+- [x] Implement metadata validation script
+- [ ] Implement **interactive graph nodes** using **D3.js**
+- [ ] Support **click-based node expansion** for hierarchical navigation
+- [ ] Ensure **graph responsiveness**
+- [ ] Style nodes and links using **cyberpunk aesthetic**
+- [ ] Implement **hover tooltips** with contextual info
+- [ ] Provide **search bar** to filter and highlight nodes
 
 ### **2️⃣ Knowledge Base Integration**
-- [ ] Load data from **Markdown files (`.md`)** stored in `/knowledge/`.
-- [ ] Parse Markdown content to extract **title, summary, relationships, and metadata**.
-- [ ] Convert structured Markdown knowledge into a **graph database format**.
-- [ ] Implement **JSON-based knowledge storage** for better performance.
+- [x] Define standardized front matter format for `.md` and `.html` files
+- [x] Implement file metadata extraction in repository.js
+- [ ] Parse front matter and meta tags using format-specific parsers
+- [ ] Convert structured knowledge into graph database format
+- [ ] Implement **JSON-based knowledge storage**
 
 ### **3️⃣ Graph Data Processing**
-- [ ] Design a **graph schema** for linking concepts.
-- [ ] Define **entity types** (e.g., "Concept," "Technology," "Person").
-- [ ] Ensure graph **auto-updates when new `.md` files are added**.
-- [ ] Implement **relationship extraction** (e.g., linking related concepts).
+- [x] Design graph schema and taxonomy
+- [x] Define entity types and categories
+- [ ] Implement auto-updates for new files
+- [ ] Setup relationship extraction
 
 ### **4️⃣ Search & Navigation**
-- [ ] Implement **search bar** for quick entity lookup.
-- [ ] Enable **keyboard navigation** (arrow keys for node traversal).
-- [ ] Allow **graph filtering by category** (e.g., "Research", "AI", "Blockchain").
-- [ ] Implement **highlighting of active node paths**.
+- [ ] Implement search bar for quick entity lookup
+- [ ] Enable keyboard navigation
+- [ ] Add category-based filtering
+- [ ] Implement path highlighting
 
 ### **5️⃣ API & Backend Considerations**
-- [ ] Provide an **API endpoint** for retrieving knowledge graph data.
-- [ ] Cache frequently accessed graph structures for performance.
-- [ ] Ensure **knowledge retrieval works with the chatbot integration**.
+- [x] Create API endpoint for retrieving files (/api/repository/files)
+- [x] Add metadata extraction endpoint (/api/file/metadata)
+- [ ] Implement caching for frequently accessed structures
+- [ ] Ensure chatbot integration compatibility
 
 ---
 
 ## **📂 File & Code Structure**
 ```
+/docs/
+│── knowledge-graph-taxonomy.md  # Official taxonomy & metadata guidelines
 /scripts/
 │── knowledge-graph.js  # Core visualization logic (D3.js)
-│── graph-data-loader.js  # Converts Markdown to graph structure
+│── graph-data-loader.js  # Converts content to graph structure
 │── search-graph.js  # Implements search and filtering
+/server/routes/
+│── repository.js  # API endpoints for file & metadata access
 /memory/
-│── knowledge-graph-history/  # Logs updates to the graph structure
 │── tasks/
 │   ├── knowledge-graph.md  # This file
 /knowledge/
-│── *.md  # Knowledge base files that the graph references
+│── *.md  # Knowledge base files
 ```
 
 ---
@@ -97,21 +105,19 @@ The goal is to develop an **interactive knowledge graph** for the rolodexter web
 ---
 
 ## **📌 rolodexter’s Status**
-📝 **Read by**: rolodexter  
-📅 **Last Read**: `[YYYY-MM-DD HH:MM:SS UTC]`  
-✅ **Completed On**: `-` *(Still in progress)*  
-🔄 **Status**: `On-going`  
-💬 **Comment**: `Need to confirm Markdown metadata structure with Joe before implementing data parsing.`  
-```
+📝 **Read by**: rolodexterVS  
+📅 **Last Updated**: 2025-02-17 15:30:00 UTC  
+✅ **Major Milestone**: Taxonomy & metadata structure defined  
+🔄 **Status**: `Implementation-Phase`  
+💬 **Comment**: `Taxonomy documentation complete. Beginning metadata implementation across existing files.`
 
 ---
 
 ## **🚀 Next Steps**
-1️⃣ **Create `knowledge-graph.js`, `graph-data-loader.js`, and `search-graph.js` under `/scripts/`.**  
-2️⃣ **Define Markdown metadata format for easy knowledge extraction.**  
-3️⃣ **Build JSON-based knowledge structure.**  
-4️⃣ **Integrate with chatbot and ensure seamless API access.**  
-5️⃣ **Test UI/UX for responsiveness and performance.**  
+1️⃣ Add graph metadata to all existing documentation files
+2️⃣ Implement automated metadata validation
+3️⃣ Update visualization to use new metadata structure
+4️⃣ Test graph data flow with new API endpoints
+5️⃣ Review and optimize parser performance
 
-🚀 **Let me know if refinements are needed!**  
-```
+🔍 **Following the newly defined taxonomy in `/docs/knowledge-graph-taxonomy.md`**
