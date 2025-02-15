@@ -4,52 +4,61 @@ on:
   push:
     paths:
       - 'memory/**'
+      - 'assets/js/**'
+      - 'server/routes/**'
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
+    - cron: '*/5 * * * *'
 
 jobs:
   update-memory:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      
+      actions: write
+    
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Verify Authentication
+      id: auth_check
+      run: |
+        if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
+          echo "::error::GitHub token not available"
+          exit 1
+        fi
+        echo "token_available=true" >> $GITHUB_OUTPUT
     
     - name: Check for Changes
       id: check_changes
+      if: steps.auth_check.outputs.token_available == 'true'
       run: |
-        # Ensure we have the latest changes
         git fetch origin
-        git diff --quiet HEAD~1 HEAD ./memory/ || echo "changes=true" >> $GITHUB_OUTPUT
+        git diff --quiet HEAD~1 HEAD ./memory/ ./assets/js/ ./server/routes/ || echo "changes=true" >> $GITHUB_OUTPUT
       continue-on-error: true
     
     - name: Update Session History
       if: steps.check_changes.outputs.changes == 'true'
       run: |
-        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-        COMMIT_HASH=$(git rev-parse HEAD)
-        CHANGED_FILES=$(git diff --name-status HEAD~1 HEAD ./memory/)
-        
         {
-          echo "### $TIMESTAMP"
+          echo "### $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
           echo "- 🔄 **Commit:** $(git log -1 --pretty=%B)"
           echo "- 👤 **Author:** $(git log -1 --pretty=%an)"
-          echo "- 🔍 **Hash:** \`$COMMIT_HASH\`"
+          echo "- 🔍 **Hash:** \`$(git rev-parse HEAD)\`"
           echo "- 📝 **Summary:**"
           echo "Changes detected:"
-          git diff --stat HEAD~1 HEAD ./memory/ | while read line; do
+          git diff --stat HEAD~1 HEAD ./memory/ ./assets/js/ ./server/routes/ | while read line; do
             echo "- $line"
           done
           echo ""
           echo "- Files changed:"
-          echo "  $CHANGED_FILES"
+          echo "\`\`\`"
+          git diff --name-status HEAD~1 HEAD ./memory/ ./assets/js/ ./server/routes/
+          echo "\`\`\`"
           echo ""
         } >> memory/session-history.md
-      continue-on-error: true
     
     - name: Commit Changes with Retry
       if: steps.check_changes.outputs.changes == 'true'
@@ -58,13 +67,14 @@ jobs:
         RETRY_COUNT=0
         
         while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-          # Configure git
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
+          # Configure git with token-based authentication
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           
-          # Pull latest changes with retry
+          # Pull with rebase and retry
           for i in {1..3}; do
-            if git pull origin main --rebase; then
+            if git pull origin ${GITHUB_REF##*/} --rebase; then
               break
             fi
             sleep 5
@@ -75,8 +85,8 @@ jobs:
           if git commit -m "[UPDATE] Auto-update session history
 
           📝 Changes Summary:
-          $(git diff --stat HEAD~1 HEAD ./memory/)"; then
-            # Try to push with exponential backoff
+          $(git diff --stat HEAD~1 HEAD)"; then
+            # Push with exponential backoff
             for i in {1..3}; do
               if git push origin HEAD; then
                 echo "✅ Successfully pushed changes on attempt $((RETRY_COUNT + 1))"
@@ -95,5 +105,17 @@ jobs:
         
         if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
           echo "❌ Failed to push changes after $MAX_RETRIES attempts"
+          echo "::error::Failed to push changes after multiple attempts"
           exit 1
         fi
+    
+    - name: Update Debug Log
+      if: always()
+      run: |
+        {
+          echo "## Workflow Run: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "- Status: ${{ job.status }}"
+          echo "- Run ID: ${{ github.run_id }}"
+          echo "- Trigger: ${{ github.event_name }}"
+          echo ""
+        } >> memory/rolodexterVS-debug.md

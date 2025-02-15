@@ -8,56 +8,137 @@ const API_CONFIG = {
 
 class ChatbotAPI {
     constructor() {
+        this.token = null;
+        this.tokenExpiry = null;
+        this.isRefreshing = false;
+        this.pendingRequests = [];
+        this.retryCount = 0;
+        this.maxRetries = 3;
         this.pendingRequests = new Map();
         this.rateLimiter = new RateLimiter(60, 'minute'); // 60 requests per minute
     }
 
-    async sendMessage(message, conversationId) {
+    async initialize() {
+        await this.ensureValidToken();
+    }
+
+    async ensureValidToken() {
+        if (this.isTokenValid()) {
+            return this.token;
+        }
+
+        if (this.isRefreshing) {
+            return new Promise(resolve => {
+                this.pendingRequests.push(resolve);
+            });
+        }
+
         try {
-            if (!await this.rateLimiter.canMakeRequest()) {
-                throw new Error('Rate limit exceeded. Please try again later.');
-            }
-
-            const response = await this.makeRequestWithRetry(async () => {
-                const result = await fetch(`${API_CONFIG.baseUrl}/chat/completions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${await this.getAuthToken()}`,
-                        'HTTP-Referer': window.location.origin,
-                    },
-                    body: JSON.stringify({
-                        model: 'openai/gpt-3.5-turbo',
-                        messages: [{ role: 'user', content: message }]
-                    })
-                });
-
-                if (!result.ok) {
-                    throw new Error(`API request failed: ${result.status}`);
-                }
-
-                return await result.json();
+            this.isRefreshing = true;
+            const response = await fetch('/api/auth/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            return this.processResponse(response);
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+
+            const { token, expires } = await response.json();
+            this.token = token;
+            this.tokenExpiry = expires;
+            
+            // Resume pending requests
+            this.pendingRequests.forEach(resolve => resolve(token));
+            this.pendingRequests = [];
+            
+            return token;
         } catch (error) {
-            console.error('Error in sendMessage:', error);
-            throw new Error('Failed to process message. Please try again.');
+            console.error('Token refresh failed:', error);
+            throw error;
+        } finally {
+            this.isRefreshing = false;
         }
     }
 
-    async getAuthToken() {
-        // Fetch token from secure backend endpoint
-        const response = await fetch('/api/auth/token', {
-            credentials: 'same-origin'
-        });
+    isTokenValid() {
+        return this.token && this.tokenExpiry && Date.now() < this.tokenExpiry;
+    }
+
+    async sendMessage(message) {
+        try {
+            const token = await this.ensureValidToken();
+            const response = await this.makeAuthenticatedRequest('/api/auth/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ message })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+
+            this.retryCount = 0; // Reset retry count on success
+            return await response.json();
+        } catch (error) {
+            await this.handleRequestError(error);
+        }
+    }
+
+    async makeAuthenticatedRequest(url, options) {
+        const token = await this.ensureValidToken();
+        options.headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(url, options);
         
-        if (!response.ok) {
-            throw new Error('Failed to get authentication token');
+        if (response.status === 401) {
+            // Token might be invalid, try to refresh
+            this.token = null;
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                return this.makeAuthenticatedRequest(url, options);
+            }
         }
         
-        const { token } = await response.json();
-        return token;
+        return response;
+    }
+
+    async handleRequestError(error) {
+        // Log error to debug file
+        await this.logError(error);
+
+        if (this.retryCount < this.maxRetries) {
+            this.retryCount++;
+            await new Promise(resolve => setTimeout(resolve, 1000 * this.retryCount));
+            return this.sendMessage(message);
+        }
+
+        throw new Error('Failed to send message after multiple attempts');
+    }
+
+    async logError(error) {
+        try {
+            const timestamp = new Date().toISOString();
+            const debugEntry = {
+                timestamp,
+                error: error.message,
+                retryCount: this.retryCount
+            };
+
+            await fetch('/api/debug/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(debugEntry)
+            });
+        } catch (logError) {
+            console.error('Failed to log error:', logError);
+        }
     }
 
     async makeRequestWithRetry(requestFn) {
@@ -142,8 +223,9 @@ class RateLimiter {
     }
 }
 
-// Initialize chatbot with security measures
+// Initialize chatbot with authentication
 const chatbot = new ChatbotAPI();
+chatbot.initialize().catch(console.error);
 
 // Export for use in other modules
 export { chatbot, ChatbotAPI, RateLimiter };
