@@ -1,73 +1,26 @@
 {
-    "media": {
-        "images": [
-            {
-                "id": "img1",
-                "title": "Neural Network Architecture",
-                "description": "Visualization of our custom neural network topology",
-                "url": "/assets/media/images/neural-network.jpg",
-                "thumbnail": "/assets/media/thumbnails/neural-network-thumb.jpg",
-                "tags": ["ai", "visualization", "architecture"]
-            },
-            {
-                "id": "img2",
-                "title": "Knowledge Graph Structure",
-                "description": "Interactive visualization of our knowledge graph",
-                "url": "/assets/media/images/knowledge-graph.jpg",
-                "thumbnail": "/assets/media/thumbnails/knowledge-graph-thumb.jpg",
-                "tags": ["graph", "visualization", "data"]
-            }
-        ],
-        "videos": [
-            {
-                "id": "vid1",
-                "title": "AI Learning Process",
-                "description": "Demonstration of our AI learning capabilities",
-                "url": "/assets/media/videos/ai-learning.mp4",
-                "thumbnail": "/assets/media/thumbnails/ai-learning-thumb.jpg",
-                "duration": "2:15",
-                "tags": ["ai", "learning", "demo"]
-            },
-            {
-                "id": "vid2",
-                "title": "Interactive Graph Demo",
-                "description": "How to use our knowledge graph interface",
-                "url": "/assets/media/videos/graph-demo.mp4",
-                "thumbnail": "/assets/media/thumbnails/graph-demo-thumb.jpg",
-                "duration": "3:45",
-                "tags": ["tutorial", "interface", "demo"]
-            }
-        ],
-        "documents": [
-            {
-                "id": "doc1",
-                "title": "Technical Documentation",
-                "description": "Detailed technical specifications and API documentation",
-                "url": "/assets/media/docs/technical-docs.pdf",
-                "thumbnail": "/assets/media/thumbnails/doc-thumb.jpg",
-                "type": "pdf",
-                "size": "2.4MB",
-                "tags": ["documentation", "technical", "api"]
-            },
-            {
-                "id": "doc2",
-                "title": "Research Paper",
-                "description": "Our latest research findings and methodologies",
-                "url": "/assets/media/docs/research-paper.pdf",
-                "thumbnail": "/assets/media/thumbnails/research-thumb.jpg",
-                "type": "pdf",
-                "size": "1.8MB",
-                "tags": ["research", "paper", "methodology"]
-            }
-        ]
-    },
-    "tags": [
-        "ai", "visualization", "architecture", "graph", "data",
-        "learning", "demo", "tutorial", "interface", "documentation",
-        "technical", "api", "research", "paper", "methodology"
+    "mediaItems": [
+        {
+            "id": "1",
+            "type": "image",
+            "title": "Neural Network Visualization",
+            "description": "Interactive visualization of rolodexter's neural pathways",
+            "url": "/assets/media/neural-vis.jpg",
+            "thumbnail": "/assets/media/thumbnails/neural-vis-thumb.jpg",
+            "tags": ["ai", "visualization", "network"]
+        },
+        {
+            "id": "2",
+            "type": "video",
+            "title": "Quantum Processing Demo",
+            "description": "Demonstration of quantum processing capabilities",
+            "url": "/assets/media/quantum-demo.mp4",
+            "thumbnail": "/assets/media/thumbnails/quantum-thumb.jpg",
+            "tags": ["quantum", "demo", "processing"]
+        }
     ],
     "pagination": {
         "itemsPerPage": 12,
-        "totalItems": 6
+        "totalItems": 2
     }
 }

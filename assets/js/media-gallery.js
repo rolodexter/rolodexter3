@@ -2,233 +2,113 @@ class MediaGallery {
     constructor() {
         this.currentPage = 1;
         this.currentFilter = 'all';
-        this.mediaData = null;
-        this.loadingState = false;
-        this.retryAttempts = 3;
-        this.init();
+        this.itemsPerPage = 12;
+        this.mediaItems = [];
+        
+        // Initialize elements
+        this.galleryGrid = document.querySelector('.gallery-grid');
+        this.filterButtons = document.querySelectorAll('.gallery-filter');
+        this.prevButton = document.querySelector('.page-prev');
+        this.nextButton = document.querySelector('.page-next');
+        this.currentPageSpan = document.querySelector('.current-page');
+        
+        this.initialize();
     }
 
-    async init() {
+    async initialize() {
         try {
-            await this.loadMediaData();
+            // Load media data
+            const response = await fetch('/assets/data/media-gallery.json');
+            const data = await response.json();
+            this.mediaItems = data.mediaItems;
+            this.itemsPerPage = data.pagination.itemsPerPage;
+            
+            // Set up event listeners
             this.setupEventListeners();
+            
+            // Initial render
             this.render();
         } catch (error) {
-            this.handleError('Failed to initialize gallery');
-        }
-    }
-
-    async loadMediaData() {
-        this.setLoading(true);
-        try {
-            const response = await fetch('/assets/data/media-gallery.json');
-            if (!response.ok) throw new Error('Failed to load media data');
-            
-            this.mediaData = await response.json();
-            this.setupPagination();
-        } catch (error) {
-            throw new Error('Error loading media data');
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-    setLoading(state) {
-        this.loadingState = state;
-        const gallery = document.querySelector('.gallery-grid');
-        if (state) {
-            gallery.classList.add('loading');
-        } else {
-            gallery.classList.remove('loading');
+            console.error('Failed to initialize media gallery:', error);
+            this.galleryGrid.innerHTML = '<p class="error">Failed to load media gallery</p>';
         }
     }
 
     setupEventListeners() {
         // Filter buttons
-        document.querySelectorAll('.gallery-filter').forEach(button => {
+        this.filterButtons.forEach(button => {
             button.addEventListener('click', () => {
                 this.currentFilter = button.dataset.filter;
                 this.currentPage = 1;
+                this.updateActiveFilter();
                 this.render();
-                this.updateURL();
             });
         });
 
         // Pagination
-        document.querySelector('.page-prev').addEventListener('click', () => {
-            if (this.currentPage > 1) {
-                this.currentPage--;
-                this.render();
-                this.updateURL();
-            }
-        });
-
-        document.querySelector('.page-next').addEventListener('click', () => {
-            const maxPages = this.getMaxPages();
-            if (this.currentPage < maxPages) {
-                this.currentPage++;
-                this.render();
-                this.updateURL();
-            }
-        });
-
-        // Handle browser back/forward
-        window.addEventListener('popstate', (event) => {
-            if (event.state) {
-                this.currentFilter = event.state.filter;
-                this.currentPage = event.state.page;
-                this.render();
-            }
-        });
-    }
-
-    updateURL() {
-        const url = new URL(window.location);
-        url.searchParams.set('filter', this.currentFilter);
-        url.searchParams.set('page', this.currentPage);
-        window.history.pushState(
-            { filter: this.currentFilter, page: this.currentPage },
-            '',
-            url
-        );
+        this.prevButton.addEventListener('click', () => this.changePage(-1));
+        this.nextButton.addEventListener('click', () => this.changePage(1));
     }
 
     getFilteredItems() {
-        if (!this.mediaData) return [];
-        
-        const allItems = [
-            ...this.mediaData.media.images,
-            ...this.mediaData.media.videos,
-            ...this.mediaData.media.documents
-        ];
-
-        return this.currentFilter === 'all'
-            ? allItems
-            : allItems.filter(item => {
-                const itemType = this.getItemType(item);
-                return itemType === this.currentFilter;
-              });
+        if (this.currentFilter === 'all') {
+            return this.mediaItems;
+        }
+        return this.mediaItems.filter(item => item.type === this.currentFilter);
     }
 
-    getItemType(item) {
-        if (item.url.match(/\.(jpg|jpeg|png|gif)$/i)) return 'images';
-        if (item.url.match(/\.(mp4|webm|ogg)$/i)) return 'videos';
-        return 'documents';
+    updateActiveFilter() {
+        this.filterButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.filter === this.currentFilter);
+        });
     }
 
-    getMaxPages() {
+    changePage(delta) {
         const filteredItems = this.getFilteredItems();
-        return Math.ceil(filteredItems.length / this.mediaData.pagination.itemsPerPage);
-    }
-
-    setupPagination() {
-        const totalItems = this.getFilteredItems().length;
-        const maxPages = Math.ceil(totalItems / this.mediaData.pagination.itemsPerPage);
+        const maxPage = Math.ceil(filteredItems.length / this.itemsPerPage);
         
-        document.querySelector('.page-info').innerHTML = `
-            Page <span class="current-page">${this.currentPage}</span> of ${maxPages}
-        `;
+        const newPage = this.currentPage + delta;
+        if (newPage >= 1 && newPage <= maxPage) {
+            this.currentPage = newPage;
+            this.render();
+        }
     }
 
     render() {
-        if (!this.mediaData) return;
-
-        const grid = document.querySelector('.gallery-grid');
         const filteredItems = this.getFilteredItems();
-        const start = (this.currentPage - 1) * this.mediaData.pagination.itemsPerPage;
-        const end = start + this.mediaData.pagination.itemsPerPage;
-        const currentItems = filteredItems.slice(start, end);
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const itemsToShow = filteredItems.slice(startIndex, endIndex);
 
-        grid.innerHTML = currentItems.map(item => this.renderItem(item)).join('');
-        
-        this.setupPagination();
-        this.updateFilterStates();
-        this.initializeLazyLoading();
+        // Update pagination UI
+        const maxPage = Math.ceil(filteredItems.length / this.itemsPerPage);
+        this.prevButton.disabled = this.currentPage === 1;
+        this.nextButton.disabled = this.currentPage === maxPage;
+        this.currentPageSpan.textContent = this.currentPage;
+
+        // Render items
+        this.galleryGrid.innerHTML = itemsToShow.map(item => this.renderItem(item)).join('');
     }
 
     renderItem(item) {
-        const itemType = this.getItemType(item);
-        const template = this.getItemTemplate(item, itemType);
-        
         return `
-            <div class="gallery-item" data-type="${itemType}">
-                ${template}
-                <div class="item-overlay">
+            <div class="gallery-item" data-type="${item.type}">
+                <div class="item-thumbnail">
+                    <img src="${item.thumbnail}" alt="${item.title}" loading="lazy">
+                </div>
+                <div class="item-info">
                     <h3>${item.title}</h3>
                     <p>${item.description}</p>
                     <div class="item-tags">
                         ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
                 </div>
-            </div>`;
-    }
-
-    getItemTemplate(item, type) {
-        switch (type) {
-            case 'images':
-                return `
-                    <img 
-                        src="${item.thumbnail}" 
-                        data-src="${item.url}" 
-                        alt="${item.title}"
-                        loading="lazy"
-                        class="lazy"
-                    >`;
-            case 'videos':
-                return `
-                    <video 
-                        src="${item.url}"
-                        poster="${item.thumbnail}"
-                        controls
-                    ></video>
-                    <span class="duration">${item.duration}</span>`;
-            case 'documents':
-                return `
-                    <div class="document-preview">
-                        <i class="document-icon"></i>
-                        <span class="document-type">${item.type.toUpperCase()}</span>
-                        <span class="document-size">${item.size}</span>
-                    </div>`;
-        }
-    }
-
-    updateFilterStates() {
-        document.querySelectorAll('.gallery-filter').forEach(button => {
-            button.classList.toggle('active', button.dataset.filter === this.currentFilter);
-        });
-    }
-
-    initializeLazyLoading() {
-        const lazyImages = document.querySelectorAll('img.lazy');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    observer.unobserve(img);
-                }
-            });
-        });
-
-        lazyImages.forEach(img => imageObserver.observe(img));
-    }
-
-    handleError(message) {
-        const gallery = document.querySelector('.gallery-grid');
-        gallery.innerHTML = `
-            <div class="error-message">
-                <p>${message}</p>
-                <button onclick="window.location.reload()">Retry</button>
-            </div>`;
+            </div>
+        `;
     }
 }
 
-// Initialize gallery with error handling
+// Initialize gallery when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        window.mediaGallery = new MediaGallery();
-    } catch (error) {
-        console.error('Failed to initialize media gallery:', error);
-    }
+    new MediaGallery();
 });

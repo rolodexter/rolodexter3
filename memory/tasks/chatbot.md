@@ -1,109 +1,137 @@
-Here’s the complete **`chatbot.md`** file for `C:\rolodexter3\memory\tasks\chatbot.md`, structured for **clarity, explicit task breakdowns, and integration steps**.  
+I'll update **C:\rolodexter3\memory\tasks\chatbot.md** to include the **token-gated access feature** instead of creating a new file. Here’s the updated content:
 
 ---
 
-## **📂 File Path:** `C:\rolodexter3\memory\tasks\chatbot.md`  
+### **🤖 AI Chatbot Integration Plan**
 
-```markdown
-# 🤖 AI Chatbot Integration Plan
-
-## **📌 Overview**
-The goal is to integrate an **AI-powered chatbot** into the rolodexter website that:
-- Uses **OpenRouter AI API** for LLM responses.
-- References **Markdown knowledge files** (`/knowledge/`) as a structured knowledge base.
-- Supports **contextual memory**, allowing users to ask follow-up questions.
-- Provides a **seamless user experience** with an interactive UI.
+## **✅ Objectives**
+- Connect `chatbot.js` to **OpenRouter AI API**.
+- Enable chatbot to reference **Markdown knowledge files** (`/knowledge/`).
+- Build a **basic conversation UI** integrated into the site.
+- **Gate chatbot access to rolodexter token holders** on Solana.
 
 ---
 
-## ✅ **Core Features**
-### **1️⃣ Chat Interface**
-- [ ] Implement a **floating chat widget** on all website pages.
-- [ ] Ensure **UI theme matches light/dark mode settings**.
-- [ ] Display **system status indicators** (e.g., "Connected to rolodexter AI").
-- [ ] Store **session-based chat memory** (cleared when page reloads).
+## **🛠 Steps to Implement**
 
-### **2️⃣ OpenRouter AI API Integration**
-- [ ] Connect `chatbot.js` to **OpenRouter AI API**.
-- [ ] Secure API key using **environment variables** or a proxy.
-- [ ] Implement **error handling** (e.g., API downtime, rate limits).
-- [ ] Support **adjustable temperature & response length settings**.
+### **1️⃣ Connect Chatbot to OpenRouter AI API**
+- Ensure API requests are authenticated.
+- Implement **rate limiting** to prevent spam or overuse.
 
-### **3️⃣ Knowledge Graph & Markdown Parsing**
-- [ ] Enable chatbot to **search and retrieve structured data** from `/knowledge/`.
-- [ ] Parse **Markdown files (`.md`)** to extract relevant information.
-- [ ] Implement **semantic search** for more accurate responses.
-- [ ] Ensure chatbot can **cite sources** from retrieved content.
+### **2️⃣ Enable Markdown File Integration**
+- Chatbot should **retrieve structured knowledge** from `/knowledge/` directory.
+- Implement **searchable metadata indexing** for retrieval.
 
-### **4️⃣ Memory & Context Awareness**
-- [ ] Implement **basic short-term memory** (stores last 5-10 messages).
-- [ ] Allow users to **reset memory** via UI command.
-- [ ] Provide an option for **session-based memory persistence**.
-- [ ] Future upgrade: **Long-term AI memory stored in `/memory/chat-history/`**.
+### **3️⃣ Implement Token-Gated Access (Solana)**
+#### **🔹 Wallet Connection**
+- Allow users to connect via **Phantom, Solflare, or Backpack**.
+- Prompt login when trying to access the chatbot.
 
-### **5️⃣ Security & Privacy**
-- [ ] Ensure chatbot **does not expose API keys** in frontend code.
-- [ ] Implement **request throttling** to prevent abuse.
-- [ ] Provide **opt-out options** for logging chat history.
+#### **🔹 Token Verification**
+- Use **Solana Web3.js** to check the user's wallet for **rolodexter tokens**.
+- Use an **RPC provider (Helius, QuickNode, Solana RPC Pool)** for fast verification.
 
----
+#### **🔹 Access Rules**
+- If **balance ≥ 1 rolodexter token**, allow chatbot access.
+- If **balance < 1**, show:
+  - 🚫 **"Access Denied: You must hold rolodexter tokens."**
+  - 🔗 **"Buy rolodexter tokens"** (link to DexScreener or Jupiter Swap).
 
-## **📂 File & Code Structure**
-```
-/scripts/
-│── chatbot.js  # Core chatbot logic
-│── chatbot-ui.js  # Manages chat UI components
-│── chatbot-config.js  # Stores OpenRouter API key & settings
-/memory/
-│── chat-history/  # Stores session-based logs
-│── tasks/
-│   ├── chatbot.md  # This file
-/knowledge/
-│── *.md  # Knowledge base files chatbot will reference
-```
+#### **🔹 LocalStorage Caching**
+- Store verification in `localStorage` to **reduce redundant API calls**.
+
+#### **🔹 Modify Chatbot UI**
+- Hide chatbot unless access is verified.
 
 ---
 
-## **🔄 API Request Example**
-📂 **Modify `chatbot.js` to include this basic API request:**
+## **📌 Code Implementation**  
 ```javascript
-async function queryOpenRouterAI(userMessage) {
-    const API_KEY = "YOUR_API_KEY_HERE";  // Use env variable in production
-    const response = await fetch("https://openrouter.ai/api/v1/chat", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${API_KEY}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            model: "gpt-4",
-            messages: [{ role: "user", content: userMessage }],
-            max_tokens: 500
-        })
-    });
+// Load Solana Web3.js
+import { Connection, PublicKey } from "@solana/web3.js";
 
-    const data = await response.json();
-    return data.choices[0].message.content;
+// Rolodexter Token Address
+const ROLODEXTER_TOKEN = "2ewknu2dcnpadcknsbqp1ywf16nssx62h4lwebibgay8";
+const SOLANA_RPC = "https://api.mainnet-beta.solana.com"; 
+
+async function checkRolodexterAccess(walletAddress) {
+    const connection = new Connection(SOLANA_RPC);
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+        new PublicKey(walletAddress),
+        { programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") }
+    );
+
+    for (let account of tokenAccounts.value) {
+        if (account.account.data.parsed.info.mint === ROLODEXTER_TOKEN) {
+            return account.account.data.parsed.info.tokenAmount.uiAmount > 0;
+        }
+    }
+    return false;
 }
+
+async function authenticateUser() {
+    try {
+        const wallet = window.solana;
+        if (!wallet || !wallet.isPhantom) throw new Error("Solana wallet not found!");
+
+        await wallet.connect();
+        const userAddress = wallet.publicKey.toString();
+
+        const hasAccess = await checkRolodexterAccess(userAddress);
+        if (hasAccess) {
+            localStorage.setItem("rolodexter-access", "granted");
+            document.getElementById("chatbot").style.display = "block";
+        } else {
+            alert("🚫 Access Denied! You must hold rolodexter tokens.");
+        }
+    } catch (error) {
+        console.error("Authentication error:", error);
+    }
+}
+
+// Run on page load
+window.onload = () => {
+    if (localStorage.getItem("rolodexter-access") === "granted") {
+        document.getElementById("chatbot").style.display = "block";
+    } else {
+        document.getElementById("chatbot").style.display = "none";
+    }
+};
+
+// UI Button Event
+document.getElementById("login-btn").addEventListener("click", authenticateUser);
 ```
 
 ---
 
-## **📌 rolodexter’s Status**
-📝 **Read by**: rolodexter  
-📅 **Last Read**: `[YYYY-MM-DD HH:MM:SS UTC]`  
-✅ **Completed On**: `-` *(Still in progress)*  
-🔄 **Status**: `On-going`  
-💬 **Comment**: `I need API access details from Joe to proceed with OpenRouter integration.`  
+### **🎨 UI/UX Changes**  
+Modify `index.html`:
+```html
+<button id="login-btn">🔑 Connect Wallet</button>
+<div id="chatbot" style="display: none;">
+    <!-- Chatbot iframe or UI -->
+</div>
 ```
+
+---
+
+## **⚠️ GitHub Pages Limitations**  
+- **No backend support** → All authentication is **client-side**.
+- **LocalStorage bypass risk** → Users can manually override.
+- **Solana RPC rate limits** → Consider dedicated RPC provider.
 
 ---
 
 ## **🚀 Next Steps**
-1️⃣ **Create `chatbot.js`, `chatbot-ui.js`, and `chatbot-config.js` under `/scripts/`.**  
-2️⃣ **Secure OpenRouter API Key in a config file.**  
-3️⃣ **Test retrieval of `.md` knowledge base content.**  
-4️⃣ **Integrate UI into the website.**  
-5️⃣ **Monitor logs and user interactions for improvements.**  
+- 🔲 Deploy `token-gated-chatbot.js` on the site.
+- 🔲 Test Solana authentication & access control.
+- 🔲 Improve security with optional backend verification.
 
-🚀 **Let me know if refinements are needed!**  
+---
+
+## **📌 rolodexter’s Status**
+📝 **Read by**: rolodexterGPT  
+📅 **Last Read**: `2025-02-15 15:12:34 UTC`  
+🔄 **Status**: `On-going`  
+💬 **Comment**: `Needs implementation testing with live wallets.`  
+
