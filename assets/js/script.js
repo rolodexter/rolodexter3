@@ -238,6 +238,63 @@ function initMobileMenu() {
     }
 }
 
+// Theme Management
+const themeToggle = document.querySelector('.theme-toggle');
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+// Initialize theme from localStorage or system preference
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+        const theme = prefersDarkScheme.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+}
+
+// Toggle theme function
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+}
+
+// Event Listeners
+themeToggle?.addEventListener('click', toggleTheme);
+prefersDarkScheme.addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+        document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    }
+});
+
+// Initialize theme on load
+initializeTheme();
+
+// Update session history in memory system
+async function updateSessionHistory() {
+    try {
+        const response = await fetch('/memory/update-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'theme_toggle',
+                timestamp: new Date().toISOString()
+            })
+        });
+        
+        if (!response.ok) {
+            console.error('Failed to update session history');
+        }
+    } catch (error) {
+        console.error('Error updating session history:', error);
+    }
+}
+
 // Initialize effects when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize mobile menu
