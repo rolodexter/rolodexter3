@@ -8,6 +8,14 @@
 - [x] Move "rolodexter Labs" content into `/labs/`
 
 ## 🔄 In Progress
+- [ ] **Naming Convention Updates** (Priority High)
+  - Implementing automated search and replace for naming consistency
+  - Updating all references to match identity.md specifications:
+    - "rolodexterGPT" for AI Assistant references
+    - "rolodexterVS" for VS Code AI Agent references
+    - "rolodexter3" for website/application references
+    - "rolodexter Labs, LLC" for legal entity references
+  - Progress: 65% complete
 - [x] Create structured memory organization with session history and task tracking
 - [x] Generate **legal markdown files** (`privacy-policy.md`, `terms-of-use.md`, etc.)
 - [x] Refactor **footer links** to use custom legal pages
@@ -54,6 +62,10 @@
   - Ensured responsive design (stacks on mobile)
 - [ ] **Update Schedule page to display knowledge graph** (filtered by date/time-stamped `.html` or `.md`)
 - [ ] **Change footer text** from “© 2025 rolodexter3 Labs” to “© 2025 rolodexter Labs, LLC”
+- [ ] **Implement automated naming validation script**
+  - Create script to regularly check for naming consistency
+  - Add to CI/CD pipeline for automated verification
+  - Generate reports for manual review of context-specific cases
 
 ## Deferred/Backlog
 - [ ] **Finalize the Media Gallery Implementation**  

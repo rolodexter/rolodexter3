@@ -1,3 +1,12 @@
+// Import routes
+const authRouter = require('./routes/auth');
+const monitorRouter = require('./routes/monitor').router;
+const repositoryRouter = require('./routes/repository');
+
+// Express app configuration
+const express = require('express');
+const app = express();
+
 module.exports = {
     solana: {
         // List of RPC endpoints for failover
@@ -28,7 +37,7 @@ module.exports = {
             JSON.parse(process.env.REQUIRED_NFT_MINTS) : [],
             
         // Whitelist addresses that bypass token requirements
-        whitelistedAddresses: process.env.WHITELISTED_ADDRESSES ?
+        whitelistedAddresses: process.env.WHITELISTED_ADDRESSES ? 
             JSON.parse(process.env.WHITELISTED_ADDRESSES) : []
     },
     
@@ -41,3 +50,8 @@ module.exports = {
         prefix: 'rolodexter:'
     }
 };
+
+// Register routes
+app.use('/api/auth', authRouter);
+app.use('/api/monitor', monitorRouter);
+app.use('/api/repository', repositoryRouter);
