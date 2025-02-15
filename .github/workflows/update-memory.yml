@@ -1,4 +1,4 @@
-name: Update Session History
+name: Update Session History and Generate Commit Messages
 
 on:
   push:
@@ -18,12 +18,29 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Generate Commit Summary
+        id: summary
+        run: |
+          # Get the list of changed files
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          
+          # Generate a structured summary
+          echo "Changes detected in:" > commit_summary.txt
+          echo "$CHANGED_FILES" | while read -r file; do
+            if [[ -f "$file" ]]; then
+              echo "- $file" >> commit_summary.txt
+            fi
+          done
+
       - name: Append Commit to Session History
         run: |
           echo -e "\n### $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> memory/session-history.md
           echo "- 🔄 **Commit:** ${{ github.event.head_commit.message }}" >> memory/session-history.md
           echo "- 👤 **Author:** ${{ github.event.head_commit.author.name }}" >> memory/session-history.md
           echo "- 🔍 **Hash:** \`${{ github.sha }}\`" >> memory/session-history.md
+          echo "- 📝 **Summary:**" >> memory/session-history.md
+          cat commit_summary.txt >> memory/session-history.md
+          echo "" >> memory/session-history.md
           echo "- Files changed:" >> memory/session-history.md
           git diff --name-status HEAD~1 HEAD | while read -r line; do
             echo "  - \`$line\`" >> memory/session-history.md
@@ -35,5 +52,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add memory/session-history.md
-          git commit -m "📝 Updated session history with latest commit details" || echo "No changes to commit"
+          git commit -m "📝 Updated session history with AI-generated summary" || echo "No changes to commit"
           git push
