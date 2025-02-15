@@ -92,6 +92,39 @@ ${JSON.stringify(entry.details || entry.data, null, 2)}
             recentErrors: this.errorLog.slice(-5)
         };
     }
+
+    async logPerformanceMetrics(metrics) {
+        const entry = {
+            type: 'PERFORMANCE',
+            timestamp: new Date().toISOString(),
+            metrics: {
+                ...metrics,
+                memory: process.memoryUsage(),
+                uptime: process.uptime()
+            }
+        };
+        await this.writeToDebugLog(entry);
+    }
+
+    getDetailedMetrics() {
+        const now = Date.now();
+        const last5min = this.requestLog.filter(r => now - new Date(r.timestamp).getTime() < 300000);
+        
+        return {
+            ...this.getMetrics(),
+            recentPerformance: {
+                averageResponseTime: last5min.reduce((acc, r) => acc + r.duration, 0) / last5min.length,
+                requestsPerMinute: (last5min.length / 5).toFixed(2),
+                successRate: (1 - (this.errorLog.length / this.requestLog.length)).toFixed(4),
+                tokenRotationFrequency: this.tokenRotations.length
+            },
+            systemHealth: {
+                memory: process.memoryUsage(),
+                uptime: process.uptime(),
+                timestamp: new Date().toISOString()
+            }
+        };
+    }
 }
 
 const apiMonitor = new APIMonitor();
@@ -130,9 +163,15 @@ router.use((error, req, res, next) => {
     next(error);
 });
 
-// Metrics endpoint
+// Enhanced metrics endpoint
 router.get('/metrics', (req, res) => {
-    res.json(apiMonitor.getMetrics());
+    res.json(apiMonitor.getDetailedMetrics());
+});
+
+// New performance logging endpoint
+router.post('/performance', async (req, res) => {
+    await apiMonitor.logPerformanceMetrics(req.body);
+    res.sendStatus(200);
 });
 
 module.exports = { router, apiMonitor };

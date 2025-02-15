@@ -1418,3 +1418,31 @@ a:hover {
         gap: 1rem;
     }
 }
+
+/* Wallet Connection UI */
+.chatbot-auth {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: var(--surface-color);
+}
+
+.chatbot-auth button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.chatbot-auth button:hover {
+    opacity: 0.9;
+}
+
+.status-text {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}

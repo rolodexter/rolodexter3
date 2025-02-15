@@ -1,3 +1,6 @@
+// Import performance tracker
+import { performanceTracker } from './performance-tracker.js';
+
 // Add smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Website loaded successfully!');
@@ -295,6 +298,28 @@ async function updateSessionHistory() {
     }
 }
 
+// Initialize wallet connection
+document.addEventListener('DOMContentLoaded', () => {
+    const connectBtn = document.getElementById('connect-wallet');
+    const statusText = document.getElementById('wallet-status');
+
+    if (!window.solana || !window.solana.isPhantom) {
+        statusText.textContent = 'Please install Phantom wallet';
+        connectBtn.disabled = true;
+        return;
+    }
+
+    connectBtn.addEventListener('click', async () => {
+        try {
+            await chatbot.solanaAuth.connect();
+            statusText.textContent = `Connected: ${chatbot.solanaAuth.wallet.slice(0, 6)}...`;
+            connectBtn.textContent = 'Disconnect';
+        } catch (error) {
+            statusText.textContent = 'Connection failed: ' + error.message;
+        }
+    });
+});
+
 // Initialize effects when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize mobile menu
@@ -350,4 +375,35 @@ document.addEventListener('DOMContentLoaded', () => {
             menuToggle.setAttribute('aria-expanded', 'false');
         }
     });
+
+    // Initialize performance monitoring
+    if (window.location.pathname.includes('/media')) {
+        performanceTracker.metrics.media.set('pageLoad', performance.now());
+    }
+    
+    // Track API interactions
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+        const startTime = performance.now();
+        try {
+            const response = await originalFetch(...args);
+            const duration = performance.now() - startTime;
+            
+            if (args[0].includes('/api/')) {
+                performanceTracker.metrics.api.set(args[0], {
+                    duration,
+                    status: response.status,
+                    timestamp: Date.now()
+                });
+            }
+            
+            return response;
+        } catch (error) {
+            performanceTracker.logWarning('API Request Failed', {
+                url: args[0],
+                error: error.message
+            });
+            throw error;
+        }
+    };
 });

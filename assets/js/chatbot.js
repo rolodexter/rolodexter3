@@ -18,6 +18,7 @@ class ChatbotAPI {
         this.rateLimiter = new RateLimiter(60, 'minute'); // 60 requests per minute
         this.debugLog = [];
         this.setupDebugMonitoring();
+        this.solanaAuth = new SolanaAuthManager();
     }
 
     setupDebugMonitoring() {
@@ -96,9 +97,22 @@ class ChatbotAPI {
         return this.token && this.tokenExpiry && Date.now() < this.tokenExpiry;
     }
 
+    async verifyAccess() {
+        if (!this.solanaAuth.isConnected) {
+            await this.solanaAuth.connect();
+        }
+        return this.solanaAuth.checkAccess();
+    }
+
     async sendMessage(message) {
         const startTime = performance.now();
         try {
+            // Add access verification
+            const hasAccess = await this.verifyAccess();
+            if (!hasAccess) {
+                throw new Error('Insufficient token balance for access');
+            }
+
             const token = await this.ensureValidToken();
             this.logDebug('MESSAGE_SEND', { status: 'started', messageLength: message.length });
 
@@ -301,6 +315,57 @@ class RateLimiter {
         
         this.requests.push(now);
         return true;
+    }
+}
+
+// Solana Wallet Integration
+class SolanaAuthManager {
+    constructor() {
+        this.wallet = null;
+        this.isConnected = false;
+        this.minTokenBalance = 1; // Minimum required token balance
+    }
+
+    async connect() {
+        try {
+            if (!window.solana || !window.solana.isPhantom) {
+                throw new Error('Phantom wallet is not installed');
+            }
+
+            const response = await window.solana.connect();
+            this.wallet = response.publicKey.toString();
+            this.isConnected = true;
+            return this.wallet;
+        } catch (error) {
+            console.error('Wallet connection error:', error);
+            throw error;
+        }
+    }
+
+    async checkAccess() {
+        if (!this.isConnected) {
+            throw new Error('Wallet not connected');
+        }
+
+        // Verify token balance
+        const connection = new window.solana.Connection(
+            'https://api.mainnet-beta.solana.com'
+        );
+        const balance = await this.getTokenBalance(connection);
+        return balance >= this.minTokenBalance;
+    }
+
+    async getTokenBalance(connection) {
+        // Add token balance check implementation
+        return 0; // Placeholder
+    }
+
+    disconnect() {
+        if (window.solana) {
+            window.solana.disconnect();
+            this.isConnected = false;
+            this.wallet = null;
+        }
     }
 }
 
