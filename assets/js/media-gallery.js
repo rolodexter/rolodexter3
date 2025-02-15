@@ -31,8 +31,15 @@ class MediaGalleryMonitor {
             timestamp: Date.now(),
             type: entry.entryType,
             name: entry.name,
-            duration: entry.duration
+            duration: entry.duration,
+            size: entry.transferSize || 0,
+            contentType: entry.initiatorType || ''
         };
+
+        // Calculate CLS if available
+        if (entry.hadRecentInput === false) {
+            metrics.cls = entry.value;
+        }
 
         // Log to debug file
         this.logToDebug('PERFORMANCE', metrics);
@@ -96,6 +103,10 @@ class MediaGallery {
         this.monitor = new MediaGalleryMonitor();
         this.setupPerformanceMonitoring();
         
+        this.imageSizes = {
+            thumbnail: { width: 300, height: 200 },
+            preview: { width: 100, height: 100 }
+        };
         this.initialize();
     }
 
@@ -209,20 +220,53 @@ class MediaGallery {
     }
 
     renderItem(item) {
+        const placeholderColor = item.averageColor || '#222';
         return `
             <div class="gallery-item" data-type="${item.type}">
-                <div class="item-thumbnail">
-                    <img src="${item.thumbnail}" alt="${item.title}" loading="lazy">
+                <div class="item-thumbnail" style="background-color: ${placeholderColor}">
+                    <img 
+                        src="${item.thumbnail}" 
+                        alt="${item.title}" 
+                        loading="lazy"
+                        srcset="${this.generateSrcSet(item)}"
+                        sizes="(max-width: 768px) 100vw, 300px"
+                        style="opacity: 0; transition: opacity 0.3s"
+                        onload="this.style.opacity = 1"
+                        onerror="this.parentElement.classList.add('error')"
+                    >
                 </div>
                 <div class="item-info">
                     <h3>${item.title}</h3>
                     <p>${item.description}</p>
+                    <div class="item-metadata">
+                        <span class="item-date">${new Date(item.date).toLocaleDateString()}</span>
+                        <span class="item-size">${this.formatFileSize(item.size)}</span>
+                    </div>
                     <div class="item-tags">
                         ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    generateSrcSet(item) {
+        const sizes = [300, 600, 900];
+        return sizes
+            .map(size => `${item.url.replace('.', `_${size}.`)} ${size}w`)
+            .join(', ');
+    }
+
+    formatFileSize(bytes) {
+        if (!bytes) return '';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let size = bytes;
+        let unitIndex = 0;
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+        return `${size.toFixed(1)} ${units[unitIndex]}`;
     }
 
     handleError(error) {

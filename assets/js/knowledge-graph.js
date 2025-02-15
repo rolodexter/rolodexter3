@@ -7,6 +7,13 @@ class KnowledgeGraph {
         this.simulation = null;
         this.nodes = [];
         this.links = [];
+        this.clusters = new Map();
+        this.nodeTypes = {
+            concept: { color: 'var(--neural-gold)', radius: 6 },
+            article: { color: 'var(--hyperglow-cyan)', radius: 5 },
+            resource: { color: 'var(--neural-purple)', radius: 4 },
+            reference: { color: 'var(--text-secondary)', radius: 4 }
+        };
         this.initializeGraph();
     }
 
@@ -27,49 +34,114 @@ class KnowledgeGraph {
 
         this.svg.call(zoom);
         
-        // Initialize force simulation
+        // Enhanced force simulation with clustering
         this.simulation = d3.forceSimulation()
-            .force('link', d3.forceLink().id(d => d.id))
-            .force('charge', d3.forceManyBody().strength(-100))
-            .force('center', d3.forceCenter(this.width / 2, this.height / 2));
+            .force('link', d3.forceLink().id(d => d.id).distance(d => this.getLinkDistance(d)))
+            .force('charge', d3.forceManyBody().strength(d => this.getNodeCharge(d)))
+            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+            .force('collision', d3.forceCollide().radius(d => this.getNodeRadius(d) * 1.5))
+            .force('cluster', this.forceCluster());
+    }
+
+    getNodeCharge(node) {
+        return node.type === 'concept' ? -150 : -100;
+    }
+
+    getLinkDistance(link) {
+        return (link.source.type === 'concept' || link.target.type === 'concept') ? 100 : 60;
+    }
+
+    getNodeRadius(node) {
+        const baseRadius = this.nodeTypes[node.type]?.radius || 5;
+        return node.weight ? baseRadius * (1 + Math.log(node.weight)) : baseRadius;
+    }
+
+    forceCluster() {
+        const strength = 0.15;
+        let nodes;
+
+        function force(alpha) {
+            const centroids = new Map();
+            
+            // Calculate cluster centroids
+            nodes.forEach(d => {
+                if (d.cluster) {
+                    let centroid = centroids.get(d.cluster) || { x: 0, y: 0, count: 0 };
+                    centroid.x += d.x;
+                    centroid.y += d.y;
+                    centroid.count += 1;
+                    centroids.set(d.cluster, centroid);
+                }
+            });
+
+            // Apply clustering force
+            centroids.forEach((centroid, cluster) => {
+                const cx = centroid.x / centroid.count;
+                const cy = centroid.y / centroid.count;
+                nodes.forEach(d => {
+                    if (d.cluster === cluster) {
+                        d.vx += (cx - d.x) * strength * alpha;
+                        d.vy += (cy - d.y) * strength * alpha;
+                    }
+                });
+            });
+        }
+
+        force.initialize = (_nodes) => nodes = _nodes;
+        return force;
     }
 
     updateData(nodes, links) {
-        this.nodes = nodes;
-        this.links = links;
+        this.nodes = this.processNodes(nodes);
+        this.links = this.processLinks(links);
         
-        // Create the links
+        // Create the links with types
         const link = this.svg.selectAll('.link')
-            .data(links)
+            .data(this.links)
             .join('line')
-            .attr('class', 'link')
-            .attr('stroke', 'var(--hyperglow-cyan)')
-            .attr('stroke-width', 1)
+            .attr('class', d => `link ${d.type || ''}`)
+            .attr('stroke', d => d.color || 'var(--hyperglow-cyan)')
+            .attr('stroke-width', d => d.weight || 1)
+            .attr('stroke-dasharray', d => d.type === 'reference' ? '5,5' : null)
             .attr('opacity', 0.6);
 
-        // Create the nodes
+        // Enhanced nodes with types and metadata
         const node = this.svg.selectAll('.node')
-            .data(nodes)
+            .data(this.nodes)
             .join('g')
-            .attr('class', 'node')
+            .attr('class', d => `node ${d.type || ''}`)
             .call(this.drag());
 
+        // Clear existing node contents
+        node.selectAll('*').remove();
+
+        // Add node circles with dynamic styling
         node.append('circle')
-            .attr('r', 5)
-            .attr('fill', 'var(--neural-gold)')
+            .attr('r', d => this.getNodeRadius(d))
+            .attr('fill', d => this.nodeTypes[d.type]?.color || 'var(--neural-gold)')
             .attr('stroke', 'var(--hyperglow-cyan)')
             .attr('stroke-width', 2);
 
+        // Add node labels with metadata
         node.append('text')
             .text(d => d.name)
-            .attr('x', 8)
+            .attr('x', d => this.getNodeRadius(d) + 5)
             .attr('y', 4)
             .attr('class', 'node-label')
             .style('fill', 'var(--text-primary)');
 
+        // Add metadata indicators if present
+        node.filter(d => d.metadata)
+            .append('circle')
+            .attr('class', 'metadata-indicator')
+            .attr('r', 3)
+            .attr('cx', d => this.getNodeRadius(d))
+            .attr('cy', -3)
+            .attr('fill', 'var(--neural-purple)');
+
         // Update simulation
         this.simulation
-            .nodes(nodes)
+            .nodes(this.nodes)
             .on('tick', () => {
                 link
                     .attr('x1', d => d.source.x)
@@ -81,8 +153,35 @@ class KnowledgeGraph {
                     .attr('transform', d => `translate(${d.x},${d.y})`);
             });
 
-        this.simulation.force('link').links(links);
+        this.simulation.force('link').links(this.links);
         this.simulation.alpha(1).restart();
+    }
+
+    processNodes(nodes) {
+        return nodes.map(node => ({
+            ...node,
+            type: node.type || 'concept',
+            weight: node.weight || 1,
+            metadata: node.metadata || null,
+            cluster: node.cluster || null
+        }));
+    }
+
+    processLinks(links) {
+        return links.map(link => ({
+            ...link,
+            type: link.type || 'default',
+            weight: link.weight || 1,
+            color: this.getLinkColor(link)
+        }));
+    }
+
+    getLinkColor(link) {
+        switch (link.type) {
+            case 'reference': return 'var(--text-secondary)';
+            case 'dependency': return 'var(--neural-purple)';
+            default: return 'var(--hyperglow-cyan)';
+        }
     }
 
     drag() {
@@ -124,6 +223,40 @@ class KnowledgeGraph {
         this.links = this.links.filter(l => 
             l.source.id !== nodeId && l.target.id !== nodeId);
         this.updateData(this.nodes, this.links);
+    }
+
+    // New methods for metadata handling
+    showNodeMetadata(nodeId) {
+        const node = this.nodes.find(n => n.id === nodeId);
+        if (node?.metadata) {
+            // Dispatch custom event with metadata
+            this.container.node().dispatchEvent(new CustomEvent('showMetadata', {
+                detail: { node, metadata: node.metadata }
+            }));
+        }
+    }
+
+    updateNodeMetadata(nodeId, metadata) {
+        const node = this.nodes.find(n => n.id === nodeId);
+        if (node) {
+            node.metadata = { ...node.metadata, ...metadata };
+            this.updateData(this.nodes, this.links);
+        }
+    }
+
+    // New methods for clustering
+    updateClusters() {
+        this.clusters.clear();
+        this.nodes.forEach(node => {
+            if (node.cluster) {
+                if (!this.clusters.has(node.cluster)) {
+                    this.clusters.set(node.cluster, []);
+                }
+                this.clusters.get(node.cluster).push(node);
+            }
+        });
+        this.simulation.force('cluster', this.forceCluster());
+        this.simulation.alpha(0.3).restart();
     }
 }
 

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rolodexter Labs - Feature Demo</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Feature Demonstration</h1>
+        
+        <section id="knowledge-demo">
+            <h2>Knowledge Graph</h2>
+            <p>Interactive visualization of knowledge nodes with dynamic clustering</p>
+            
+            <div class="graph-container">
+                <div class="graph-controls">
+                    <button id="zoom-in">Zoom In</button>
+                    <button id="zoom-out">Zoom Out</button>
+                    <button id="reset-view">Reset</button>
+                </div>
+                <div id="knowledge-graph"></div>
+            </div>
+        </section>
+
+        <section id="media-demo">
+            <h2>Media Gallery</h2>
+            <p>Responsive image gallery with lazy loading and performance monitoring</p>
+            
+            <div class="gallery-filters">
+                <button class="gallery-filter active" data-filter="all">All</button>
+                <button class="gallery-filter" data-filter="image">Images</button>
+                <button class="gallery-filter" data-filter="video">Videos</button>
+            </div>
+            
+            <div class="gallery-grid">
+                <!-- Gallery items will be dynamically populated -->
+            </div>
+            
+            <div class="gallery-pagination">
+                <button class="page-prev">Previous</button>
+                <span class="current-page">1</span>
+                <button class="page-next">Next</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="/assets/js/knowledge-graph.js"></script>
+    <script src="/assets/js/graph-demo.js"></script>
+    <script src="/assets/js/media-gallery.js"></script>
+    
+    <script>
+        // Initialize performance monitoring
+        const performanceMonitor = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                console.log(`Performance Entry: ${entry.name}`, {
+                    type: entry.entryType,
+                    duration: entry.duration,
+                    size: entry.transferSize
+                });
+            }
+        });
+        
+        performanceMonitor.observe({
+            entryTypes: ['resource', 'measure', 'navigation']
+        });
+    </script>
+</body>
+</html>

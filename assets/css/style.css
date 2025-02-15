@@ -174,6 +174,41 @@ a:hover {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.item-thumbnail {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/2;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.item-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.item-thumbnail.error::after {
+    content: '!';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-error);
+    font-size: 24px;
+}
+
+.item-metadata {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
 }
 
 /* Knowledge Graph */
@@ -187,6 +222,72 @@ a:hover {
     display: flex;
     gap: 0.5rem;
     padding: var(--spacing-unit);
+}
+
+/* Knowledge Graph Enhancements */
+.knowledge-graph {
+    background: var(--bg-primary);
+}
+
+.node {
+    cursor: pointer;
+}
+
+.node circle {
+    transition: r 0.3s ease;
+}
+
+.node:hover circle {
+    filter: brightness(1.2);
+}
+
+.node-label {
+    font-size: 12px;
+    pointer-events: none;
+    user-select: none;
+}
+
+.metadata-indicator {
+    transition: opacity 0.3s ease;
+}
+
+.link {
+    transition: stroke-width 0.3s ease;
+}
+
+.link:hover {
+    stroke-width: 2px;
+}
+
+.link.reference {
+    stroke-dasharray: 5,5;
+}
+
+.link.dependency {
+    stroke: var(--neural-purple);
+}
+
+/* Node type-specific styles */
+.node.concept circle {
+    stroke-width: 3px;
+}
+
+.node.article circle {
+    stroke-width: 2px;
+}
+
+.node.resource circle,
+.node.reference circle {
+    stroke-width: 1px;
+}
+
+/* Cluster visualization */
+.cluster-hull {
+    fill: var(--bg-secondary);
+    fill-opacity: 0.1;
+    stroke: var(--text-secondary);
+    stroke-width: 1px;
+    stroke-opacity: 0.2;
 }
 
 /* Responsive Design */

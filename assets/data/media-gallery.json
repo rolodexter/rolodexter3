@@ -1,43 +1,74 @@
 {
     "mediaItems": [
         {
-            "id": "1",
+            "id": "img1",
             "type": "image",
-            "title": "Neural Network Visualization",
-            "description": "Interactive visualization of rolodexter's neural pathways",
-            "url": "/assets/media/neural-vis.jpg",
-            "thumbnail": "/assets/media/thumbnails/neural-vis-thumb.jpg",
-            "tags": ["ai", "visualization", "network"],
-            "size": "1.2MB",
-            "dimensions": "1920x1080"
+            "title": "Neural Network Architecture",
+            "description": "Visualization of a deep learning model architecture",
+            "thumbnail": "/assets/media/samples/neural-net-thumb.jpg",
+            "url": "/assets/media/samples/neural-net.jpg",
+            "date": "2025-02-01",
+            "tags": ["AI", "Deep Learning", "Visualization"],
+            "size": 1254400,
+            "metadata": {
+                "dimensions": "2400x1600",
+                "format": "JPEG",
+                "averageColor": "#2a2a2a"
+            }
         },
         {
-            "id": "2",
+            "id": "vid1",
             "type": "video",
-            "title": "Quantum Processing Demo",
-            "description": "Demonstration of quantum processing capabilities",
-            "url": "/assets/media/quantum-demo.mp4",
-            "thumbnail": "/assets/media/thumbnails/quantum-thumb.jpg",
-            "tags": ["quantum", "demo", "processing"],
-            "duration": "2:15",
-            "size": "8.5MB"
+            "title": "Knowledge Graph Animation",
+            "description": "Dynamic visualization of knowledge graph clustering",
+            "thumbnail": "/assets/media/samples/graph-thumb.jpg",
+            "url": "/assets/media/samples/graph-demo.mp4",
+            "date": "2025-02-10",
+            "tags": ["Graph", "Animation", "Demo"],
+            "size": 15728640,
+            "metadata": {
+                "duration": "2:15",
+                "resolution": "1920x1080",
+                "format": "MP4",
+                "averageColor": "#1a1a1a"
+            }
         },
         {
-            "id": "3",
+            "id": "img2",
             "type": "image",
-            "title": "Data Flow Analysis",
-            "description": "Real-time visualization of data flow patterns",
-            "url": "/assets/media/data-flow.jpg",
-            "thumbnail": "/assets/media/thumbnails/data-flow-thumb.jpg",
-            "tags": ["data", "analysis", "flow"],
-            "size": "0.8MB",
-            "dimensions": "1600x900"
+            "title": "Data Flow Diagram",
+            "description": "System architecture and data flow visualization",
+            "thumbnail": "/assets/media/samples/dataflow-thumb.jpg",
+            "url": "/assets/media/samples/dataflow.jpg",
+            "date": "2025-02-15",
+            "tags": ["Architecture", "System Design", "Documentation"],
+            "size": 982000,
+            "metadata": {
+                "dimensions": "3200x1800",
+                "format": "PNG",
+                "averageColor": "#ffffff"
+            }
+        },
+        {
+            "id": "img3",
+            "type": "image",
+            "title": "UI Components",
+            "description": "Design system component library preview",
+            "thumbnail": "/assets/media/samples/ui-thumb.jpg",
+            "url": "/assets/media/samples/ui-components.jpg",
+            "date": "2025-02-20",
+            "tags": ["UI", "Design System", "Components"],
+            "size": 754200,
+            "metadata": {
+                "dimensions": "1920x1080",
+                "format": "PNG",
+                "averageColor": "#f5f5f5"
+            }
         }
-        // ... 17 more items with varied types and sizes
     ],
     "pagination": {
         "itemsPerPage": 12,
-        "totalItems": 20
+        "totalItems": 4
     },
     "performance": {
         "imageOptimizationEnabled": true,
