@@ -354,7 +354,7 @@ section::before {
     width: 2px;
     background: linear-gradient(
         to bottom,
-        var(--hyperglow-cyan),
+        var (--hyperglow-cyan),
         var(--liminal-purple)
     );
 }
@@ -460,6 +460,67 @@ a:hover {
     transition: background-color 0.3s ease;
 }
 
+/* Footer Legal Styles */
+.footer-legal {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.legal-notices {
+    max-width: 800px;
+    margin: 1.5rem auto;
+    font-size: 0.85rem;
+    color: var(--holo-white);
+    opacity: 0.7;
+    text-align: justify;
+}
+
+.legal-notices p {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.disclaimer {
+    font-style: italic;
+    border-left: 2px solid var(--hyperglow-cyan);
+    padding-left: 1rem;
+}
+
+.legal-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+}
+
+.legal-text a {
+    color: var(--synthwave-teal);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+}
+
+.legal-text a:hover {
+    color: var(--neural-gold);
+    text-decoration-style: solid;
+}
+
+.rights-reserved {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 255, 255, 0.05), 
+        transparent);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .legal-notices {
+        text-align: left;
+        padding: 0 1rem;
+    }
+}
+
 /* Responsive Navigation */
 @media (max-width: 768px) {
     .header-nav {
@@ -476,5 +537,180 @@ a:hover {
     .footer-grid {
         grid-template-columns: 1fr;
         text-align: center;
+    }
+}
+
+/* Legal Pages Styles */
+.legal-page main {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 3rem;
+}
+
+.legal-page .header-nav {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.legal-content h1 {
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--hyperglow-cyan);
+    padding-bottom: 1rem;
+}
+
+.legal-content section {
+    margin-bottom: 3rem;
+}
+
+.legal-content h2 {
+    color: var(--neural-gold);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.legal-content ul {
+    list-style: none;
+    padding-left: 1.5rem;
+}
+
+.legal-content ul li {
+    position: relative;
+    margin-bottom: 0.75rem;
+}
+
+.legal-content ul li::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 0.5rem;
+    width: 8px;
+    height: 8px;
+    background: var(--hyperglow-cyan);
+    transform: rotate(45deg);
+}
+
+.last-updated {
+    color: var(--synthwave-teal);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+/* Legal Page Hover Effects */
+.legal-content section:hover {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 255, 0.03),
+        transparent
+    );
+}
+
+.legal-content section:hover h2 {
+    text-shadow: 0 0 8px var(--neural-gold);
+}
+
+/* Legal Page Responsive Styles */
+@media (max-width: 768px) {
+    .legal-page main {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .legal-content h1 {
+        font-size: 1.75rem;
+    }
+    
+    .legal-content h2 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Cookie Consent Banner */
+.cookie-banner {
+    position: fixed;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    padding: 1.5rem;
+    z-index: 1000;
+    transition: bottom 0.3s ease-in-out;
+    background: var(--dark-graphite);
+    border: 1px solid var(--hyperglow-cyan);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+}
+
+.cookie-banner.visible {
+    bottom: 20px;
+}
+
+.cookie-content {
+    text-align: center;
+}
+
+.cookie-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.cookie-banner button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    transition: all 0.3s ease;
+}
+
+.accept-btn {
+    background: var(--hyperglow-cyan);
+    color: var(--deep-void-black);
+}
+
+.accept-btn:hover {
+    background: var(--neural-gold);
+    transform: scale(1.05);
+    box-shadow: 0 0 10px var(--hyperglow-cyan);
+}
+
+.reject-btn {
+    background: transparent;
+    color: var(--holo-white);
+    border: 1px solid var(--hyperglow-cyan);
+}
+
+.reject-btn:hover {
+    border-color: var(--neural-gold);
+    color: var (--neural-gold);
+    box-shadow: 0 0 10px var(--hyperglow-cyan);
+}
+
+.cookie-link {
+    color: var(--synthwave-teal);
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.cookie-link:hover {
+    color: var(--neural-gold);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .cookie-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .cookie-banner button,
+    .cookie-link {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
     }
 }

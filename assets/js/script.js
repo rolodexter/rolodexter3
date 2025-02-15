@@ -130,6 +130,60 @@ class LoadingStateManager {
     }
 }
 
+// Add cookie consent functionality
+class CookieConsent {
+    constructor() {
+        this.cookieName = 'rolodexter_cookie_consent';
+        this.consentBanner = null;
+        this.init();
+    }
+
+    init() {
+        if (!this.hasConsent()) {
+            this.showBanner();
+        }
+    }
+
+    hasConsent() {
+        return localStorage.getItem(this.cookieName) === 'true';
+    }
+
+    setConsent(accepted) {
+        localStorage.setItem(this.cookieName, accepted);
+        if (this.consentBanner) {
+            this.consentBanner.remove();
+        }
+        // Trigger event for analytics
+        const event = new CustomEvent('cookieConsentUpdate', { detail: { accepted } });
+        document.dispatchEvent(event);
+    }
+
+    showBanner() {
+        const banner = document.createElement('div');
+        banner.className = 'cookie-banner holo-card';
+        banner.innerHTML = `
+            <div class="cookie-content">
+                <p>We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.</p>
+                <div class="cookie-buttons">
+                    <button class="accept-btn">Accept All</button>
+                    <button class="reject-btn">Reject Non-Essential</button>
+                    <a href="/legal/cookies.html" class="cookie-link">Learn More</a>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(banner);
+        this.consentBanner = banner;
+
+        // Add event listeners
+        banner.querySelector('.accept-btn').addEventListener('click', () => this.setConsent(true));
+        banner.querySelector('.reject-btn').addEventListener('click', () => this.setConsent(false));
+
+        // Add animation
+        setTimeout(() => banner.classList.add('visible'), 100);
+    }
+}
+
 // Initialize effects when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize glitch effects on headings
@@ -150,6 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
             await LoadingStateManager.loadContent(card, new Promise(resolve => setTimeout(resolve, 2000)));
         });
     });
+
+    // Initialize cookie consent
+    new CookieConsent();
 
     console.log('ROLODEXTER interface initialized with cyberpunk effects');
 });
