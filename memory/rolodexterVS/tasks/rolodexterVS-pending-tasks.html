@@ -1,156 +1,142 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pending Tasks - rolodexter Labs</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../assets/brand/favicon_io/favicon-32x32.png">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/documentation.css">
-    
-    <!-- Knowledge Graph Metadata -->
-    <meta name="description" content="Active and pending tasks for rolodexter Labs development">
-    <meta name="keywords" content="tasks, pending, development, planning, roadmap">
-    <meta name="graph-tags" content="documentation, tasks, planning, active">
-    <meta name="graph-category" content="documentation">
-    <meta name="graph-connections" content="index.html, resolved-tasks/index.html, rolodexterGPT-memory/session-history.html">
-    <meta name="graph-created" content="2025-02-15T12:00:00Z">
-    <meta name="graph-modified" content="2025-02-18T01:00:00Z">
-    <meta name="graph-authors" content="rolodexterVS">
-    <meta name="graph-status" content="active">
-    <meta name="graph-priority" content="high">
-</head>
-<body class="documentation-page">
-    <main class="container">
-        <article class="memory-content">
-            <h1>Pending Tasks</h1>
-            
-            <section class="task-summary">
-                <p>Current development tasks and priorities for rolodexter Labs. Tasks are organized by priority and status.</p>
-            </section>
+---
+layout: base
+title: Pending Tasks - rolodexter Labs
+---
 
-            <section class="priority-high">
-                <h2>High-Priority Tasks</h2>
-                <ul>
-                    <li>
-                        <strong>UI/UX Refinements (Active)</strong>
-                        <ul>
-                            <li class="in-progress">◐ Step 1: Menu & Navigation Interactions
-                                <ul>
-                                    <li class="in-progress">◐ 1. Mobile Touch & Gesture Handling
-                                        <ul>
-                                            <li class="completed">✓ Implement tap and swipe gesture handlers</li>
-                                            <li class="completed">✓ Add overflow control for open menu state</li>
-                                            <li class="in-progress">◐ Test iOS/Android browser compatibility</li>
-                                            <li class="completed">✓ Handle multi-touch interactions</li>
-                                            <li class="completed">✓ Implement click-outside detection</li>
-                                        </ul>
-                                    </li>
-                                    <li class="pending">○ 2. Animation Performance
-                                        <ul>
-                                            <li class="pending">○ Convert to transform/opacity-based animations</li>
-                                            <li class="pending">○ Add GPU acceleration optimizations</li>
-                                            <li class="pending">○ Test and optimize animation speed</li>
-                                            <li class="pending">○ Verify performance on low-end devices</li>
-                                        </ul>
-                                    </li>
-                                    <li class="pending">○ 3. Focus Management
-                                        <ul>
-                                            <li class="pending">○ Implement tab key navigation flow</li>
-                                            <li class="pending">○ Add focus trap for open menu</li>
-                                            <li class="pending">○ Handle shift+tab navigation</li>
-                                            <li class="pending">○ Enhance focus visibility indicators</li>
-                                        </ul>
-                                    </li>
-                                    <li class="pending">○ 4. ARIA Implementation
-                                        <ul>
-                                            <li class="pending">○ Add proper ARIA roles and states</li>
-                                            <li class="pending">○ Implement state change announcements</li>
-                                            <li class="pending">○ Test with screen readers</li>
-                                            <li class="pending">○ Verify accessibility compliance</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="pending">○ Step 2: Dark Mode & Theming
-                                <ul>
-                                    <li class="pending">○ Validate contrast ratios in extreme conditions</li>
-                                    <li class="pending">○ Implement smooth theme transitions</li>
-                                    <li class="pending">○ Test UI scaling across resolutions</li>
-                                </ul>
-                            </li>
-                            <li class="pending">○ Step 3: Visual Feedback & Microinteractions
-                                <ul>
-                                    <li class="pending">○ Enhance hover/click states</li>
-                                    <li class="pending">○ Add subtle interactive animations</li>
-                                    <li class="pending">○ Implement reduced-motion preferences</li>
-                                </ul>
-                            </li>
-                            <li class="pending">○ Step 4: Performance & Responsiveness
-                                <ul>
-                                    <li class="pending">○ Optimize UI element loading</li>
-                                    <li class="pending">○ Run performance benchmarks</li>
-                                    <li class="pending">○ Test network speed resilience</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <strong>Knowledge Graph Implementation (Paused)</strong>
-                        <ul>
-                            <li>✓ Create core D3.js visualization script</li>
-                            <li>✓ Implement metadata extraction</li>
-                            <li>✓ Add search functionality</li>
-                            <li class="paused">◌ Verify all HTML files are included in graph</li>
-                            <li class="paused">◌ Test graph data connections</li>
-                            <li class="paused">◌ Optimize force-directed layout</li>
-                        </ul>
-                    </li>
-                    <li>
-                        <strong>Memory System Migration (Paused)</strong>
-                        <ul>
-                            <li>✓ Convert MD files to HTML format</li>
-                            <li>✓ Add proper graph metadata</li>
-                            <li class="paused">◌ Move deprecated files to archive</li>
-                            <li class="paused">◌ Verify all memory files are connected</li>
-                            <li class="paused">◌ Test memory system navigation</li>
-                        </ul>
-                    </li>
-                </ul>
-            </section>
+<!-- Knowledge Graph Metadata -->
+<meta name="description" content="Active and pending tasks for rolodexter Labs development">
+<meta name="keywords" content="tasks, pending, development, planning, roadmap">
+<meta name="graph-category" content="documentation">
+<meta name="graph-tags" content="tasks, updates, status">
+<meta name="graph-connections" content="/memory/rolodexterVS/index.html">
+<meta name="graph-created" content="2025-02-17T12:00:00Z">
+<meta name="graph-modified" content="2025-02-17T12:00:00Z">
+<meta name="graph-authors" content="rolodexterVS">
+<meta name="graph-status" content="active">
+<meta name="graph-priority" content="high">
 
-            <section class="priority-medium">
-                <h2>Current Tasks</h2>
-                <ul>
-                    <li>
-                        <strong>Documentation Updates</strong>
-                        <ul>
-                            <li class="in-progress">◐ Document UI/UX testing procedures and results</li>
-                            <li class="paused">◌ Update implementation guidelines</li>
-                            <li class="paused">◌ Document graph visualization features</li>
-                            <li class="paused">◌ Create troubleshooting guide</li>
-                        </ul>
-                    </li>
-                </ul>
-            </section>
+<main class="container">
+    <article class="memory-content">
+        <h1>Pending Tasks</h1>
+        
+        <section class="task-summary">
+            <p>Current development tasks and priorities for rolodexter Labs. Tasks are organized by priority and status.</p>
+        </section>
 
-            <section class="author-signature">
-                <p>Task list maintained by <span class="agent-name">rolodexterVS</span></p>
-                <p class="timestamp">Created: 2025-02-15 12:00 UTC | Last Updated: 2025-02-18 03:00 UTC</p>
-            </section>
+        <section class="priority-high">
+            <h2>High-Priority Tasks</h2>
+            <ul>
+                <li>
+                    <strong>UI/UX Refinements (Active)</strong>
+                    <ul>
+                        <li class="in-progress">◐ Step 1: Menu & Navigation Interactions
+                            <ul>
+                                <li class="in-progress">◐ 1. Mobile Touch & Gesture Handling
+                                    <ul>
+                                        <li class="completed">✓ Implement tap and swipe gesture handlers</li>
+                                        <li class="completed">✓ Add overflow control for open menu state</li>
+                                        <li class="in-progress">◐ Test iOS/Android browser compatibility</li>
+                                        <li class="completed">✓ Handle multi-touch interactions</li>
+                                        <li class="completed">✓ Implement click-outside detection</li>
+                                    </ul>
+                                </li>
+                                <li class="pending">○ 2. Animation Performance
+                                    <ul>
+                                        <li class="pending">○ Convert to transform/opacity-based animations</li>
+                                        <li class="pending">○ Add GPU acceleration optimizations</li>
+                                        <li class="pending">○ Test and optimize animation speed</li>
+                                        <li class="pending">○ Verify performance on low-end devices</li>
+                                    </ul>
+                                </li>
+                                <li class="pending">○ 3. Focus Management
+                                    <ul>
+                                        <li class="pending">○ Implement tab key navigation flow</li>
+                                        <li class="pending">○ Add focus trap for open menu</li>
+                                        <li class="pending">○ Handle shift+tab navigation</li>
+                                        <li class="pending">○ Enhance focus visibility indicators</li>
+                                    </ul>
+                                </li>
+                                <li class="pending">○ 4. ARIA Implementation
+                                    <ul>
+                                        <li class="pending">○ Add proper ARIA roles and states</li>
+                                        <li class="pending">○ Implement state change announcements</li>
+                                        <li class="pending">○ Test with screen readers</li>
+                                        <li class="pending">○ Verify accessibility compliance</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="pending">○ Step 2: Dark Mode & Theming
+                            <ul>
+                                <li class="pending">○ Validate contrast ratios in extreme conditions</li>
+                                <li class="pending">○ Implement smooth theme transitions</li>
+                                <li class="pending">○ Test UI scaling across resolutions</li>
+                            </ul>
+                        </li>
+                        <li class="pending">○ Step 3: Visual Feedback & Microinteractions
+                            <ul>
+                                <li class="pending">○ Enhance hover/click states</li>
+                                <li class="pending">○ Add subtle interactive animations</li>
+                                <li class="pending">○ Implement reduced-motion preferences</li>
+                            </ul>
+                        </li>
+                        <li class="pending">○ Step 4: Performance & Responsiveness
+                            <ul>
+                                <li class="pending">○ Optimize UI element loading</li>
+                                <li class="pending">○ Run performance benchmarks</li>
+                                <li class="pending">○ Test network speed resilience</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Knowledge Graph Implementation (Paused)</strong>
+                    <ul>
+                        <li>✓ Create core D3.js visualization script</li>
+                        <li>✓ Implement metadata extraction</li>
+                        <li>✓ Add search functionality</li>
+                        <li class="paused">◌ Verify all HTML files are included in graph</li>
+                        <li class="paused">◌ Test graph data connections</li>
+                        <li class="paused">◌ Optimize force-directed layout</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Memory System Migration (Paused)</strong>
+                    <ul>
+                        <li>✓ Convert MD files to HTML format</li>
+                        <li>✓ Add proper graph metadata</li>
+                        <li class="paused">◌ Move deprecated files to archive</li>
+                        <li class="paused">◌ Verify all memory files are connected</li>
+                        <li class="paused">◌ Test memory system navigation</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
 
-            <footer class="task-footer">
-                <p>Maintained by: rolodexterVS</p>
-                <p>Next Review: 2025-02-18 12:00 UTC</p>
-                <a href="resolved-tasks/navigation-structure-update.html">Navigation Structure Update</a>
-            </footer>
-        </article>
-    </main>
+        <section class="priority-medium">
+            <h2>Current Tasks</h2>
+            <ul>
+                <li>
+                    <strong>Documentation Updates</strong>
+                    <ul>
+                        <li class="in-progress">◐ Document UI/UX testing procedures and results</li>
+                        <li class="paused">◌ Update implementation guidelines</li>
+                        <li class="paused">◌ Document graph visualization features</li>
+                        <li class="paused">◌ Create troubleshooting guide</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
 
-    <script src="../assets/js/script.js"></script>
-</body>
-</html>
+        <section class="author-signature">
+            <p>Task list maintained by <span class="agent-name">rolodexterVS</span></p>
+            <p class="timestamp">Created: 2025-02-15 12:00 UTC | Last Updated: 2025-02-18 03:00 UTC</p>
+        </section>
+
+        <footer class="task-footer">
+            <p>Maintained by: rolodexterVS</p>
+            <p>Next Review: 2025-02-18 12:00 UTC</p>
+            <a href="resolved-tasks/navigation-structure-update.html">Navigation Structure Update</a>
+        </footer>
+    </article>
+</main>

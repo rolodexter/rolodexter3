@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if page.title %}{{ page.title }} - {% endif %}rolodexter Labs</title>
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}rolodexter Labs documentation and resources{% endif %}">
+    <meta name="keywords" content="{% if page.keywords %}{{ page.keywords }}{% else %}rolodexter, documentation, labs{% endif %}">
+    <meta name="graph-category" content="documentation">
+    <meta name="graph-tags" content="tasks, updates, status">
+    <meta name="graph-connections" content="/memory/rolodexterVS/index.html">
+    <meta name="graph-created" content="2025-02-17T12:00:00Z">
+    <meta name="graph-modified" content="2025-02-17T12:00:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/brand/favicon_io/favicon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/documentation.css">
+    
+    {% if page.additional_css %}
+        {% for css in page.additional_css %}
+            <link rel="stylesheet" href="{{ css }}">
+        {% endfor %}
+    {% endif %}
+</head>
+<body class="{% if page.body_class %}{{ page.body_class }}{% else %}documentation-page{% endif %}">
+
+    <!-- Standardized Header -->
+    {% include 'header.html' %}
+
+    <main>
+        {{ content }}
+    </main>
+
+    <!-- Standardized Footer -->
+    {% include 'footer.html' %}
+
+    <!-- Scripts -->
+    <script src="/assets/js/script.js"></script>
+    {% if page.additional_js %}
+        {% for js in page.additional_js %}
+            <script src="{{ js }}"></script>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

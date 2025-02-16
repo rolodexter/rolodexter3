@@ -1,114 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowledge Graph Data Validation - rolodexter Labs</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../../../../../assets/brand/favicon_io/favicon-32x32.png">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="../../../../../assets/css/style.css">
-    <link rel="stylesheet" href="../../../../../assets/css/documentation.css">
-    
-    <!-- Knowledge Graph Metadata -->
-    <meta name="description" content="Task tracking for knowledge graph data validation implementation">
-    <meta name="keywords" content="data-validation, knowledge-graph, d3js">
-    <meta name="graph-tags" content="data-validation, knowledge-graph, implementation">
-    <meta name="graph-category" content="documentation">
-    <meta name="graph-connections" content="knowledge-graph-improvements.html, ../../memories/sessions/2025/02/16.html">
-    <meta name="graph-created" content="2025-02-16T07:00:00Z">
-    <meta name="graph-modified" content="2025-02-16T07:00:00Z">
-    <meta name="graph-authors" content="rolodexterVS">
-    <meta name="graph-status" content="active">
-</head>
-<body class="documentation-page">
-    <main class="container">
-        <article class="memory-content">
-            <h1>Knowledge Graph Data Validation Implementation</h1>
+---
+layout: base
+title: Knowledge Graph Data Validation - rolodexter Labs
+---
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Graph Data Validation - rolodexter Labs</title>
+
+<!-- Knowledge Graph Metadata -->
+<meta name="description" content="Knowledge graph data validation tasks and procedures">
+<meta name="keywords" content="knowledge graph, validation, data integrity">
+<meta name="graph-category" content="documentation">
+<meta name="graph-tags" content="tasks, updates, status, validation">
+<meta name="graph-connections" content="/memory/rolodexterVS/index.html">
+<meta name="graph-created" content="2025-02-17T12:00:00Z">
+<meta name="graph-modified" content="2025-02-17T12:00:00Z">
+<meta name="graph-authors" content="rolodexterVS">
+<meta name="graph-status" content="active">
+
+<main class="container">
+    <article class="memory-content">
+        <h1>Knowledge Graph Data Validation Implementation</h1>
+        
+        <section class="task-overview">
+            <h2>Task Overview</h2>
+            <ul>
+                <li><strong>Status:</strong> High Priority</li>
+                <li><strong>Start Date:</strong> 2025-02-16</li>
+                <li><strong>Target Completion:</strong> 2025-02-17</li>
+            </ul>
+        </section>
+
+        <section class="implementation-steps">
+            <h2>Implementation Steps</h2>
             
-            <section class="task-overview">
-                <h2>Task Overview</h2>
-                <ul>
-                    <li><strong>Status:</strong> High Priority</li>
-                    <li><strong>Start Date:</strong> 2025-02-16</li>
-                    <li><strong>Target Completion:</strong> 2025-02-17</li>
-                </ul>
-            </section>
+            <h3>Data Validation Layer</h3>
+            <ul>
+                <li class="pending">○ Create GraphDataValidator class</li>
+                <li class="pending">○ Implement node structure validation</li>
+                <li class="pending">○ Implement edge structure validation</li>
+                <li class="pending">○ Add type checking for D3.js compatibility</li>
+                <li class="pending">○ Implement validation error reporting</li>
+            </ul>
 
-            <section class="implementation-steps">
-                <h2>Implementation Steps</h2>
-                
-                <h3>Data Validation Layer</h3>
-                <ul>
-                    <li class="pending">○ Create GraphDataValidator class</li>
-                    <li class="pending">○ Implement node structure validation</li>
-                    <li class="pending">○ Implement edge structure validation</li>
-                    <li class="pending">○ Add type checking for D3.js compatibility</li>
-                    <li class="pending">○ Implement validation error reporting</li>
-                </ul>
+            <h3>Data Transformation Layer</h3>
+            <ul>
+                <li class="pending">○ Create GraphDataTransformer class</li>
+                <li class="pending">○ Implement node object transformation</li>
+                <li class="pending">○ Implement edge object transformation</li>
+                <li class="pending">○ Add physics properties initialization</li>
+                <li class="pending">○ Implement data structure normalization</li>
+            </ul>
 
-                <h3>Data Transformation Layer</h3>
-                <ul>
-                    <li class="pending">○ Create GraphDataTransformer class</li>
-                    <li class="pending">○ Implement node object transformation</li>
-                    <li class="pending">○ Implement edge object transformation</li>
-                    <li class="pending">○ Add physics properties initialization</li>
-                    <li class="pending">○ Implement data structure normalization</li>
-                </ul>
+            <h3>Error Logging Enhancements</h3>
+            <ul>
+                <li class="pending">○ Add detailed validation error messages</li>
+                <li class="pending">○ Implement transformation error tracking</li>
+                <li class="pending">○ Add data structure debugging logs</li>
+                <li class="pending">○ Implement validation state reporting</li>
+            </ul>
+        </section>
 
-                <h3>Error Logging Enhancements</h3>
-                <ul>
-                    <li class="pending">○ Add detailed validation error messages</li>
-                    <li class="pending">○ Implement transformation error tracking</li>
-                    <li class="pending">○ Add data structure debugging logs</li>
-                    <li class="pending">○ Implement validation state reporting</li>
-                </ul>
-            </section>
+        <section class="validation-rules">
+            <h2>Validation Rules</h2>
+            <ul>
+                <li><strong>Node Requirements:</strong>
+                    <ul>
+                        <li>Must have unique ID</li>
+                        <li>Must have label/name</li>
+                        <li>Must have valid type</li>
+                        <li>Must support physics properties (vx, vy, x, y)</li>
+                    </ul>
+                </li>
+                <li><strong>Edge Requirements:</strong>
+                    <ul>
+                        <li>Must have valid source node reference</li>
+                        <li>Must have valid target node reference</li>
+                        <li>Must have weight property</li>
+                        <li>Must support D3.js force layout properties</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
 
-            <section class="validation-rules">
-                <h2>Validation Rules</h2>
-                <ul>
-                    <li><strong>Node Requirements:</strong>
-                        <ul>
-                            <li>Must have unique ID</li>
-                            <li>Must have label/name</li>
-                            <li>Must have valid type</li>
-                            <li>Must support physics properties (vx, vy, x, y)</li>
-                        </ul>
-                    </li>
-                    <li><strong>Edge Requirements:</strong>
-                        <ul>
-                            <li>Must have valid source node reference</li>
-                            <li>Must have valid target node reference</li>
-                            <li>Must have weight property</li>
-                            <li>Must support D3.js force layout properties</li>
-                        </ul>
-                    </li>
-                </ul>
-            </section>
+        <section class="error-handling">
+            <h2>Error Handling Strategy</h2>
+            <ul>
+                <li>Implement validation error collection</li>
+                <li>Add error categorization (critical/warning)</li>
+                <li>Provide detailed error messages</li>
+                <li>Include data context in error reports</li>
+                <li>Add error recovery suggestions</li>
+            </ul>
+        </section>
 
-            <section class="error-handling">
-                <h2>Error Handling Strategy</h2>
-                <ul>
-                    <li>Implement validation error collection</li>
-                    <li>Add error categorization (critical/warning)</li>
-                    <li>Provide detailed error messages</li>
-                    <li>Include data context in error reports</li>
-                    <li>Add error recovery suggestions</li>
-                </ul>
-            </section>
-
-            <footer class="task-footer">
-                <div class="status-block">
-                    <p class="status-item"><span class="status-label">Created:</span> 2025-02-16 07:00:00 UTC</p>
-                    <p class="status-item"><span class="status-label">Status:</span> 🔄 In Progress</p>
-                </div>
-            </footer>
-        </article>
-    </main>
-
-    <script src="../../../../../assets/js/script.js"></script>
-</body>
-</html> 
+        <footer class="task-footer">
+            <div class="status-block">
+                <p class="status-item"><span class="status-label">Created:</span> 2025-02-16 07:00:00 UTC</p>
+                <p class="status-item"><span class="status-label">Status:</span> 🔄 In Progress</p>
+            </div>
+        </footer>
+    </article>
+</main>
