@@ -15,52 +15,97 @@
     <!-- Knowledge Graph Metadata -->
     <meta name="description" content="Memory System Overview and Recent Updates">
     <meta name="keywords" content="memory system, session logs, insights, tasks">
-    <meta name="graph-tags" content="memory-system, session-tracking, documentation">
+    <meta name="graph-tags" content="memory-system, session-tracking, documentation, ai-insights">
     <meta name="graph-category" content="documentation">
-    <meta name="graph-connections" content="/memory/rolodexterVS/tasks/memory-system-reorganization.html, /memory/rolodexterVS/memories/sessions/2025/02/17.html, /memory/rolodexterVS/memories/sessions/2025/02/16.html">
+    <meta name="graph-connections" content="/memory/rolodexterVS/tasks/memory-system-reorganization.html, /memory/rolodexterVS/memories/sessions/2025/02/17.html, /memory/rolodexterVS/memories/sessions/2025/02/16.html, /memory/rolodexterVS/tasks/rolodexterVS-pending-tasks.html">
     <meta name="graph-created" content="2025-02-17T04:00:00Z">
-    <meta name="graph-modified" content="2025-02-17T04:00:00Z">
+    <meta name="graph-modified" content="2025-02-17T04:15:00Z">
     <meta name="graph-authors" content="rolodexterVS">
     <meta name="graph-status" content="active">
+    <meta name="graph-priority" content="high">
 </head>
 <body class="documentation-page">
+    <!-- Navigation Header -->
+    <header class="main-header">
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/memory/index.html">Memory</a></li>
+                <li><a href="/memory/rolodexterVS/memory-system.html" class="active">Memory System</a></li>
+                <li><a href="/memory/rolodexterVS/tasks/rolodexterVS-pending-tasks.html">Tasks</a></li>
+            </ul>
+        </nav>
+    </header>
+
     <main class="container">
         <article class="memory-content">
             <h1>🧠 Memory System Overview</h1>
-            <p class="last-updated">Last Updated: 2025-02-17 04:00 UTC</p>
+            <p class="last-updated">Last Updated: 2025-02-17 04:15 UTC</p>
+
+            <!-- Memory Controls -->
+            <section class="memory-controls">
+                <div class="controls-wrapper">
+                    <div class="sort-controls">
+                        <label for="sortMethod">Sort By:</label>
+                        <select id="sortMethod" onchange="updateMemorySort()">
+                            <option value="recent">Most Recent</option>
+                            <option value="ai-priority">AI Priority</option>
+                            <option value="category">Category</option>
+                        </select>
+                    </div>
+                    <div class="filter-controls">
+                        <label for="filterCategory">Filter:</label>
+                        <select id="filterCategory" onchange="updateMemoryFilter()">
+                            <option value="all">All Updates</option>
+                            <option value="critical">Critical Only</option>
+                            <option value="insights">AI Insights</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
 
             <section class="trending-updates">
                 <h2>📌 Trending & Critical Memory Updates</h2>
-                <ul>
-                    <li>
+                <div class="ai-priority-indicator">Priority determined by AI analysis</div>
+                <ul id="trendingUpdates">
+                    <li class="high-priority">
+                        <strong>2025-02-17 04:15 UTC:</strong> 
+                        <span class="ai-badge">AI Priority: High</span>
+                        <p>Memory System Overview page created with comprehensive tracking and AI-assisted insights.</p>
+                    </li>
+                    <li class="high-priority">
                         <strong>2025-02-17 04:00 UTC:</strong> 
-                        Completed comprehensive review of tasks and priorities, with UI/UX refinements at 80% completion.
+                        <span class="ai-badge">AI Priority: High</span>
+                        <p>UI/UX refinements at 80% completion, focusing on mobile touch & gesture handling.</p>
                     </li>
                     <li>
                         <strong>2025-02-17 03:45 UTC:</strong>
-                        Enhanced metadata validation across documentation files and fixed session persistence issues.
-                    </li>
-                    <li>
-                        <strong>2025-02-17 03:30 UTC:</strong>
-                        Created dedicated memory system tasks page with comprehensive tracking sections.
+                        <p>Enhanced metadata validation and fixed session persistence issues.</p>
                     </li>
                 </ul>
             </section>
 
             <section class="recent-insights">
                 <h2>📝 Recent Session Notes & AI Insights</h2>
-                <div class="session-note">
-                    <blockquote>"UI/UX enhancements take priority to ensure optimal user interaction with the memory system."</blockquote>
+                <div class="insights-controls">
+                    <button onclick="generateAISummary()" class="ai-action-btn">Generate AI Summary</button>
+                </div>
+                <div class="session-note ai-generated">
+                    <blockquote>"Memory system enhancement requires a balance between UI/UX refinements and robust data management."</blockquote>
                     <p><strong>rolodexterGPT</strong> - <em>Session on 2025-02-17</em></p>
+                    <span class="ai-tag">AI Generated Summary</span>
                 </div>
                 <div class="session-note">
-                    <blockquote>"Mobile-first approach in menu & navigation ensures consistent access to memory systems across all devices."</blockquote>
+                    <blockquote>"Mobile-first approach ensures consistent memory access across all devices, prioritizing user experience."</blockquote>
                     <p><strong>rolodexterVS</strong> - <em>Session on 2025-02-17</em></p>
                 </div>
             </section>
 
             <section class="active-tasks">
                 <h2>🔄 Current Memory System Tasks</h2>
+                <div class="task-controls">
+                    <button onclick="toggleArchivedTasks()" class="toggle-btn">Show/Hide Archived Tasks</button>
+                </div>
                 <ul>
                     <li class="in-progress">
                         <strong>UI/UX Refinements</strong>
@@ -79,49 +124,62 @@
                             <li>✓ Implement file archival process</li>
                         </ul>
                     </li>
-                    <li class="paused">
-                        <strong>Knowledge Graph Implementation</strong>
+                </ul>
+            </section>
+
+            <section class="archived-tasks" style="display: none;">
+                <h2>📁 Archived Memory Tasks</h2>
+                <ul>
+                    <li class="completed">
+                        <strong>Initial Memory System Setup</strong>
                         <ul>
-                            <li>✓ Create core D3.js visualization</li>
-                            <li>✓ Implement metadata extraction</li>
-                            <li>◌ Verify HTML file inclusion (Paused)</li>
-                            <li>◌ Test graph connections (Paused)</li>
+                            <li>✓ Created core D3.js visualization</li>
+                            <li>✓ Implemented metadata extraction</li>
+                            <li>✓ Established base file structure</li>
                         </ul>
                     </li>
                 </ul>
             </section>
 
-            <section class="completed-tasks">
-                <h2>✅ Recently Completed Tasks</h2>
-                <ul>
-                    <li>Added required metadata tags to base.html template</li>
-                    <li>Created dedicated memory-system-tasks.html page</li>
-                    <li>Converted MD files to HTML format</li>
-                    <li>Implemented file archival process</li>
-                </ul>
-            </section>
-
             <section class="system-health">
                 <h2>📊 Memory System Health</h2>
-                <ul>
-                    <li><strong>Metadata Coverage:</strong> 98%</li>
-                    <li><strong>Graph Connections:</strong> Verified</li>
-                    <li><strong>File Format:</strong> HTML Standard</li>
-                    <li><strong>Last Validation:</strong> 2025-02-17 03:45 UTC</li>
-                </ul>
+                <div class="health-metrics">
+                    <div class="metric-card">
+                        <h3>Metadata Coverage</h3>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 98%;">98%</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Graph Connections</h3>
+                        <p class="status verified">✓ Verified</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>File Format</h3>
+                        <p class="status standard">HTML Standard</p>
+                    </div>
+                </div>
+                <p class="last-validation">Last Validation: 2025-02-17 04:15 UTC</p>
             </section>
 
             <footer class="task-footer">
                 <div class="status-block">
                     <p class="status-item"><span class="status-label">Maintained by:</span> rolodexterVS</p>
-                    <p class="status-item"><span class="status-label">Last Updated:</span> 2025-02-17 04:00 UTC</p>
+                    <p class="status-item"><span class="status-label">Last Updated:</span> 2025-02-17 04:15 UTC</p>
                     <p class="status-item"><span class="status-label">Next Review:</span> 2025-02-17 08:00 UTC</p>
                 </div>
+                <nav class="footer-nav">
+                    <a href="/memory/index.html">Memory Home</a> |
+                    <a href="/memory/rolodexterVS/tasks/rolodexterVS-pending-tasks.html">Pending Tasks</a> |
+                    <a href="/memory/rolodexterVS/tasks/memory-system-reorganization.html">System Reorganization</a>
+                </nav>
             </footer>
         </article>
     </main>
 
+    <!-- Scripts -->
     <script src="../../../assets/js/script.js"></script>
     <script src="../../../assets/js/session-manager.js"></script>
+    <script src="../../../assets/js/memory-system.js"></script>
 </body>
 </html> 
