@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="./assets/css/style.css">
 
+    <!-- D3.js for Knowledge Graph -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="./assets/css/style.css">
+
     <meta name="description" content="rolodexter3 - AI-powered knowledge management system">
     <meta name="keywords" content="ai, knowledge-graph, web3, solana, blockchain">
     <meta name="graph-tags" content="main, landing-page, system-overview">
@@ -69,9 +73,13 @@
     </header>
     
     <main class="container">
-        <!-- Placeholder for future content -->
-        <div class="placeholder-content">
-            <p>Updates coming soon.</p>
+        <div id="knowledge-graph-container">
+            <div id="knowledge-graph"></div>
+            <div class="graph-controls">
+                <button id="zoom-in" aria-label="Zoom in">+</button>
+                <button id="zoom-out" aria-label="Zoom out">-</button>
+                <button id="reset-view" aria-label="Reset view">Reset</button>
+            </div>
         </div>
     </main>
 
@@ -98,6 +106,7 @@
     </footer>
 
     <script src="./assets/js/script.js"></script>
+    <script type="module" src="./assets/js/knowledge-graph.js"></script>
     
     <div class="bottom-overlay" id="bottomOverlay">
         <div class="overlay-header">
