@@ -68,29 +68,31 @@
     </header>
 
     <main class="container">
-        <div id="graph-container" class="graph-container">
-            <div class="loading-container">
-                <div class="loading-spinner"></div>
-                <p>Loading knowledge graph...</p>
+        <div id="knowledge-graph-container">
+            <div id="knowledge-graph">
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Loading knowledge graph...</p>
+                </div>
             </div>
-        </div>
-        <div class="graph-controls">
-            <div class="search-container">
-                <input type="text" id="graph-search" placeholder="Search nodes...">
-                <select id="category-filter">
-                    <option value="">All Categories</option>
-                    <option value="core">Core</option>
-                    <option value="documentation">Documentation</option>
-                    <option value="research">Research</option>
-                    <option value="feature">Feature</option>
-                    <option value="legal">Legal</option>
-                    <option value="community">Community</option>
-                    <option value="labs">Labs</option>
-                </select>
+            <div class="graph-controls">
+                <div class="search-container">
+                    <input type="text" id="graph-search" placeholder="Search nodes...">
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="core">Core</option>
+                        <option value="documentation">Documentation</option>
+                        <option value="research">Research</option>
+                        <option value="feature">Feature</option>
+                        <option value="legal">Legal</option>
+                        <option value="community">Community</option>
+                        <option value="labs">Labs</option>
+                    </select>
+                </div>
+                <button id="zoom-in" class="graph-btn">+</button>
+                <button id="zoom-out" class="graph-btn">-</button>
+                <button id="reset-view" class="graph-btn">Reset</button>
             </div>
-            <button id="zoom-in" class="graph-btn">+</button>
-            <button id="zoom-out" class="graph-btn">-</button>
-            <button id="reset-view" class="graph-btn">Reset</button>
         </div>
     </main>
 
@@ -182,13 +184,13 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[App] DOM Content Loaded');
             try {
-                const container = document.getElementById('graph-container');
+                const container = document.getElementById('knowledge-graph');
                 if (!container) {
                     throw new Error('Graph container element not found');
                 }
                 
                 console.log('[App] Creating Knowledge Graph instance');
-                const graph = new KnowledgeGraph('graph-container');
+                const graph = new KnowledgeGraph('knowledge-graph');
                 
                 console.log('[App] Initializing graph');
                 const success = await graph.initGraph();
@@ -198,8 +200,9 @@
                     container.innerHTML = `
                         <div class="error-container">
                             <div class="error-message">
-                                <h3>Error Loading Knowledge Graph</h3>
-                                <p>Failed to initialize the graph. Please check the console for details.</p>
+                                <h3>Fatal Error</h3>
+                                <p>${error.message}</p>
+                                <pre class="error-details">${error.stack}</pre>
                                 <button onclick="location.reload()">Retry</button>
                             </div>
                         </div>
@@ -207,7 +210,7 @@
                 }
             } catch (error) {
                 console.error('[App] Fatal error:', error);
-                const container = document.getElementById('graph-container');
+                const container = document.getElementById('knowledge-graph');
                 if (container) {
                     container.innerHTML = `
                         <div class="error-container">
