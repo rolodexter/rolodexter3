@@ -1,16 +1,43 @@
-// Constants that don't depend on runtime
-const CONFIG_DEFAULTS = {
-    paths: {
-        index: 'assets/data/index.json',
-        graphData: 'assets/data/graph-data.json',
-        backupData: 'assets/data/graph-data.backup.json'
+// Initialize base config first
+const defaultConfig = {
+    // Environment detection with manual override support
+    environment: {
+        mode: 'local', // Default to local, will be updated after detection
+        forceMode: null,
+        basePath: null,
+        debug: {
+            showEnvironmentInfo: true,
+            showPathResolution: true
+        }
     },
+
+    // Cache settings
+    cache: {
+        enabled: true,
+        version: null,
+        forceRefresh: false,
+        debug: {
+            showCacheOperations: true,
+            showExpiry: true
+        }
+    },
+
+    // GitHub Pages specific settings
     githubPages: {
         owner: 'rolodexter',
         repo: 'rolodexter3',
         branch: 'gh-pages-data',
         autoDetectRepo: true
     },
+
+    // Paths (relative to base path)
+    paths: {
+        index: 'assets/data/index.json',
+        graphData: 'assets/data/graph-data.json',
+        backupData: 'assets/data/graph-data.backup.json'
+    },
+
+    // Debug settings
     debug: {
         enabled: true,
         logLevel: 'debug',
@@ -22,175 +49,269 @@ const CONFIG_DEFAULTS = {
     }
 };
 
-// Runtime configuration singleton
-let configInstance = null;
+// Export the config object
+export const config = defaultConfig;
 
-class Config {
-    constructor() {
-        if (configInstance) {
-            return configInstance;
-        }
-
-        this.initialize();
-        configInstance = this;
-        return this;
+// Environment detection function
+function detectEnvironment() {
+    if (typeof window === 'undefined') return 'local';
+    
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isGitHubPages = hostname.endsWith('github.io');
+    const isCustomDomain = !isLocalhost && !isGitHubPages;
+    const isWWW = hostname.startsWith('www.');
+    const baseHostname = isWWW ? hostname.substring(4) : hostname;
+    
+    if (config.debug.showEnvironmentInfo) {
+        debugLog('Environment Detection', {
+            hostname,
+            baseHostname,
+            isLocalhost,
+            isGitHubPages,
+            isCustomDomain,
+            isWWW,
+            protocol: window.location.protocol,
+            pathname: window.location.pathname,
+            origin: window.location.origin,
+            href: window.location.href,
+            userAgent: navigator.userAgent
+        });
     }
-
-    initialize() {
-        // Initialize with defaults
-        Object.assign(this, CONFIG_DEFAULTS);
-
-        // Add runtime-dependent properties
-        this.environment = {
-            mode: 'local', // Will be updated by detectEnvironment
-            forceMode: null,
-            basePath: null,
-            debug: {
-                showEnvironmentInfo: true,
-                showPathResolution: true
-            }
-        };
-
-        this.cache = {
-            enabled: true,
-            version: null,
-            forceRefresh: false,
-            debug: {
-                showCacheOperations: true,
-                showExpiry: true
-            }
-        };
-
-        // Detect environment after initialization
-        this.environment.mode = this.detectEnvironment();
-        
-        if (this.debug.enabled) {
-            console.debug('[Config] Initialized with mode:', this.environment.mode);
-        }
-    }
-
-    detectEnvironment() {
-        if (typeof window === 'undefined') return 'local';
-        
-        const hostname = window.location.hostname;
-        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-        const isGitHubPages = hostname.endsWith('github.io');
-        const isCustomDomain = !isLocalhost && !isGitHubPages;
-        
-        if (this.debug.enabled) {
-            console.debug('[Config] Environment detection:', {
-                hostname,
-                isLocalhost,
-                isGitHubPages,
-                isCustomDomain
-            });
-        }
-        
-        if (isLocalhost) return 'local';
-        if (isGitHubPages) return 'github-pages';
-        if (isCustomDomain) return 'custom-domain';
-        return 'unknown';
-    }
-
-    getBasePath() {
-        if (this.environment.basePath) {
-            return this.environment.basePath;
-        }
-
-        const mode = this.environment.forceMode || this.environment.mode;
-        let basePath;
-        
-        switch (mode) {
-            case 'github-pages':
-                basePath = this.resolveGitHubPagesPath();
-                break;
-            case 'custom-domain':
-                basePath = this.resolveCustomDomainPath();
-                break;
-            case 'local':
-                basePath = this.resolveLocalPath();
-                break;
-            default:
-                basePath = this.resolveFallbackPath();
-        }
-
-        this.environment.basePath = basePath;
-        
-        if (this.debug.logPathResolution) {
-            console.debug('[Config] Resolved base path:', {
-                mode,
-                basePath,
-                origin: window.location.origin
-            });
-        }
-
-        return basePath;
-    }
-
-    resolveGitHubPagesPath() {
-        if (this.githubPages.autoDetectRepo) {
-            const pathSegments = window.location.pathname.split('/');
-            const repoPath = pathSegments
-                .filter(segment => segment && !segment.includes('.'))
-                .join('/');
-            return `${window.location.origin}/${repoPath}`;
-        }
-        return `${window.location.origin}/${this.githubPages.owner}/${this.githubPages.repo}`;
-    }
-
-    resolveCustomDomainPath() {
-        const pathname = window.location.pathname;
-        const lastSlashIndex = pathname.lastIndexOf('/');
-        return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
-    }
-
-    resolveLocalPath() {
-        const baseDir = window.location.pathname.split('/')[1];
-        return baseDir ? `${window.location.origin}/${baseDir}` : window.location.origin;
-    }
-
-    resolveFallbackPath() {
-        const pathname = window.location.pathname;
-        const lastSlashIndex = pathname.lastIndexOf('/');
-        return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
-    }
-
-    setEnvironmentMode(mode) {
-        if (mode !== 'github-pages' && mode !== 'local' && mode !== 'custom-domain') {
-            throw new Error('Invalid environment mode. Use "github-pages", "local", or "custom-domain"');
-        }
-        this.environment.forceMode = mode;
-        this.environment.basePath = null; // Reset basePath to force recalculation
-        
-        if (this.debug.enabled) {
-            console.debug('[Config] Environment mode set:', mode);
-        }
-    }
-
-    enableDebug(options = {}) {
-        Object.assign(this.debug, options);
-        this.debug.enabled = true;
-        
-        if (this.debug.enabled) {
-            console.debug('[Config] Debug enabled with options:', options);
-        }
-    }
+    
+    if (isLocalhost) return 'local';
+    if (isGitHubPages) return 'github-pages';
+    if (isCustomDomain) return 'custom-domain';
+    return 'unknown';
 }
 
-// Export singleton instance
-export const config = new Config();
+// Initialize environment after config is created
+config.environment.mode = detectEnvironment();
 
-// Export utility functions that use the singleton
+// Export utility functions
 export function setEnvironmentMode(mode) {
-    config.setEnvironmentMode(mode);
+    if (mode !== 'github-pages' && mode !== 'local' && mode !== 'custom-domain') {
+        throw new Error('Invalid environment mode. Use "github-pages", "local", or "custom-domain"');
+    }
+    config.environment.forceMode = mode;
+    debugLog('Environment', `Mode set to: ${mode}`);
 }
 
 export function enableDebug(options = {}) {
-    config.enableDebug(options);
+    config.debug = {
+        ...config.debug,
+        enabled: true,
+        ...options
+    };
+    
+    debugLog('Debug Mode', 'Enabled with options:', options);
 }
 
 export function getBasePath() {
-    return config.getBasePath();
+    if (config.environment.basePath) {
+        debugLog('Base Path', 'Using configured base path:', config.environment.basePath);
+        return config.environment.basePath;
+    }
+
+    const mode = config.environment.forceMode || config.environment.mode;
+    let basePath;
+    
+    switch (mode) {
+        case 'github-pages':
+            basePath = resolveGitHubPagesPath();
+            break;
+        case 'custom-domain':
+            basePath = resolveCustomDomainPath();
+            break;
+        case 'local':
+            basePath = resolveLocalPath();
+            break;
+        default:
+            basePath = resolveFallbackPath();
+    }
+
+    // Cache the resolved base path
+    config.environment.basePath = basePath;
+    
+    if (config.debug.logPathResolution) {
+        debugLog('Base Path Resolution', {
+            mode,
+            resolved: basePath,
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            fullUrl: new URL(basePath + '/').href
+        });
+    }
+
+    // Validate the resolved path if enabled
+    if (config.debug.validatePaths) {
+        validateBasePath(basePath).catch(error => {
+            debugLog('Base Path Validation', 'Warning: Base path validation failed', { error: error.message });
+        });
+    }
+    
+    return basePath;
+}
+
+// Helper functions for path resolution
+function resolveGitHubPagesPath() {
+    if (config.githubPages.autoDetectRepo) {
+        const pathSegments = window.location.pathname.split('/');
+        const repoPath = pathSegments
+            .filter(segment => segment && !segment.includes('.'))
+            .join('/');
+        return `${window.location.origin}/${repoPath}`;
+    }
+    return `${window.location.origin}/${config.githubPages.owner}/${config.githubPages.repo}`;
+}
+
+function resolveCustomDomainPath() {
+    const pathname = window.location.pathname;
+    const lastSlashIndex = pathname.lastIndexOf('/');
+    return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
+}
+
+function resolveLocalPath() {
+    const baseDir = window.location.pathname.split('/')[1];
+    return baseDir ? `${window.location.origin}/${baseDir}` : window.location.origin;
+}
+
+function resolveFallbackPath() {
+    const pathname = window.location.pathname;
+    const lastSlashIndex = pathname.lastIndexOf('/');
+    return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
+}
+
+async function validateBasePath(basePath) {
+    try {
+        // Try to fetch the index file to validate the base path
+        const indexUrl = `${basePath}/${config.paths.index}`;
+        const graphDataUrl = `${basePath}/${config.paths.graphData}`;
+        
+        // Check both HTTP and HTTPS if needed
+        const urls = [indexUrl];
+        if (window.location.protocol === 'https:' && basePath.startsWith('http:')) {
+            urls.push(indexUrl.replace('http:', 'https:'));
+        }
+        
+        // Try all possible URLs
+        for (const url of urls) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (response.ok) {
+                    debugLog('Base Path Validation', 'Successfully validated base path', {
+                        basePath,
+                        url,
+                        status: response.status
+                    });
+                    return true;
+                }
+            } catch (error) {
+                debugLog('Base Path Validation', `Failed to validate URL: ${url}`, {
+                    error: error.message
+                });
+            }
+        }
+        
+        // Check if graph data exists
+        const graphDataResponse = await fetch(graphDataUrl, { method: 'HEAD' });
+        if (!graphDataResponse.ok) {
+            debugLog('Base Path Validation', 'Warning: graph-data.json not found', {
+                url: graphDataUrl,
+                status: graphDataResponse.status
+            });
+            
+            // Show warning banner for missing data files
+            showMissingDataWarning(graphDataUrl);
+        }
+        
+        throw new Error(`Failed to validate base path: No valid URLs found`);
+    } catch (error) {
+        debugLog('Base Path Validation', 'Failed to validate base path', {
+            basePath,
+            error: error.message
+        });
+        return false;
+    }
+}
+
+function showMissingDataWarning(url) {
+    const warningContainer = document.createElement('div');
+    warningContainer.className = 'missing-data-warning';
+    warningContainer.innerHTML = `
+        <div class="warning-content">
+            <h3>⚠️ Missing Data Files</h3>
+            <p>The graph data files could not be found at the expected location.</p>
+            <p>Expected URL: <code>${url}</code></p>
+            <div class="warning-actions">
+                <button onclick="window.location.reload()">Refresh Page</button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()">Dismiss</button>
+            </div>
+        </div>
+    `;
+    
+    // Add styles if not already present
+    if (!document.getElementById('missing-data-warning-styles')) {
+        const style = document.createElement('style');
+        style.id = 'missing-data-warning-styles';
+        style.textContent = `
+            .missing-data-warning {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--warning-bg, #fff3cd);
+                border: 1px solid var(--warning-border, #ffeeba);
+                border-radius: 8px;
+                padding: 1rem;
+                z-index: 1000;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                max-width: 90%;
+                width: 500px;
+            }
+            
+            .warning-content {
+                text-align: center;
+            }
+            
+            .warning-content h3 {
+                margin: 0 0 1rem;
+                color: var(--warning-text, #856404);
+            }
+            
+            .warning-content code {
+                display: block;
+                background: rgba(0,0,0,0.05);
+                padding: 0.5rem;
+                margin: 0.5rem 0;
+                border-radius: 4px;
+                word-break: break-all;
+            }
+            
+            .warning-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
+            .warning-actions button {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                background: var(--primary-color, #4a90e2);
+                color: white;
+            }
+            
+            .warning-actions button:last-child {
+                background: var(--secondary-color, #6c757d);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(warningContainer);
 }
 
 // Debug logging utility
