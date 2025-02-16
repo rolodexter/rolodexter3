@@ -1,3 +1,10 @@
+# DEPRECATED
+This file has been converted to HTML format. Please visit the new location:
+[Debug Notes](debug.html)
+
+The markdown version of this file is no longer maintained.
+Last Updated: 2025-02-16
+
 # rolodexterVS Debug Log
 
 ## System Verification Summary (2025-02-15)
