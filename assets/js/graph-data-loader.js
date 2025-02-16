@@ -71,24 +71,21 @@ export class GraphDataLoader {
         }
     }
 
-    async loadPage(url) {
-        if (this.processedFiles.has(url)) {
+    async loadPage(path) {
+        if (this.processedFiles.has(path)) {
             return; // Skip already processed files
         }
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(`/api/files/read/${path}`);
             if (!response.ok) {
-                if (response.status === 404) {
-                    return; // Silently skip 404s for optional files
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Failed to read file: ${response.statusText}`);
             }
             
             const text = await response.text();
             let metadata;
             
-            if (url.endsWith('.md')) {
+            if (path.endsWith('.md')) {
                 metadata = this.extractMarkdownMetadata(text);
             } else {
                 const parser = new DOMParser();
@@ -99,17 +96,14 @@ export class GraphDataLoader {
             if (!metadata) return; // Skip if no valid metadata
             
             // Create node
-            const id = new URL(url).pathname;
+            const id = path;
             const name = metadata.title || this.getFilenameFromPath(id);
             const node = { id, name, metadata };
             this.nodes.set(id, node);
             
-            this.processedFiles.add(url);
+            this.processedFiles.add(path);
         } catch (error) {
-            if (error.message.includes('404')) {
-                return; // Silently ignore 404s
-            }
-            this.logWarning(`Error loading page ${url}:`, error);
+            this.logWarning(`Error loading page ${path}:`, error);
             throw error;
         }
     }
@@ -261,10 +255,15 @@ export class GraphDataLoader {
 
     async getLocalFiles(dirPath) {
         try {
-            // This is a placeholder - in a real implementation, you would need to
-            // implement directory listing for local files, possibly using a backend API
-            // For now, we'll return an empty array to prevent errors
-            return [];
+            const response = await fetch(`/api/files/list/${dirPath}`);
+            if (!response.ok) {
+                throw new Error(`Failed to list directory: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            return data.files
+                .filter(file => !file.isDirectory)
+                .map(file => file.name);
         } catch (error) {
             this.logWarning(`Error listing directory ${dirPath}:`, error);
             return [];
