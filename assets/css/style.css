@@ -753,36 +753,54 @@ a:hover {
         display: block;
         border-radius: 4px;
         transition: background-color var(--transition-speed), color var(--transition-speed);
+        color: var(--text-primary);
+        text-decoration: none;
+        min-height: 44px; /* iOS minimum touch target size */
+        display: flex;
+        align-items: center;
     }
 
     .nav-links a:focus-visible {
         outline: 2px solid var(--accent-color);
         outline-offset: -2px;
+        background: var(--bg-secondary);
     }
 
     .nav-links a:hover {
         background: var(--bg-secondary);
+        color: var(--accent-color);
     }
 
     .menu-toggle {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 44px; /* Minimum touch target size */
+        height: 44px;
         padding: 0.5rem;
         border-radius: 4px;
-        transition: background-color var(--transition-speed), transform var(--transition-speed);
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background-color var(--transition-speed), transform var(--transition-speed), border-color var(--transition-speed);
     }
 
     .menu-toggle:hover {
+        background: var(--bg-secondary);
+        border-color: var(--accent-color);
+    }
+
+    .menu-toggle:focus-visible {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
         background: var(--bg-secondary);
     }
 
     .menu-toggle svg {
         width: 24px;
         height: 24px;
-        stroke: var(--text-primary);
+        stroke: currentColor;
         transition: transform var(--transition-speed);
     }
 
@@ -790,24 +808,75 @@ a:hover {
         transform: scale(1.1);
     }
 
-    /* Ensure theme toggle is visible and properly positioned on mobile */
-    .theme-toggle {
-        position: fixed;
-        top: 1rem;
-        right: 4rem;
-        z-index: 1001; /* Above the mobile menu */
-    }
-
     /* Prevent body scroll when menu is open */
     body.menu-open {
         overflow: hidden;
     }
+}
 
-    /* Improved touch area for mobile */
-    .nav-links a {
-        min-height: 44px; /* iOS minimum touch target size */
-        display: flex;
-        align-items: center;
+/* Dark mode enhancements */
+[data-theme="dark"] .menu-toggle {
+    border-color: var(--dark-border-color, rgba(255, 255, 255, 0.2));
+}
+
+[data-theme="dark"] .nav-links {
+    background: var(--dark-surface-color, #1a1a1a);
+    border-color: var(--dark-border-color, rgba(255, 255, 255, 0.2));
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .nav-links a:hover,
+[data-theme="dark"] .nav-links a:focus-visible {
+    background: var(--dark-bg-secondary, #2a2a2a);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .menu-toggle,
+    .nav-links,
+    .menu-toggle svg {
+        transition: none !important;
+    }
+
+    .nav-links {
+        transform: none !important;
+    }
+
+    .menu-toggle:hover svg {
+        transform: none !important;
+    }
+
+    .nav-links.active {
+        transform: none !important;
+    }
+}
+
+/* Glitch animation */
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+    }
+    60% {
+        transform: translate(2px, 2px);
+    }
+    80% {
+        transform: translate(2px, -2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Only apply glitch animation if reduced motion is not preferred */
+@media (prefers-reduced-motion: no-preference) {
+    .menu-toggle.glitch {
+        animation: glitch 300ms cubic-bezier(.25, .46, .45, .94);
     }
 }
 
