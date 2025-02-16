@@ -334,18 +334,47 @@ function initMobileMenu() {
                 menuToggle.setAttribute('aria-expanded', 'false');
                 navLinks.style.display = ''; // Reset to CSS default
                 menuToggle.style.display = 'none'; // Ensure button is hidden
+                document.body.classList.remove('menu-open'); // Remove scroll lock
             } else {
                 menuToggle.style.display = 'flex'; // Show button on mobile
                 // Always ensure menu is closed on mobile load/resize
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('menu-open'); // Remove scroll lock
+            }
+        }
+
+        // Function to manage focus trap within menu
+        function manageFocusTrap(e) {
+            if (!navLinks.classList.contains('active')) return;
+
+            const focusableElements = navLinks.querySelectorAll(
+                'a[href], button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
+            );
+            
+            const firstFocusable = focusableElements[0];
+            const lastFocusable = focusableElements[focusableElements.length - 1];
+
+            // Handle Tab key
+            if (e.key === 'Tab') {
+                if (e.shiftKey) { // Shift + Tab
+                    if (document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    }
+                } else { // Tab
+                    if (document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
             }
         }
 
         // Debounced resize handler
-        const debouncedHandleMenuState = debounce(handleMenuState, 250);
+        const debouncedHandleMenuState = debounce(handleMenuState, 200); // Updated to 200ms
 
-        // Toggle menu on button click and keyboard
+        // Toggle menu function
         function toggleMenu(e) {
             if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
                 return; // Only handle Enter and Space for keyboard
@@ -357,20 +386,32 @@ function initMobileMenu() {
             navLinks.classList.toggle('active');
             menuToggle.setAttribute('aria-expanded', !isExpanded);
             
-            // Add glitch effect on toggle
-            const glitchDuration = 300;
-            menuToggle.style.animation = `glitch ${glitchDuration}ms cubic-bezier(.25, .46, .45, .94)`;
+            // Toggle body scroll lock
+            document.body.classList.toggle('menu-open');
             
-            setTimeout(() => {
-                menuToggle.style.animation = '';
-            }, glitchDuration);
+            // Check if reduced motion is preferred
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            
+            if (!prefersReducedMotion) {
+                // Add glitch effect on toggle
+                const glitchDuration = 300;
+                menuToggle.style.animation = `glitch ${glitchDuration}ms cubic-bezier(.25, .46, .45, .94)`;
+                
+                setTimeout(() => {
+                    menuToggle.style.animation = '';
+                }, glitchDuration);
+            }
 
-            // If opening menu, focus first link
+            // Focus management
             if (!isExpanded) {
+                // Opening menu - focus first link
                 const firstLink = navLinks.querySelector('a');
                 if (firstLink) {
                     firstLink.focus();
                 }
+            } else {
+                // Closing menu - return focus to toggle
+                menuToggle.focus();
             }
         }
 
@@ -382,14 +423,18 @@ function initMobileMenu() {
         menuToggle.setAttribute('role', 'button');
         menuToggle.setAttribute('aria-controls', 'nav-links');
         menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.setAttribute('aria-label', 'Toggle navigation menu');
         menuToggle.setAttribute('tabindex', '0');
         navLinks.id = 'nav-links';
+        navLinks.setAttribute('role', 'navigation');
+        navLinks.setAttribute('aria-label', 'Main navigation');
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!menuToggle.contains(e.target) && !navLinks.contains(e.target) && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('menu-open');
                 menuToggle.focus(); // Return focus to toggle button
             }
         });
@@ -399,6 +444,7 @@ function initMobileMenu() {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('menu-open');
             });
         });
 
@@ -435,13 +481,15 @@ function initMobileMenu() {
             }
         }, { passive: false });
 
-        // Handle escape key
+        // Handle escape key and focus trap
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('menu-open');
                 menuToggle.focus(); // Return focus to toggle button
             }
+            manageFocusTrap(e);
         });
 
         // Handle window resize with debounce
@@ -456,6 +504,9 @@ function initMobileMenu() {
                 handleMenuState(); // Reset state when page becomes visible
             }
         });
+
+        // Reset menu state on page load/refresh
+        window.addEventListener('load', handleMenuState);
     }
 }
 
