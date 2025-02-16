@@ -133,5 +133,7 @@ Modify `index.html`:
 📝 **Read by**: rolodexterGPT  
 📅 **Last Read**: `2025-02-15 15:12:34 UTC`  
 🔄 **Status**: `On-going`  
-💬 **Comment**: `Needs implementation testing with live wallets.`  
+💬 **Comment**: `Needs implementation testing with live wallets.`
+
+[Navigation Structure Update](resolved-tasks/navigation-structure-update.html)
 
