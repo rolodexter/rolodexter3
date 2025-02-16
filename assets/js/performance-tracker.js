@@ -12,6 +12,7 @@ class PerformanceMonitor {
             memoryUsage: 0.8,     // 80% of heap limit
             errorRate: 0.05       // 5% error rate
         };
+        this.isGitHubPages = window.location.hostname.includes('github.io');
         this.initialize();
     }
 
@@ -159,6 +160,18 @@ class PerformanceMonitor {
     }
 
     async logMetric(metric) {
+        if (this.isGitHubPages) {
+            // Store metrics locally when on GitHub Pages
+            const key = `metric_${Date.now()}`;
+            try {
+                localStorage.setItem(key, JSON.stringify(metric));
+            } catch (error) {
+                console.debug('Local storage full, clearing old metrics');
+                this.clearOldMetrics();
+            }
+            return;
+        }
+
         try {
             await fetch('/api/monitor/performance', {
                 method: 'POST',
@@ -166,11 +179,23 @@ class PerformanceMonitor {
                 body: JSON.stringify(metric)
             });
         } catch (error) {
-            console.error('Failed to log metric:', error);
+            console.debug('Failed to log metric:', error);
         }
     }
 
     async logSessionEvent(event) {
+        if (this.isGitHubPages) {
+            // Store session events locally when on GitHub Pages
+            const key = `session_${Date.now()}`;
+            try {
+                localStorage.setItem(key, JSON.stringify(event));
+            } catch (error) {
+                console.debug('Local storage full, clearing old events');
+                this.clearOldMetrics();
+            }
+            return;
+        }
+
         try {
             await fetch('/api/monitor/session', {
                 method: 'POST',
@@ -178,8 +203,18 @@ class PerformanceMonitor {
                 body: JSON.stringify(event)
             });
         } catch (error) {
-            console.error('Failed to log session event:', error);
+            console.debug('Failed to log session event:', error);
         }
+    }
+
+    clearOldMetrics() {
+        // Keep only the last 100 metrics/events
+        const keys = Object.keys(localStorage)
+            .filter(key => key.startsWith('metric_') || key.startsWith('session_'))
+            .sort()
+            .slice(0, -100);
+        
+        keys.forEach(key => localStorage.removeItem(key));
     }
 
     logWarning(message, data) {
