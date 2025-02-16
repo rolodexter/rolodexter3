@@ -1206,16 +1206,16 @@ footer {
     margin-bottom: 1.5rem;
 }
 
-.task-column h3 {
-    margin: 0 0 1rem;
-    font-size: 1.2rem;
-    color: var(--text-secondary);
+.task-column {
+    display: flex;
+    flex-direction: column;
 }
 
 .tasks-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    width: 100%;
 }
 
 .task-item {
