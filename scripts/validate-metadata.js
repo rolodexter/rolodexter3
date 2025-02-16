@@ -64,8 +64,8 @@ async function validateFile(filePath) {
     
     // Check for missing required tags
     REQUIRED_META_TAGS.forEach(tag => {
-        if (!foundTags.has(`graph-${tag}`)) {
-            issues.push(`Missing required meta tag: graph-${tag}`);
+        if (!foundTags.has(tag)) {
+            issues.push(`Missing required meta tag: ${tag}`);
         }
     });
     
