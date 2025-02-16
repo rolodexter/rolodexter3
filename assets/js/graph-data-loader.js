@@ -1,69 +1,47 @@
+import { PathResolver } from './utils/path-resolver.js';
+
 export class GraphDataLoader {
-    constructor() {
+    constructor(options = {}) {
         this.nodes = new Map();
         this.edges = [];
         this.processedFiles = new Set();
         this.retryAttempts = 0;
         this.maxRetries = 3;
         this.isLoading = false;
-        this.baseDirectories = [
-            'memory/rolodexterVS/tasks',
-            'memory/rolodexterVS/memories',
-            'memory/rolodexterVS',
-            'memory',
-            'docs',
-            'legal'
-        ];
+        this.pathResolver = new PathResolver(options);
+        this.cache = new Map();
+        this.cacheExpiry = options.cacheExpiry || 5 * 60 * 1000; // 5 minutes
     }
 
-    async loadDirectory(baseUrl = '') {
+    async loadDirectory() {
         try {
             this.isLoading = true;
             
-            // Load files from each base directory
-            for (const dir of this.baseDirectories) {
-                try {
-                    // Use local file system path
-                    const dirPath = `${dir}/`;
-                    
-                    // Get list of HTML files in directory
-                    const files = await this.getLocalFiles(dirPath);
-                    
-                    if (!files || files.length === 0) {
-                        this.logWarning(`No HTML files found in directory: ${dir}`);
-                        continue;
-                    }
-                    
-                    // Process files in parallel with error handling
-                    const results = await Promise.allSettled(files.map(file => this.loadPage(`${dirPath}${file}`)));
-                    
-                    // Log only actual errors
-                    results.forEach((result, index) => {
-                        if (result.status === 'rejected') {
-                            this.logWarning(`Failed to load ${files[index]}: ${result.reason}`);
-                        }
-                    });
-                } catch (error) {
-                    this.logWarning(`Error loading directory ${dir}:`, error);
-                    continue;
-                }
+            // Try to load from cache first
+            const cachedData = this.getFromCache('graphData');
+            if (cachedData) {
+                return cachedData;
             }
 
-            // Create edges after all nodes are loaded
-            this.createEdges();
-            
-            if (this.nodes.size === 0) {
-                throw new Error('No valid nodes found in any directory');
+            // Load the static graph data
+            const data = await this.loadGraphData();
+            if (!data) {
+                // Try to load fallback data
+                const fallbackData = await this.loadFallbackData();
+                if (!fallbackData) {
+                    throw new Error('No graph data available');
+                }
+                return this.processAndCacheData(fallbackData);
             }
-            
-            return this.getGraphData();
+
+            return this.processAndCacheData(data);
         } catch (error) {
-            this.logError('Error loading directories:', error);
+            this.logError('Error loading graph data:', error);
             if (this.retryAttempts < this.maxRetries) {
                 this.retryAttempts++;
-                this.logWarning(`Retrying directory load (${this.retryAttempts}/${this.maxRetries})`);
+                this.logWarning(`Retrying data load (${this.retryAttempts}/${this.maxRetries})`);
                 await new Promise(resolve => setTimeout(resolve, this.retryAttempts * 1000));
-                return this.loadDirectory(baseUrl);
+                return this.loadDirectory();
             }
             throw error;
         } finally {
@@ -71,144 +49,78 @@ export class GraphDataLoader {
         }
     }
 
-    async loadPage(path) {
-        if (this.processedFiles.has(path)) {
-            return; // Skip already processed files
-        }
-
+    async loadGraphData() {
         try {
-            const response = await fetch(`/api/files/read/${path}`);
+            const response = await fetch(this.pathResolver.resolveGraphDataPath());
             if (!response.ok) {
-                throw new Error(`Failed to read file: ${response.statusText}`);
+                throw new Error('Failed to load graph data');
             }
-            
-            const text = await response.text();
-            let metadata;
-            
-            if (path.endsWith('.md')) {
-                metadata = this.extractMarkdownMetadata(text);
-            } else {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                metadata = this.extractHTMLMetadata(doc);
-            }
-            
-            if (!metadata) return; // Skip if no valid metadata
-            
-            // Create node
-            const id = path;
-            const name = metadata.title || this.getFilenameFromPath(id);
-            const node = { id, name, metadata };
-            this.nodes.set(id, node);
-            
-            this.processedFiles.add(path);
+            return await response.json();
         } catch (error) {
-            this.logWarning(`Error loading page ${path}:`, error);
-            throw error;
-        }
-    }
-
-    extractHTMLMetadata(doc) {
-        const metadata = {};
-        const metaTags = doc.querySelectorAll('meta[name^="graph-"]');
-        
-        if (metaTags.length === 0) {
-            return null; // Skip files without graph metadata
-        }
-
-        // Get title
-        metadata.title = doc.querySelector('title')?.textContent;
-
-        metaTags.forEach(tag => {
-            const name = tag.getAttribute('name').replace('graph-', '');
-            metadata[name] = tag.getAttribute('content') || this.getDefaultValue(name);
-        });
-
-        return this.normalizeMetadata(metadata);
-    }
-
-    extractMarkdownMetadata(text) {
-        const metadata = {};
-        const frontMatterMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
-        
-        if (!frontMatterMatch) {
+            this.logWarning('Failed to load primary graph data:', error);
             return null;
         }
+    }
 
-        const frontMatter = frontMatterMatch[1];
-        const lines = frontMatter.split('\n');
-        
-        lines.forEach(line => {
-            const [key, ...valueParts] = line.split(':');
-            if (key && valueParts.length) {
-                const value = valueParts.join(':').trim();
-                metadata[key.trim()] = value;
-            }
-        });
-
-        // Extract title from first heading if not in frontmatter
-        if (!metadata.title) {
-            const titleMatch = text.match(/^#\s+(.+)$/m);
-            if (titleMatch) {
-                metadata.title = titleMatch[1];
-            }
+    async loadFallbackData() {
+        try {
+            const indexData = await this.pathResolver.fetchIndex();
+            return this.buildGraphFromIndex(indexData);
+        } catch (error) {
+            this.logWarning('Failed to load fallback data:', error);
+            return null;
         }
-
-        return this.normalizeMetadata(metadata);
     }
 
-    normalizeMetadata(metadata) {
-        // Ensure required metadata fields have values
-        const normalized = {
-            title: metadata.title || '',
-            category: metadata.category || 'uncategorized',
-            tags: metadata.tags || '',
-            connections: this.validateConnections(metadata.connections),
-            created: metadata.created || new Date().toISOString(),
-            modified: metadata.modified || metadata.created,
-            authors: metadata.authors || 'unknown',
-            status: metadata.status || 'active'
-        };
-
-        return normalized;
-    }
-
-    validateConnections(connections) {
-        if (!connections) return '';
+    buildGraphFromIndex(indexData) {
+        const nodes = [];
+        const edges = [];
         
-        return connections.split(',')
-            .map(conn => conn.trim())
-            .filter(conn => {
-                if (!conn.endsWith('.html') && !conn.endsWith('.md')) {
-                    this.logWarning(`Invalid connection format: ${conn}`);
-                    return false;
-                }
-                return true;
-            })
-            .join(',');
-    }
-
-    createEdges() {
-        this.edges = [];
-        this.nodes.forEach(node => {
-            if (node.metadata.connections) {
-                const connections = node.metadata.connections.split(',').map(c => c.trim());
-                connections.forEach(target => {
-                    // Handle both .html and .md extensions
-                    const targetHtml = target.replace('.md', '.html');
-                    const targetMd = target.replace('.html', '.md');
-                    
-                    if (this.nodes.has(target) || this.nodes.has(targetHtml) || this.nodes.has(targetMd)) {
-                        this.edges.push({
-                            source: node.id,
-                            target: this.nodes.has(target) ? target : 
-                                   this.nodes.has(targetHtml) ? targetHtml : targetMd,
-                            weight: 1
-                        });
+        const processDirectory = (dir, path = '') => {
+            if (dir.files) {
+                Object.entries(dir.files).forEach(([filename, metadata]) => {
+                    const filePath = this.pathResolver.joinPaths(path, filename);
+                    nodes.push({
+                        id: filePath,
+                        name: metadata.title || filename,
+                        metadata: {
+                            ...metadata,
+                            category: metadata.category || 'uncategorized'
+                        }
+                    });
+                });
+            }
+            
+            if (dir.directories) {
+                dir.directories.forEach(subdir => {
+                    const subdirPath = this.pathResolver.joinPaths(path, subdir);
+                    if (dir[subdir]) {
+                        processDirectory(dir[subdir], subdirPath);
                     }
                 });
             }
+        };
+
+        processDirectory(indexData.structure);
+        return { nodes, edges };
+    }
+
+    processAndCacheData(data) {
+        // Process nodes
+        this.nodes.clear();
+        data.nodes.forEach(node => {
+            this.nodes.set(node.id, node);
         });
+        
+        // Process edges
+        this.edges = data.edges;
+        
+        const processedData = this.getGraphData();
+        
+        // Cache the processed data
+        this.setCache('graphData', processedData);
+        
+        return processedData;
     }
 
     getGraphData() {
@@ -218,23 +130,19 @@ export class GraphDataLoader {
         };
     }
 
-    getDefaultValue(field) {
-        const defaults = {
-            category: 'uncategorized',
-            tags: '',
-            connections: '',
-            created: new Date().toISOString(),
-            modified: new Date().toISOString(),
-            authors: 'unknown',
-            status: 'active'
-        };
-        return defaults[field] || '';
+    getFromCache(key) {
+        const cached = this.cache.get(key);
+        if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+            return cached.data;
+        }
+        return null;
     }
 
-    getFilenameFromPath(path) {
-        const parts = path.split('/');
-        const filename = parts[parts.length - 1];
-        return filename.replace(/\.(html|md)$/, '');
+    setCache(key, data) {
+        this.cache.set(key, {
+            data,
+            timestamp: Date.now()
+        });
     }
 
     logError(message, error) {
@@ -251,22 +159,6 @@ export class GraphDataLoader {
         this.processedFiles.clear();
         this.retryAttempts = 0;
         this.isLoading = false;
-    }
-
-    async getLocalFiles(dirPath) {
-        try {
-            const response = await fetch(`/api/files/list/${dirPath}`);
-            if (!response.ok) {
-                throw new Error(`Failed to list directory: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            return data.files
-                .filter(file => !file.isDirectory)
-                .map(file => file.name);
-        } catch (error) {
-            this.logWarning(`Error listing directory ${dirPath}:`, error);
-            return [];
-        }
+        this.cache.clear();
     }
 } 

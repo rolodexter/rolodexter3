@@ -1,0 +1,25 @@
+{
+    "nodes": [
+        {
+            "id": "memory/rolodexterVS/tasks/memory-system-reorganization.html",
+            "name": "Memory System Reorganization",
+            "metadata": {
+                "title": "Memory System Reorganization",
+                "category": "documentation",
+                "tags": "task-tracking, memory-system, reorganization",
+                "connections": "../index.html, ../../memories/sessions/2025/02/16.html",
+                "created": "2025-02-16T09:30:00Z",
+                "modified": "2025-02-16T09:30:00Z",
+                "authors": "rolodexterVS",
+                "status": "active"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "memory/rolodexterVS/tasks/memory-system-reorganization.html",
+            "target": "memory/rolodexterVS/tasks/index.html",
+            "weight": 1
+        }
+    ]
+} 
