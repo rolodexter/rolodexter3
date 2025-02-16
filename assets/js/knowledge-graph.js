@@ -1,208 +1,243 @@
 import { GraphDataLoader } from './graph-data-loader.js';
+import { GraphSearch } from './search-graph.js';
 
 export class KnowledgeGraph {
     constructor(containerId) {
+        console.log('[KnowledgeGraph] Initializing with container:', containerId);
+        this.containerId = containerId;
         this.container = document.getElementById(containerId);
+        
         if (!this.container) {
-            throw new Error(`Container with id '${containerId}' not found`);
+            console.error(`[KnowledgeGraph] Container not found: ${containerId}`);
+            return;
         }
         
-        // Set dimensions based on container
         this.width = this.container.clientWidth;
-        this.height = this.container.clientHeight;
-        
-        // Initialize D3 selections
-        this.svg = null;
-        this.simulation = null;
-        this.nodes = [];
-        this.edges = [];
-        
-        // Color mapping for categories
-        this.colorMap = {
-            'core': '#ff4444',
-            'documentation': '#44ff44',
-            'research': '#4444ff',
-            'feature': '#ffff44',
-            'legal': '#ff44ff',
-            'community': '#44ffff',
-            'labs': '#ff8844',
-            'uncategorized': '#999999'
-        };
-        
-        // Initialize data loader
+        this.height = Math.max(500, window.innerHeight * 0.6);
         this.dataLoader = new GraphDataLoader();
         
-        // Bind methods
-        this.handleNodeClick = this.handleNodeClick.bind(this);
-        this.handleNodeDrag = this.handleNodeDrag.bind(this);
-        this.handleZoom = this.handleZoom.bind(this);
-        this.updateSearch = this.updateSearch.bind(this);
-        this.updateCategoryFilter = this.updateCategoryFilter.bind(this);
-    }
-    
-    async initGraph() {
-        try {
-            // Load graph data
-            const graphData = await this.dataLoader.loadDirectory();
-            if (!graphData || !graphData.nodes || !graphData.edges) {
-                throw new Error('Invalid graph data structure');
+        // Add resize handler
+        window.addEventListener('resize', () => {
+            this.width = this.container.clientWidth;
+            this.height = Math.max(500, window.innerHeight * 0.6);
+            if (this.svg) {
+                this.svg
+                    .attr('width', this.width)
+                    .attr('height', this.height);
+                this.simulation.force('center', d3.forceCenter(this.width / 2, this.height / 2));
+                this.simulation.alpha(0.3).restart();
             }
-            
-            this.nodes = graphData.nodes;
-            this.edges = graphData.edges;
-            
-            // Create SVG
-            this.svg = d3.select(this.container)
-                .append('svg')
-                .attr('width', this.width)
-                .attr('height', this.height);
-            
-            // Add zoom behavior
-            const zoom = d3.zoom()
-                .scaleExtent([0.1, 4])
-                .on('zoom', this.handleZoom);
-            
-            this.svg.call(zoom);
-            
-            // Create container for zoomable content
-            this.graphContainer = this.svg.append('g');
-            
-            // Initialize force simulation
-            this.simulation = d3.forceSimulation(this.nodes)
-                .force('link', d3.forceLink(this.edges).id(d => d.id))
-                .force('charge', d3.forceManyBody().strength(-100))
-                .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-                .on('tick', () => this.updateGraph());
-            
-            // Create edges
-            this.edgeElements = this.graphContainer.append('g')
-                .selectAll('line')
-                .data(this.edges)
-                .enter().append('line')
-                .attr('stroke', '#999')
-                .attr('stroke-opacity', 0.6);
-            
-            // Create nodes
-            this.nodeElements = this.graphContainer.append('g')
-                .selectAll('g')
-                .data(this.nodes)
-                .enter().append('g')
-                .call(d3.drag()
-                    .on('start', this.handleNodeDrag.start)
-                    .on('drag', this.handleNodeDrag.drag)
-                    .on('end', this.handleNodeDrag.end));
-            
-            // Add circles to nodes
-            this.nodeElements.append('circle')
-                .attr('r', 5)
-                .attr('fill', d => this.getNodeColor(d));
-            
-            // Add labels to nodes
-            this.nodeElements.append('text')
-                .text(d => d.id)
-                .attr('dx', 8)
-                .attr('dy', 3);
-            
-            // Hide loading container
-            const loadingContainer = document.querySelector('.loading-container');
-            if (loadingContainer) {
-                loadingContainer.style.display = 'none';
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Error initializing graph:', error);
-            throw error;
-        }
-    }
-    
-    initControls() {
-        // Add search input
-        const searchContainer = document.createElement('div');
-        searchContainer.className = 'search-container';
-        searchContainer.innerHTML = `
-            <input type="text" id="node-search" placeholder="Search nodes...">
-            <select id="category-filter">
-                <option value="all">All Categories</option>
-                ${Object.keys(this.colorMap).map(category => 
-                    `<option value="${category}">${category.charAt(0).toUpperCase() + category.slice(1)}</option>`
-                ).join('')}
-            </select>
-        `;
-        this.container.parentNode.insertBefore(searchContainer, this.container);
-        
-        // Add event listeners
-        document.getElementById('node-search').addEventListener('input', this.updateSearch);
-        document.getElementById('category-filter').addEventListener('change', this.updateCategoryFilter);
-    }
-    
-    updateGraph() {
-        // Update edge positions
-        this.edgeElements
-            .attr('x1', d => d.source.x)
-            .attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x)
-            .attr('y2', d => d.target.y);
-        
-        // Update node positions
-        this.nodeElements.attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
-    }
-    
-    handleNodeClick(d) {
-        // Navigate to node's URL
-        window.location.href = d.id;
-    }
-    
-    handleNodeDrag = {
-        start: (event, d) => {
-            if (!event.active) this.simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        },
-        drag: (event, d) => {
-            d.fx = event.x;
-            d.fy = event.y;
-        },
-        end: (event, d) => {
-            if (!event.active) this.simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-        }
-    }
-    
-    handleZoom(event) {
-        this.graphContainer.attr('transform', event.transform);
-    }
-    
-    updateSearch(event) {
-        const searchTerm = event.target.value.toLowerCase();
-        this.nodeElements.style('display', d => 
-            d.id.toLowerCase().includes(searchTerm) ? 'block' : 'none'
-        );
-        
-        // Update edge visibility based on connected nodes
-        this.edgeElements.style('display', d => 
-            d.source.id.toLowerCase().includes(searchTerm) ||
-            d.target.id.toLowerCase().includes(searchTerm) ? 'block' : 'none'
-        );
-    }
-    
-    updateCategoryFilter(event) {
-        const category = event.target.value;
-        this.nodeElements.style('display', d => 
-            category === 'all' || d.metadata?.category === category ? 'block' : 'none'
-        );
-        
-        // Update edge visibility based on connected nodes
-        this.edgeElements.style('display', d => {
-            const sourceVisible = category === 'all' || d.source.metadata?.category === category;
-            const targetVisible = category === 'all' || d.target.metadata?.category === category;
-            return sourceVisible || targetVisible ? 'block' : 'none';
         });
     }
     
-    getNodeColor(node) {
-        return this.colorMap[node.metadata?.category] || this.colorMap.uncategorized;
+    async initGraph() {
+        console.log('[KnowledgeGraph] Starting initialization');
+        try {
+            this.showLoading();
+            
+            // Initialize SVG and simulation first
+            this.initSVG();
+            this.initSimulation();
+            
+            console.log('[KnowledgeGraph] Loading graph data');
+            const data = await this.dataLoader.loadDirectory();
+            
+            if (!data || !data.nodes || data.nodes.length === 0) {
+                throw new Error('No valid graph data found');
+            }
+            
+            console.log(`[KnowledgeGraph] Loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
+            
+            // Render the graph
+            this.renderGraph(data.nodes, data.edges);
+            this.hideLoading();
+            
+            // Initialize controls after successful load
+            this.initControls();
+            
+            return true;
+        } catch (error) {
+            console.error('[KnowledgeGraph] Initialization failed:', error);
+            this.showError(`Failed to load knowledge graph: ${error.message}`);
+            return false;
+        }
+    }
+    
+    initSVG() {
+        console.log('[KnowledgeGraph] Initializing SVG');
+        this.svg = d3.select(`#${this.containerId}`)
+            .append('svg')
+            .attr('width', this.width)
+            .attr('height', this.height)
+            .attr('viewBox', [0, 0, this.width, this.height])
+            .attr('style', 'max-width: 100%; height: auto;');
+
+        this.g = this.svg.append('g');
+        
+        // Add zoom behavior
+        this.zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => {
+                this.g.attr('transform', event.transform);
+            });
+            
+        this.svg.call(this.zoom);
+    }
+    
+    initSimulation() {
+        console.log('[KnowledgeGraph] Initializing force simulation');
+        this.simulation = d3.forceSimulation()
+            .force('link', d3.forceLink().id(d => d.id).distance(100))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+            .force('collision', d3.forceCollide().radius(30));
+    }
+    
+    renderGraph(nodes, edges) {
+        // Clear existing graph
+        this.g.selectAll('*').remove();
+        
+        // Create links
+        const link = this.g.selectAll('.link')
+            .data(edges)
+            .join('line')
+            .attr('class', 'link')
+            .attr('stroke', '#999')
+            .attr('stroke-opacity', 0.6)
+            .attr('stroke-width', d => Math.sqrt(d.weight || 1));
+            
+        // Create nodes
+        const node = this.g.selectAll('.node')
+            .data(nodes)
+            .join('g')
+            .attr('class', 'node')
+            .call(this.drag());
+            
+        // Add circles to nodes
+        node.append('circle')
+            .attr('r', 10)
+            .attr('fill', d => this.getCategoryColor(d.metadata.category))
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 1.5);
+            
+        // Add labels to nodes
+        node.append('text')
+            .attr('class', 'node-label')
+            .attr('dx', 12)
+            .attr('dy', '.35em')
+            .text(d => d.name)
+            .on('click', (event, d) => {
+                event.preventDefault();
+                event.stopPropagation();
+                window.location.href = d.id;
+            });
+            
+        // Update simulation
+        this.simulation
+            .nodes(nodes)
+            .force('link', d3.forceLink(edges).id(d => d.id))
+            .on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                    
+                node
+                    .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
+            });
+            
+        this.simulation.alpha(1).restart();
+    }
+    
+    getCategoryColor(category) {
+        const colors = {
+            'core': '#00FFFF',      // Cyan
+            'documentation': '#FFD700', // Gold
+            'research': '#FF69B4',   // Pink
+            'feature': '#32CD32',    // Lime
+            'legal': '#9370DB',      // Purple
+            'community': '#FF7F50',  // Coral
+            'labs': '#20B2AA',       // Light Sea Green
+            'uncategorized': '#999999' // Gray
+        };
+        return colors[category] || colors.uncategorized;
+    }
+    
+    initControls() {
+        // Zoom controls
+        d3.select('#zoom-in').on('click', () => {
+            this.svg.transition().call(
+                this.zoom.scaleBy, 1.5
+            );
+        });
+        
+        d3.select('#zoom-out').on('click', () => {
+            this.svg.transition().call(
+                this.zoom.scaleBy, 0.75
+            );
+        });
+        
+        d3.select('#reset-view').on('click', () => {
+            this.svg.transition().call(
+                this.zoom.transform,
+                d3.zoomIdentity
+            );
+        });
+    }
+    
+    drag() {
+        const simulation = this.simulation;
+        
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+        
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+        
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+        
+        return d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended);
+    }
+    
+    showLoading() {
+        const loadingContainer = this.container.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.display = 'flex';
+        }
+    }
+    
+    hideLoading() {
+        const loadingContainer = this.container.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.display = 'none';
+        }
+    }
+    
+    showError(message) {
+        this.hideLoading();
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'error-container';
+        errorContainer.innerHTML = `
+            <div class="error-message">
+                <h3>Error Loading Knowledge Graph</h3>
+                <p>${message}</p>
+                <button onclick="location.reload()">Retry</button>
+            </div>
+        `;
+        this.container.appendChild(errorContainer);
     }
 }
 
