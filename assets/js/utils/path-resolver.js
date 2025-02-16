@@ -1,24 +1,30 @@
+import { config, debugLog, getBasePath } from '../config.js';
+
 export class PathResolver {
     constructor(options = {}) {
-        this.baseUrl = this.detectBaseUrl();
-        this.indexPath = options.indexPath || 'assets/data/index.json';
-        this.graphDataPath = options.graphDataPath || 'assets/data/graph-data.json';
-    }
-
-    detectBaseUrl() {
-        if (typeof window === 'undefined') return '';
+        this.baseUrl = options.baseUrl || getBasePath();
+        this.indexPath = options.indexPath || config.paths.index;
+        this.graphDataPath = options.graphDataPath || config.paths.graphData;
         
-        const ghPages = /\.github\.io$/;
-        if (ghPages.test(window.location.hostname)) {
-            return `${window.location.origin}/${window.location.pathname.split('/')[1]}`;
+        if (config.debug.logPathResolution) {
+            debugLog('PathResolver', 'Initialized with:', {
+                baseUrl: this.baseUrl,
+                indexPath: this.indexPath,
+                graphDataPath: this.graphDataPath
+            });
         }
-        return window.location.origin;
     }
 
     resolvePath(path) {
         // Remove leading/trailing slashes and normalize
         const normalizedPath = path.replace(/^\/+|\/+$/g, '');
-        return `${this.baseUrl}/${normalizedPath}`.replace(/\/+/g, '/');
+        const resolvedPath = `${this.baseUrl}/${normalizedPath}`.replace(/\/+/g, '/');
+        
+        if (config.debug.logPathResolution) {
+            debugLog('PathResolver', `Resolved path: ${path} → ${resolvedPath}`);
+        }
+        
+        return resolvedPath;
     }
 
     resolveIndexPath() {
@@ -34,11 +40,23 @@ export class PathResolver {
     }
 
     getRelativePath(absolutePath) {
-        return absolutePath.replace(this.baseUrl, '').replace(/^\/+/, '');
+        const relativePath = absolutePath.replace(this.baseUrl, '').replace(/^\/+/, '');
+        
+        if (config.debug.logPathResolution) {
+            debugLog('PathResolver', `Converted absolute to relative: ${absolutePath} → ${relativePath}`);
+        }
+        
+        return relativePath;
     }
 
     joinPaths(...parts) {
-        return parts.map(part => part.replace(/^\/+|\/+$/g, '')).join('/');
+        const joined = parts.map(part => part.replace(/^\/+|\/+$/g, '')).join('/');
+        
+        if (config.debug.logPathResolution) {
+            debugLog('PathResolver', `Joined paths: ${parts.join(', ')} → ${joined}`);
+        }
+        
+        return joined;
     }
 
     // Navigate the index.json structure to find a specific path
@@ -53,6 +71,10 @@ export class PathResolver {
                 current = current[part];
             }
 
+            if (config.debug.logPathResolution) {
+                debugLog('PathResolver', `Index resolution for ${path}:`, current);
+            }
+
             return current || null;
         } catch (error) {
             console.error('Failed to resolve path in index:', path, error);
@@ -63,6 +85,18 @@ export class PathResolver {
     async fetchIndex() {
         const response = await fetch(this.resolveIndexPath());
         if (!response.ok) throw new Error('Failed to fetch index');
-        return await response.json();
+        
+        const data = await response.json();
+        
+        // Update cache version from index
+        if (data.version) {
+            config.cache.version = data.version;
+            
+            if (config.debug.logCacheOperations) {
+                debugLog('Cache', `Updated version from index: ${data.version}`);
+            }
+        }
+        
+        return data;
     }
 } 
