@@ -324,15 +324,20 @@ export class KnowledgeGraph {
             
             // Get container dimensions
             const rect = this.container.getBoundingClientRect();
-            this.width = rect.width || 800; // Fallback width
-            this.height = rect.height || 600; // Fallback height
+            this.width = rect.width || 800;
+            this.height = rect.height || 600;
 
-            // Create SVG element
+            console.debug('[KnowledgeGraph] Container dimensions:', { width: this.width, height: this.height });
+
+            // Create SVG element with responsive attributes
             this.svg = d3.select(`#${this.containerId}`)
                 .append('svg')
                 .attr('width', '100%')
                 .attr('height', '100%')
-                .attr('viewBox', [0, 0, this.width, this.height]);
+                .attr('viewBox', [0, 0, this.width, this.height])
+                .attr('preserveAspectRatio', 'xMidYMid meet')
+                .style('max-width', '100%')
+                .style('height', 'auto');
 
             // Add zoom behavior
             const zoom = d3.zoom()
@@ -349,6 +354,7 @@ export class KnowledgeGraph {
             // Create main group for graph elements
             this.g = this.svg.append('g');
             
+            console.debug('[KnowledgeGraph] SVG initialized');
             return true;
         } catch (error) {
             this.handleError(error);
@@ -387,27 +393,78 @@ export class KnowledgeGraph {
 
     renderGraph(nodes, edges) {
         try {
+            // Debug: Log initial data
+            console.debug('[KnowledgeGraph] Initial data:', { nodes, edges });
+
             // Format nodes to ensure they are objects
             const nodeObjects = nodes.map(node => {
                 if (typeof node === 'string') {
                     return {
                         id: node,
                         name: node.split('/').pop().replace('.html', ''),
-                        type: 'default'
+                        type: 'default',
+                        // Initialize physics properties
+                        vx: 0,
+                        vy: 0,
+                        x: this.width / 2 + (Math.random() - 0.5) * 100,
+                        y: this.height / 2 + (Math.random() - 0.5) * 100
                     };
                 }
-                return node;
+                return {
+                    ...node,
+                    vx: node.vx || 0,
+                    vy: node.vy || 0,
+                    x: node.x || this.width / 2 + (Math.random() - 0.5) * 100,
+                    y: node.y || this.height / 2 + (Math.random() - 0.5) * 100
+                };
             });
 
             // Create a map for quick node lookup
             const nodeMap = new Map(nodeObjects.map(node => [node.id, node]));
 
             // Format edges to ensure they use node objects
-            const edgeObjects = edges.map(edge => ({
-                source: nodeMap.get(edge.source) || edge.source,
-                target: nodeMap.get(edge.target) || edge.target,
-                weight: edge.weight || 1
-            }));
+            const edgeObjects = edges.map(edge => {
+                const sourceNode = nodeMap.get(edge.source) || nodeMap.get(typeof edge.source === 'object' ? edge.source.id : edge.source);
+                const targetNode = nodeMap.get(edge.target) || nodeMap.get(typeof edge.target === 'object' ? edge.target.id : edge.target);
+
+                if (!sourceNode || !targetNode) {
+                    console.warn('[KnowledgeGraph] Missing node reference:', { edge, sourceNode, targetNode });
+                    return null;
+                }
+
+                return {
+                    source: sourceNode,
+                    target: targetNode,
+                    weight: edge.weight || 1
+                };
+            }).filter(Boolean); // Remove any null edges
+
+            // Debug: Log formatted data
+            console.debug('[KnowledgeGraph] Formatted data for D3:', {
+                nodes: nodeObjects,
+                edges: edgeObjects
+            });
+
+            // Add temporary debug styling to SVG
+            if (!document.getElementById('graph-debug-style')) {
+                const debugStyle = document.createElement('style');
+                debugStyle.id = 'graph-debug-style';
+                debugStyle.textContent = `
+                    .debug-mode svg {
+                        background-color: rgba(200, 200, 200, 0.1);
+                        outline: 1px solid rgba(255, 0, 0, 0.2);
+                    }
+                    .debug-mode .node circle {
+                        stroke: rgba(0, 0, 0, 0.5);
+                        stroke-width: 1px;
+                    }
+                    .debug-mode .link {
+                        stroke-width: 2px;
+                    }
+                `;
+                document.head.appendChild(debugStyle);
+                this.container.classList.add('debug-mode');
+            }
 
             // Adjust node size based on screen size
             const baseRadius = window.innerWidth <= 768 ? 8 : 5;
@@ -418,7 +475,8 @@ export class KnowledgeGraph {
                 .join('line')
                 .attr('class', 'link')
                 .attr('stroke', '#999')
-                .attr('stroke-opacity', 0.6);
+                .attr('stroke-opacity', 0.6)
+                .attr('stroke-width', d => Math.sqrt(d.weight));
 
             // Create nodes
             const node = this.g.selectAll('.node')
@@ -442,25 +500,43 @@ export class KnowledgeGraph {
 
             // Update simulation with the formatted data
             this.simulation
-                .nodes(nodeObjects);
-            
-            this.simulation.force('link')
+                .nodes(nodeObjects)
+                .force('link')
                 .links(edgeObjects);
 
-            // Adjust force strengths for mobile
-            if (window.innerWidth <= 768) {
-                this.simulation
-                    .force('charge')
-                    .strength(-300)
-                    .distanceMax(200);
-                
-                this.simulation
-                    .force('link')
-                    .distance(150);
-            }
+            // Adjust force simulation parameters
+            this.simulation
+                .force('charge')
+                .strength(window.innerWidth <= 768 ? -300 : -200)
+                .distanceMax(window.innerWidth <= 768 ? 200 : 300);
+
+            this.simulation
+                .force('link')
+                .distance(window.innerWidth <= 768 ? 150 : 100)
+                .strength(d => 1 / Math.min(d.source.weight || 1, d.target.weight || 1));
+
+            // Add collision force to prevent node overlap
+            this.simulation
+                .force('collision')
+                .radius(d => (baseRadius + 5) * (d.weight || 1));
+
+            // Debug: Log simulation configuration
+            console.debug('[KnowledgeGraph] Simulation config:', {
+                charge: this.simulation.force('charge'),
+                link: this.simulation.force('link'),
+                collision: this.simulation.force('collision')
+            });
 
             // Restart simulation
             this.simulation.alpha(1).restart();
+
+            // Monitor simulation progress
+            this.simulation.on('tick.debug', () => {
+                const energy = this.simulation.alpha();
+                if (energy < 0.1) {
+                    console.debug('[KnowledgeGraph] Simulation settling:', { energy });
+                }
+            });
         } catch (error) {
             console.error('Failed to render graph:', error);
             this.handleError(error);
