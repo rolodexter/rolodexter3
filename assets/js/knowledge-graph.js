@@ -3,30 +3,72 @@ import { GraphSearch } from './search-graph.js';
 
 export class KnowledgeGraph {
     constructor(containerId) {
-        console.log(`[KnowledgeGraph] Initializing with container: ${containerId}`);
-        this.container = d3.select(`#${containerId}`);
-        if (!this.container.node()) {
-            throw new Error(`Container #${containerId} not found in DOM`);
-        }
-        
+        console.log('[KnowledgeGraph] Initializing with container:', containerId);
+        this.containerId = containerId;
+        this.container = document.getElementById(containerId);
+        this.width = this.container.clientWidth;
+        this.height = Math.max(500, window.innerHeight * 0.6);
         this.dataLoader = new GraphDataLoader();
-        this.width = this.container.node().getBoundingClientRect().width;
-        this.height = 600;
         
-        this.initSVG();
-        this.initSimulation();
-        console.log('[KnowledgeGraph] Constructor completed');
+        // Add resize handler
+        window.addEventListener('resize', () => {
+            this.width = this.container.clientWidth;
+            this.height = Math.max(500, window.innerHeight * 0.6);
+            if (this.svg) {
+                this.svg
+                    .attr('width', this.width)
+                    .attr('height', this.height);
+                this.simulation.force('center', d3.forceCenter(this.width / 2, this.height / 2));
+                this.simulation.alpha(0.3).restart();
+            }
+        });
+    }
+    
+    async initGraph() {
+        console.log('[KnowledgeGraph] Starting initialization');
+        try {
+            this.showLoading();
+            
+            // Initialize SVG and simulation first
+            this.initSVG();
+            this.initSimulation();
+            
+            console.log('[KnowledgeGraph] Loading graph data');
+            const data = await this.dataLoader.loadDirectory();
+            
+            if (!data || !data.nodes || data.nodes.length === 0) {
+                throw new Error('No valid graph data found');
+            }
+            
+            console.log(`[KnowledgeGraph] Loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
+            
+            // Render the graph
+            this.renderGraph(data.nodes, data.edges);
+            this.hideLoading();
+            
+            // Initialize controls after successful load
+            this.initControls();
+            
+            return true;
+        } catch (error) {
+            console.error('[KnowledgeGraph] Initialization failed:', error);
+            this.showError(`Failed to load knowledge graph: ${error.message}`);
+            return false;
+        }
     }
     
     initSVG() {
-        this.svg = this.container.append('svg')
+        console.log('[KnowledgeGraph] Initializing SVG');
+        this.svg = d3.select(`#${this.containerId}`)
+            .append('svg')
             .attr('width', this.width)
             .attr('height', this.height)
-            .attr('viewBox', [0, 0, this.width, this.height]);
-            
+            .attr('viewBox', [0, 0, this.width, this.height])
+            .attr('style', 'max-width: 100%; height: auto;');
+
         this.g = this.svg.append('g');
         
-        // Initialize zoom behavior
+        // Add zoom behavior
         this.zoom = d3.zoom()
             .scaleExtent([0.1, 4])
             .on('zoom', (event) => {
@@ -37,41 +79,13 @@ export class KnowledgeGraph {
     }
     
     initSimulation() {
-        // Initialize simulation
+        console.log('[KnowledgeGraph] Initializing force simulation');
         this.simulation = d3.forceSimulation()
             .force('link', d3.forceLink().id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-400))
+            .force('charge', d3.forceManyBody().strength(-300))
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-            .force('collision', d3.forceCollide().radius(30));
-    }
-    
-    async initGraph() {
-        console.log('[KnowledgeGraph] Starting graph initialization');
-        try {
-            this.showLoading();
-            console.log('[KnowledgeGraph] Loading data from directory');
-            const data = await this.dataLoader.loadDirectory('.');
-            
-            if (!data || !data.nodes || !data.edges) {
-                throw new Error('Invalid graph data structure received');
-            }
-            
-            console.log(`[KnowledgeGraph] Loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
-            
-            console.log('[KnowledgeGraph] Rendering graph');
-            await this.renderGraph(data.nodes, data.edges);
-            
-            this.hideLoading();
-            console.log('[KnowledgeGraph] Initializing search');
-            this.search = new GraphSearch(this);
-            
-            return true;
-        } catch (error) {
-            console.error('[KnowledgeGraph] Initialization failed:', error);
-            const errorMessage = `Failed to initialize graph: ${error.message}\n\nPlease check the console for detailed logs.`;
-            this.showError(errorMessage);
-            return false;
-        }
+            .force('collision', d3.forceCollide().radius(30))
+            .on('tick', () => this.tick());
     }
     
     renderGraph(nodes, edges) {
@@ -193,34 +207,42 @@ export class KnowledgeGraph {
     }
     
     showLoading() {
-        this.container.select('.loading-indicator').remove();
-        this.container.append('div')
-            .attr('class', 'loading-indicator')
-            .html('Loading knowledge graph...');
+        const loadingContainer = this.container.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.display = 'flex';
+        }
     }
     
     hideLoading() {
-        this.container.select('.loading-indicator').remove();
+        const loadingContainer = this.container.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.display = 'none';
+        }
     }
     
     showError(message) {
-        this.hideLoading();
-        const errorContainer = this.container.selectAll('.error-container').data([null]);
+        this.container.innerHTML = `
+            <div class="error-container">
+                <div class="error-message">
+                    <h3>Error Loading Knowledge Graph</h3>
+                    <p>${message}</p>
+                    <button onclick="location.reload()">Retry</button>
+                </div>
+            </div>
+        `;
+    }
+    
+    tick() {
+        if (!this.g) return;
         
-        const errorEnter = errorContainer.enter()
-            .append('div')
-            .attr('class', 'error-container');
-            
-        errorEnter.append('div')
-            .attr('class', 'error-message')
-            .html(`
-                <h3>Error Loading Knowledge Graph</h3>
-                <p>${message}</p>
-                <pre class="error-details"></pre>
-                <button onclick="location.reload()">Retry</button>
-            `);
-            
-        console.error('[KnowledgeGraph] Error:', message);
+        this.g.selectAll('.link')
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        this.g.selectAll('.node')
+            .attr('transform', d => `translate(${d.x},${d.y})`);
     }
 }
 
