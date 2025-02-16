@@ -20,16 +20,30 @@ export class GraphDataLoader {
         button.innerHTML = '🔄 Reload Graph Data';
         button.style.display = 'none'; // Hide initially
         
+        // Add tooltip for rate limiting
+        button.title = 'Click to reload graph data';
+        
         button.onclick = async () => {
-            if (this.lastLoadAttempt && Date.now() - this.lastLoadAttempt < this.minRetryInterval) {
-                debugLog('GraphDataLoader', 'Reload rate limited. Please wait...');
+            const now = Date.now();
+            if (this.lastLoadAttempt && now - this.lastLoadAttempt < this.minRetryInterval) {
+                const waitTime = Math.ceil((this.minRetryInterval - (now - this.lastLoadAttempt)) / 1000);
+                button.classList.add('rate-limited');
+                button.title = `Please wait ${waitTime} seconds before retrying`;
+                debugLog('GraphDataLoader', `Reload rate limited. Please wait ${waitTime}s...`);
+                
+                // Reset button state after rate limit expires
+                setTimeout(() => {
+                    button.classList.remove('rate-limited');
+                    button.title = 'Click to reload graph data';
+                }, this.minRetryInterval);
                 return;
             }
             
-            this.lastLoadAttempt = Date.now();
+            this.lastLoadAttempt = now;
             this.retryCount = 0; // Reset retry count for manual reload
             button.disabled = true;
             button.innerHTML = '⏳ Loading...';
+            button.title = 'Loading graph data...';
             
             try {
                 const data = await this.loadDirectory();
@@ -44,8 +58,30 @@ export class GraphDataLoader {
             } finally {
                 button.disabled = false;
                 button.innerHTML = '🔄 Reload Graph Data';
+                button.title = 'Click to reload graph data';
             }
         };
+        
+        // Add styles for rate limiting
+        if (!document.getElementById('reload-button-styles')) {
+            const style = document.createElement('style');
+            style.id = 'reload-button-styles';
+            style.textContent = `
+                .graph-reload-button.rate-limited {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    background: var(--warning-bg, #fff3cd) !important;
+                    animation: shake 0.5s;
+                }
+                
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         // Add to document
         document.body.appendChild(button);
@@ -169,23 +205,30 @@ export class GraphDataLoader {
     showError(message, error) {
         const container = document.createElement('div');
         container.className = 'graph-error-container';
+        
+        // Include retry count in error message if applicable
+        const retryInfo = this.retryCount > 0 ? 
+            `<p class="retry-info">Attempted ${this.retryCount} automatic retries</p>` : '';
+        
         container.innerHTML = `
             <div class="graph-error-message">
                 <h3>⚠️ ${message}</h3>
                 <p>${error.message}</p>
+                ${retryInfo}
                 <div class="graph-error-details">
                     <p>Troubleshooting steps:</p>
                     <ul>
                         <li>Check your internet connection</li>
                         <li>Verify the data files exist in the correct location</li>
                         <li>Try refreshing the page</li>
-                        <li>Check the browser console for detailed errors</li>
+                        <li>Check the browser console for detailed errors (Press F12)</li>
+                        <li>Clear your browser cache and reload</li>
                     </ul>
                 </div>
             </div>
         `;
 
-        // Add styles if not already present
+        // Update styles to include retry info
         if (!document.getElementById('graph-error-styles')) {
             const style = document.createElement('style');
             style.id = 'graph-error-styles';
@@ -254,6 +297,12 @@ export class GraphDataLoader {
                 @keyframes slideDown {
                     from { transform: translate(-50%, -100%); }
                     to { transform: translate(-50%, 0); }
+                }
+
+                .retry-info {
+                    color: var(--warning-text, #856404);
+                    font-style: italic;
+                    margin: 0.5rem 0;
                 }
             `;
             document.head.appendChild(style);

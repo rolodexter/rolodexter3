@@ -55,13 +55,18 @@ function detectEnvironment() {
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isGitHubPages = hostname.endsWith('github.io');
     const isCustomDomain = !isLocalhost && !isGitHubPages;
+    const isWWW = hostname.startsWith('www.');
+    const baseHostname = isWWW ? hostname.substring(4) : hostname;
     
     if (config.debug.showEnvironmentInfo) {
         debugLog('Environment Detection', {
             hostname,
+            baseHostname,
             isLocalhost,
             isGitHubPages,
             isCustomDomain,
+            isWWW,
+            protocol: window.location.protocol,
             pathname: window.location.pathname,
             origin: window.location.origin,
             href: window.location.href,
@@ -175,27 +180,132 @@ async function validateBasePath(basePath) {
     try {
         // Try to fetch the index file to validate the base path
         const indexUrl = `${basePath}/${config.paths.index}`;
-        const response = await fetch(indexUrl, { method: 'HEAD' });
+        const graphDataUrl = `${basePath}/${config.paths.graphData}`;
         
-        if (!response.ok) {
-            throw new Error(`Failed to validate base path: ${response.status} ${response.statusText}`);
+        // Check both HTTP and HTTPS if needed
+        const urls = [indexUrl];
+        if (window.location.protocol === 'https:' && basePath.startsWith('http:')) {
+            urls.push(indexUrl.replace('http:', 'https:'));
         }
         
-        debugLog('Base Path Validation', 'Successfully validated base path', {
-            basePath,
-            indexUrl,
-            status: response.status
-        });
+        // Try all possible URLs
+        for (const url of urls) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (response.ok) {
+                    debugLog('Base Path Validation', 'Successfully validated base path', {
+                        basePath,
+                        url,
+                        status: response.status
+                    });
+                    return true;
+                }
+            } catch (error) {
+                debugLog('Base Path Validation', `Failed to validate URL: ${url}`, {
+                    error: error.message
+                });
+            }
+        }
         
-        return true;
+        // Check if graph data exists
+        const graphDataResponse = await fetch(graphDataUrl, { method: 'HEAD' });
+        if (!graphDataResponse.ok) {
+            debugLog('Base Path Validation', 'Warning: graph-data.json not found', {
+                url: graphDataUrl,
+                status: graphDataResponse.status
+            });
+            
+            // Show warning banner for missing data files
+            showMissingDataWarning(graphDataUrl);
+        }
+        
+        throw new Error(`Failed to validate base path: No valid URLs found`);
     } catch (error) {
         debugLog('Base Path Validation', 'Failed to validate base path', {
             basePath,
             error: error.message
         });
-        
         return false;
     }
+}
+
+function showMissingDataWarning(url) {
+    const warningContainer = document.createElement('div');
+    warningContainer.className = 'missing-data-warning';
+    warningContainer.innerHTML = `
+        <div class="warning-content">
+            <h3>⚠️ Missing Data Files</h3>
+            <p>The graph data files could not be found at the expected location.</p>
+            <p>Expected URL: <code>${url}</code></p>
+            <div class="warning-actions">
+                <button onclick="window.location.reload()">Refresh Page</button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()">Dismiss</button>
+            </div>
+        </div>
+    `;
+    
+    // Add styles if not already present
+    if (!document.getElementById('missing-data-warning-styles')) {
+        const style = document.createElement('style');
+        style.id = 'missing-data-warning-styles';
+        style.textContent = `
+            .missing-data-warning {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--warning-bg, #fff3cd);
+                border: 1px solid var(--warning-border, #ffeeba);
+                border-radius: 8px;
+                padding: 1rem;
+                z-index: 1000;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                max-width: 90%;
+                width: 500px;
+            }
+            
+            .warning-content {
+                text-align: center;
+            }
+            
+            .warning-content h3 {
+                margin: 0 0 1rem;
+                color: var(--warning-text, #856404);
+            }
+            
+            .warning-content code {
+                display: block;
+                background: rgba(0,0,0,0.05);
+                padding: 0.5rem;
+                margin: 0.5rem 0;
+                border-radius: 4px;
+                word-break: break-all;
+            }
+            
+            .warning-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
+            .warning-actions button {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                background: var(--primary-color, #4a90e2);
+                color: white;
+            }
+            
+            .warning-actions button:last-child {
+                background: var(--secondary-color, #6c757d);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(warningContainer);
 }
 
 // Enhanced debug logging utility
