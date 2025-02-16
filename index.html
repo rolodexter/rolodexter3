@@ -34,12 +34,20 @@
         function updateThemeToggleIcons(theme) {
             const sunIcon = document.querySelector('.theme-toggle .sun');
             const moonIcon = document.querySelector('.theme-toggle .moon');
+            const logos = document.querySelectorAll('.site-logo');
+            
             if (theme === 'dark') {
                 sunIcon.style.display = 'none';
                 moonIcon.style.display = 'block';
+                logos.forEach(logo => {
+                    logo.src = './assets/brand/logos/primary/DARK_LOGO.jpg';
+                });
             } else {
                 sunIcon.style.display = 'block';
                 moonIcon.style.display = 'none';
+                logos.forEach(logo => {
+                    logo.src = './assets/brand/logos/primary/SQUARE_LOGO.jpg';
+                });
             }
         }
 
@@ -100,7 +108,7 @@
             <div class="nav-content">
                 <div class="nav-logo">
                     <a href="/" class="logo-link">
-                        <img src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                        <img src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo" data-light-src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" data-dark-src="./assets/brand/logos/primary/DARK_LOGO.jpg">
                         <span class="visually-hidden">rolodexter Labs</span>
                     </a>
                 </div>
@@ -146,7 +154,7 @@
                 </div>
             </div>
             <div class="footer-legal">
-                <p><img src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
+                <p><img src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo" data-light-src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" data-dark-src="./assets/brand/logos/primary/DARK_LOGO.jpg"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
             </div>
         </div>
     </footer>

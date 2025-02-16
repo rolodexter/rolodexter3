@@ -772,6 +772,7 @@ input, textarea {
     border-radius: 50%;
     object-fit: cover;
     vertical-align: middle;
+    transition: opacity var(--transition-speed);
 }
 
 .nav-logo .site-logo {
@@ -782,6 +783,20 @@ input, textarea {
     width: 24px;
     height: 24px;
     margin-right: 0.25rem;
+}
+
+/* Logo theme transition */
+.site-logo {
+    opacity: 1;
+}
+
+.site-logo.switching {
+    opacity: 0;
+}
+
+/* Dark mode logo handling */
+[data-theme="dark"] .site-logo {
+    filter: brightness(1.1);
 }
 
 /* Responsive Footer Adjustments */
