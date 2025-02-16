@@ -313,6 +313,16 @@ function initMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
     
     if (menuToggle && navLinks) {
+        // Function to handle menu state based on window width
+        function handleMenuState() {
+            if (window.innerWidth >= 768) {
+                // Reset menu state on desktop
+                navLinks.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                navLinks.style.display = ''; // Reset to CSS default
+            }
+        }
+
         // Toggle menu on button click
         menuToggle.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -373,6 +383,12 @@ function initMobileMenu() {
                 menuToggle.setAttribute('aria-expanded', 'false');
             }
         });
+
+        // Handle window resize
+        window.addEventListener('resize', handleMenuState);
+        
+        // Initial state check
+        handleMenuState();
     }
 }
 
