@@ -313,8 +313,11 @@ function initMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
     
     if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
+        // Toggle menu on button click
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             navLinks.classList.toggle('active');
+            menuToggle.setAttribute('aria-expanded', navLinks.classList.contains('active'));
             
             // Add glitch effect on toggle
             const glitchDuration = 300;
@@ -329,6 +332,7 @@ function initMobileMenu() {
         document.addEventListener('click', (e) => {
             if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
                 navLinks.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
             }
         });
 
@@ -336,10 +340,46 @@ function initMobileMenu() {
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
             });
+        });
+
+        // Handle touch events
+        let touchStartY = 0;
+        navLinks.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        navLinks.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const scrollTop = navLinks.scrollTop;
+            const scrollHeight = navLinks.scrollHeight;
+            const clientHeight = navLinks.clientHeight;
+
+            // Prevent scrolling up when menu is at the top
+            if (scrollTop <= 0 && touchY > touchStartY) {
+                e.preventDefault();
+            }
+            // Prevent scrolling down when menu is at the bottom
+            if (scrollTop + clientHeight >= scrollHeight && touchY < touchStartY) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Handle escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 }
+
+// Initialize mobile menu
+document.addEventListener('DOMContentLoaded', () => {
+    initMobileMenu();
+});
 
 // Theme Management
 const themeToggle = document.querySelector('.theme-toggle');
