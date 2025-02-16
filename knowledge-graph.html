@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph - rolodexter Labs</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/brand/favicon_io/favicon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="./assets/css/style.css">
+    
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="Interactive knowledge graph visualization">
+    <meta name="keywords" content="knowledge-graph, visualization, d3js">
+    <meta name="graph-tags" content="visualization, knowledge-graph">
+    <meta name="graph-category" content="core">
+    <meta name="graph-connections" content="index.html, memory/rolodexterVS/tasks/knowledge-graph-improvements.html, memory/rolodexterVS/tasks/knowledge-graph-data-validation.html">
+    <meta name="graph-created" content="2025-02-16T07:00:00Z">
+    <meta name="graph-modified" content="2025-02-16T07:00:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
+</head>
+<body>
+    <header>
+        <nav class="header-nav">
+            <div class="nav-content">
+                <a href="/" class="nav-logo">
+                    <img src="./assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                </a>
+                <h1>Knowledge Graph</h1>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="knowledge-graph-container">
+            <div id="knowledge-graph"></div>
+            <div class="graph-controls">
+                <div class="search-container">
+                    <input type="text" id="graph-search" placeholder="Search nodes...">
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="core">Core</option>
+                        <option value="documentation">Documentation</option>
+                        <option value="research">Research</option>
+                        <option value="feature">Feature</option>
+                        <option value="legal">Legal</option>
+                        <option value="community">Community</option>
+                        <option value="labs">Labs</option>
+                    </select>
+                </div>
+                <button id="zoom-in" aria-label="Zoom in">+</button>
+                <button id="zoom-out" aria-label="Zoom out">-</button>
+                <button id="reset-view" aria-label="Reset view">Reset</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="./assets/js/knowledge-graph.js"></script>
+</body>
+</html> 
