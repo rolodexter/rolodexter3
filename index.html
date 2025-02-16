@@ -19,7 +19,6 @@
     <!-- Scripts -->
     <script type="module" src="./assets/js/script.js"></script>
     <script src="./assets/js/theme.js"></script>
-    <script src="./assets/js/tasks.js"></script>
     
     <script>
         // Theme handling
@@ -136,34 +135,79 @@
         <section id="task-overview" class="task-overview">
             <div class="task-grid">
                 <div id="pending-tasks" class="task-column">
-                    <ul id="pending-tasks-list" class="tasks-list">
-                        <li class="task-item loading">
-                            <div class="loading-indicator">
-                                <div class="loading-spinner"></div>
-                                <p>Loading tasks...</p>
+                    <ul class="tasks-list">
+                        <li class="task-item high-priority in-progress">
+                            <div class="task-header">
+                                <h4><a href="/memory/rolodexterVS/tasks/knowledge-graph-implementation.html">Knowledge Graph Implementation</a></h4>
+                                <span class="status-badge in-progress">in progress</span>
+                            </div>
+                            <p class="task-details">Implementing and optimizing the knowledge graph visualization system</p>
+                            <div class="task-meta">
+                                <span class="agent">👤 rolodexterVS</span>
+                                <span class="updated">🕒 Feb 18, 2025</span>
+                            </div>
+                        </li>
+                        <li class="task-item high-priority in-progress">
+                            <div class="task-header">
+                                <h4><a href="/memory/rolodexterVS/tasks/memory-system-migration.html">Memory System Migration</a></h4>
+                                <span class="status-badge in-progress">in progress</span>
+                            </div>
+                            <p class="task-details">Converting and organizing the memory system structure</p>
+                            <div class="task-meta">
+                                <span class="agent">👤 rolodexterVS</span>
+                                <span class="updated">🕒 Feb 18, 2025</span>
+                            </div>
+                        </li>
+                        <li class="task-item medium-priority pending">
+                            <div class="task-header">
+                                <h4><a href="/memory/rolodexterVS/tasks/documentation-updates.html">Documentation Updates</a></h4>
+                                <span class="status-badge pending">pending</span>
+                            </div>
+                            <p class="task-details">Updating implementation guidelines and documentation</p>
+                            <div class="task-meta">
+                                <span class="agent">👤 rolodexterVS</span>
+                                <span class="updated">🕒 Feb 18, 2025</span>
                             </div>
                         </li>
                     </ul>
                 </div>
                 <div id="resolved-tasks" class="task-column">
-                    <ul id="resolved-tasks-list" class="tasks-list">
-                        <li class="task-item loading">
-                            <div class="loading-indicator">
-                                <div class="loading-spinner"></div>
-                                <p>Loading tasks...</p>
+                    <ul class="tasks-list">
+                        <li class="task-item resolved">
+                            <div class="task-header">
+                                <h4><a href="/memory/rolodexterVS/tasks/resolved/metadata-validation-fix.html">Metadata Validation Fix</a></h4>
+                                <span class="completion-date">✅ Feb 18, 2025</span>
+                            </div>
+                            <p class="task-details">Fixed validation script and implemented proper metadata tags</p>
+                            <div class="task-meta">
+                                <span class="agent">👤 rolodexterVS</span>
+                            </div>
+                        </li>
+                        <li class="task-item resolved">
+                            <div class="task-header">
+                                <h4><a href="/memory/rolodexterVS/tasks/resolved/navigation-structure-update.html">Navigation Structure Update</a></h4>
+                                <span class="completion-date">✅ Feb 17, 2025</span>
+                            </div>
+                            <p class="task-details">Simplified and standardized navigation across all pages</p>
+                            <div class="task-meta">
+                                <span class="agent">👤 rolodexterVS</span>
+                            </div>
+                        </li>
+                        <li class="task-item resolved">
+                            <div class="task-header">
+                                <h4><a href="/memory/rolodexterVS/tasks/resolved/footer-standardization.html">Footer Standardization</a></h4>
+                                <span class="completion-date">✅ Feb 17, 2025</span>
+                            </div>
+                            <p class="task-details">Completed footer refinements and standardization</p>
+                            <div class="task-meta">
+                                <span class="agent">👤 rolodexterVS</span>
                             </div>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="task-overview-footer">
-                <p id="tasks-last-updated" class="tasks-timestamp">Loading update time...</p>
-                <button id="refresh-tasks" class="refresh-button" aria-label="Refresh tasks">
-                    <svg viewBox="0 0 24 24" width="16" height="16">
-                        <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+                <p class="tasks-timestamp">Last updated: February 18, 2025 01:15 UTC</p>
             </div>
         </section>
     </main>
