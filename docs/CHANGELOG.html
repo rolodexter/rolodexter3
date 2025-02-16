@@ -1,37 +1,58 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Changelog - rolodexter</title>
+    <title>rolodexter3</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../assets/brand/favicon_io/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../assets/brand/favicon_io/site.webmanifest">
     
     <!-- Styles -->
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/documentation.css">
     
     <!-- Knowledge Graph Metadata -->
-    <meta name="description" content="Changelog - Version History and Updates for rolodexter Labs">
-    <meta name="keywords" content="changelog, updates, version history, releases">
-    <meta name="graph-tags" content="documentation, changelog, updates, history">
+    <meta name="description" content="Changelog for rolodexter3 project">
+    <meta name="keywords" content="changelog, version history, updates">
+    <meta name="graph-tags" content="documentation, changelog, version-history">
     <meta name="graph-category" content="documentation">
-    <meta name="graph-connections" content="../index.html, VERSION.html, ../research/index.html">
-    <meta name="graph-created" content="2025-02-15T12:00:00Z">
-    <meta name="graph-modified" content="2025-02-18T00:20:00Z">
+    <meta name="graph-connections" content="VERSION.html, ../index.html">
+    <meta name="graph-created" content="2024-01-20">
+    <meta name="graph-modified" content="2025-01-20">
     <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
 </head>
-<body>
+<body class="documentation-page">
+    <!-- Theme Toggle Button -->
     <button class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
     </button>
 
     <header>
         <nav class="header-nav">
             <div class="nav-content">
                 <div class="nav-logo">
-                    <h1>rolodexter3</h1>
+                    <a href="../" class="logo-link">
+                        <img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo" data-light-src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" data-dark-src="../assets/brand/logos/primary/DARK_LOGO.jpg">
+                        <span class="visually-hidden">rolodexter Labs</span>
+                    </a>
                 </div>
                 <button class="menu-toggle" aria-label="Toggle navigation menu">
                     <svg width="24" height="24" viewBox="0 0 24 24">
@@ -50,100 +71,94 @@
     </header>
 
     <main class="container">
-        <h1>ROLODEXTER Changelog</h1>
-        
-        <p>All notable changes to the ROLODEXTER project will be documented here.</p>
-        
-        <section>
-            <h2>[1.1.0] - 2025-01-20</h2>
-            <h3>Added</h3>
-            <ul>
-                <li>Legal pages (Privacy Policy, Terms of Use, Cookie Policy)</li>
-                <li>Cookie consent banner with cyberpunk styling</li>
-                <li>Footer legal notices and disclaimers</li>
-                <li>Legal page specific styling with cyberpunk aesthetic</li>
-                <li>GDPR compliant cookie management system</li>
-            </ul>
+        <article class="memory-content">
+            <h1>CHANGELOG</h1>
+            
+            <section class="version-entry">
+                <h2>[1.1.0] - 2025-01-20</h2>
+                
+                <h3>Added</h3>
+                <ul>
+                    <li>Legal pages (Privacy Policy, Terms of Use, Cookie Policy)</li>
+                    <li>Cookie consent banner with cyberpunk styling</li>
+                    <li>Footer legal notices and disclaimers</li>
+                    <li>Legal page specific styling with cyberpunk aesthetic</li>
+                    <li>GDPR compliant cookie management system</li>
+                </ul>
 
-            <h3>Changed</h3>
-            <ul>
-                <li>Updated copyright year to 2025</li>
-                <li>Enhanced footer layout with legal section</li>
-                <li>Improved accessibility in legal pages</li>
-                <li>Updated navigation to include legal links</li>
-            </ul>
+                <h3>Changed</h3>
+                <ul>
+                    <li>Updated copyright year to 2025</li>
+                    <li>Enhanced footer layout with legal section</li>
+                    <li>Improved accessibility in legal pages</li>
+                    <li>Updated navigation to include legal links</li>
+                </ul>
 
-            <h3>Security</h3>
-            <ul>
-                <li>Implemented cookie consent management</li>
-                <li>Added privacy-focused legal documentation</li>
-                <li>Enhanced data protection notices</li>
-            </ul>
-        </section>
+                <h3>Security</h3>
+                <ul>
+                    <li>Implemented cookie consent management</li>
+                    <li>Added privacy-focused legal documentation</li>
+                    <li>Enhanced data protection notices</li>
+                </ul>
+            </section>
 
-        <section>
-            <h2>[1.0.0] - 2024-01-20</h2>
-            <h3>Added</h3>
-            <ul>
-                <li>Base HTML structure</li>
-                <li>Core styling with CSS variables</li>
-                <li>JavaScript animations and effects</li>
-                <li>Favicon and PWA support</li>
-                <li>Brand documentation</li>
-                <li>Asset directory structure</li>
-            </ul>
+            <section class="version-entry">
+                <h2>[1.0.0] - 2024-01-20</h2>
+                
+                <h3>Added</h3>
+                <ul>
+                    <li>Base HTML structure</li>
+                    <li>Core styling with CSS variables</li>
+                    <li>JavaScript animations and effects</li>
+                    <li>Favicon and PWA support</li>
+                    <li>Brand documentation</li>
+                    <li>Asset directory structure</li>
+                </ul>
 
-            <h3>Changed</h3>
-            <ul>
-                <li>Updated color palette to match brand guidelines</li>
-                <li>Implemented responsive navigation</li>
-                <li>Enhanced typography system</li>
-            </ul>
+                <h3>Changed</h3>
+                <ul>
+                    <li>Updated color palette to match brand guidelines</li>
+                    <li>Implemented responsive navigation</li>
+                    <li>Enhanced typography system</li>
+                </ul>
 
-            <h3>Security</h3>
-            <ul>
-                <li>Added secure headers</li>
-                <li>Implemented PWA manifest</li>
-            </ul>
-        </section>
+                <h3>Security</h3>
+                <ul>
+                    <li>Added secure headers</li>
+                    <li>Implemented PWA manifest</li>
+                </ul>
+            </section>
+
+            <section class="author-signature">
+                <p>Maintained by <span class="agent-name">rolodexterVS</span></p>
+                <p class="timestamp">Created: 2024-01-20 | Last Updated: 2025-01-20</p>
+            </section>
+        </article>
     </main>
 
     <footer>
         <div class="footer-content">
-            <div class="footer-grid">
-                <div class="footer-section">
-                    <h3>Navigate</h3>
-                    <ul>
-                        <li><a href="../labs/index.html">Labs</a></li>
-                        <li><a href="../research/index.html">Research</a></li>
-                        <li><a href="../community/index.html">Community</a></li>
-                    </ul>
+            <div class="footer-links">
+                <div class="footer-links-row">
+                    <a href="../knowledge-graph.html">Knowledge Graph</a><span class="separator">,</span>
+                    <a href="./CHANGELOG.html">Changelog</a><span class="separator">,</span>
+                    <a href="./VERSION.html">Version</a><span class="separator">,</span>
+                    <a href="https://github.com/rolodexter3">GitHub</a>
                 </div>
-                <div class="footer-section">
-                    <h3>Resources</h3>
-                    <ul>
-                        <li><a href="../docs/CHANGELOG.html">Changelog</a></li>
-                        <li><a href="../docs/VERSION.html">Version</a></li>
-                        <li><a href="https://github.com/rolodexter3">GitHub</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Legal</h3>
-                    <ul>
-                        <li><a href="../legal/privacy.html">Privacy Policy</a></li>
-                        <li><a href="../legal/terms.html">Terms of Use</a></li>
-                        <li><a href="../legal/cookies.html">Cookie Policy</a></li>
-                        <li><a href="../legal/ai-ethics.html">AI Ethics</a></li>
-                    </ul>
+                <div class="footer-links-row">
+                    <a href="../legal/privacy.html">Privacy Policy</a><span class="separator">,</span>
+                    <a href="../legal/terms.html">Terms of Use</a><span class="separator">,</span>
+                    <a href="../legal/cookies.html">Cookie Policy</a><span class="separator">,</span>
+                    <a href="../legal/ai-ethics.html">AI Ethics</a>
                 </div>
             </div>
             <div class="footer-legal">
-                <p>© 2025 rolodexter3 Labs. All rights reserved.</p>
-                <p class="legal-text">By using this site, you agree to our <a href="../legal/privacy.html">Privacy Policy</a> and <a href="../legal/terms.html">Terms of Use</a>.</p>
+                <p><img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo" data-light-src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" data-dark-src="../assets/brand/logos/primary/DARK_LOGO.jpg"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/theme.js"></script>
 </body>
 </html>
