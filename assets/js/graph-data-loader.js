@@ -1,197 +1,267 @@
 export class GraphDataLoader {
     constructor() {
-        console.log('[GraphDataLoader] Initializing');
-        this.cache = new Map();
+        this.nodes = new Map();
+        this.edges = [];
+        this.processedFiles = new Set();
+        this.retryAttempts = 0;
+        this.maxRetries = 3;
+        this.isLoading = false;
+        this.baseDirectories = [
+            '/memory/rolodexterVS/tasks',
+            '/memory/rolodexterVS/memories',
+            '/memory/rolodexterVS',
+            '/memory',
+            '/docs',
+            '/legal'
+        ];
     }
 
-    // Normalize path to remove ../ and ./ references
-    normalizePath(path) {
-        const parts = path.split('/');
-        const stack = [];
-        for (const part of parts) {
-            if (part === '.' || part === '') continue;
-            if (part === '..') {
-                stack.pop();
-            } else {
-                stack.push(part);
-            }
-        }
-        return stack.join('/');
-    }
-
-    async loadDirectory() {
-        console.log('[GraphDataLoader] Starting directory load');
+    async loadDirectory(baseUrl) {
         try {
-            const htmlFiles = await this.getHTMLFiles();
-            console.log(`[GraphDataLoader] Found ${htmlFiles.length} HTML files`);
-
-            const nodes = [];
-            const edges = [];
-
-            for (const file of htmlFiles) {
+            this.isLoading = true;
+            
+            // Load files from each base directory
+            for (const dir of this.baseDirectories) {
                 try {
-                    console.log(`[GraphDataLoader] Processing file: ${file}`);
-                    const response = await fetch(file);
+                    const dirUrl = `${baseUrl}${dir}`;
+                    const response = await fetch(`${dirUrl}/`);
+                    
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        this.logWarning(`Directory not found: ${dir}`);
+                        continue;
                     }
-                    const html = await response.text();
-                    const metadata = await this.extractMetadata(html, file);
-                    if (metadata) {
-                        nodes.push(metadata);
-                    }
+                    
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'text/html');
+                    
+                    // Extract file links from directory listing
+                    const links = Array.from(doc.querySelectorAll('a'))
+                        .map(a => a.href)
+                        .filter(href => href.endsWith('.html') || href.endsWith('.md'));
+                    
+                    // Process files in parallel with error handling
+                    const results = await Promise.allSettled(links.map(url => this.loadPage(url)));
+                    
+                    // Log only actual errors, not 404s
+                    results.forEach((result, index) => {
+                        if (result.status === 'rejected' && !result.reason.message.includes('404')) {
+                            this.logWarning(`Failed to load ${links[index]}: ${result.reason}`);
+                        }
+                    });
                 } catch (error) {
-                    console.error(`[GraphDataLoader] Error processing file ${file}:`, error);
+                    this.logWarning(`Error loading directory ${dir}:`, error);
+                    continue;
                 }
             }
 
-            if (nodes.length === 0) {
-                throw new Error('No valid nodes found in the directory');
-            }
-
-            console.log(`[GraphDataLoader] Successfully loaded ${nodes.length} nodes`);
-            
             // Create edges after all nodes are loaded
-            const graphEdges = this.createEdges(nodes);
-            console.log(`[GraphDataLoader] Created ${graphEdges.length} edges`);
-
-            return { nodes, edges: graphEdges };
+            this.createEdges();
+            
+            if (this.nodes.size === 0) {
+                throw new Error('No valid nodes found in any directory');
+            }
+            
+            return this.getGraphData();
         } catch (error) {
-            console.error('[GraphDataLoader] Error loading directory:', error);
+            this.logError('Error loading directories:', error);
+            if (this.retryAttempts < this.maxRetries) {
+                this.retryAttempts++;
+                this.logWarning(`Retrying directory load (${this.retryAttempts}/${this.maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, this.retryAttempts * 1000));
+                return this.loadDirectory(baseUrl);
+            }
+            throw error;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async loadPage(url) {
+        if (this.processedFiles.has(url)) {
+            return; // Skip already processed files
+        }
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    return; // Silently skip 404s for optional files
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const text = await response.text();
+            let metadata;
+            
+            if (url.endsWith('.md')) {
+                metadata = this.extractMarkdownMetadata(text);
+            } else {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                metadata = this.extractHTMLMetadata(doc);
+            }
+            
+            if (!metadata) return; // Skip if no valid metadata
+            
+            // Create node
+            const id = new URL(url).pathname;
+            const name = metadata.title || this.getFilenameFromPath(id);
+            const node = { id, name, metadata };
+            this.nodes.set(id, node);
+            
+            this.processedFiles.add(url);
+        } catch (error) {
+            if (error.message.includes('404')) {
+                return; // Silently ignore 404s
+            }
+            this.logWarning(`Error loading page ${url}:`, error);
             throw error;
         }
     }
 
-    async getHTMLFiles() {
-        console.log('[GraphDataLoader] Scanning for HTML files');
-        return [
-            'index.html',
-            'knowledge/index.html',
-            'labs/index.html',
-            'labs/demo.html',
-            'research/index.html',
-            'community/index.html',
-            'memory/index.html',
-            'memory/pending-tasks.html',
-            'memory/resolved-tasks/index.html',
-            'memory/resolved-tasks/metadata-validation-fix.html',
-            'memory/resolved-tasks/navigation-structure-update.html',
-            'memory/resolved-tasks/footer-standardization.html',
-            'memory/rolodexterGPT-memory/session-history.html',
-            'docs/CHANGELOG.html',
-            'docs/VERSION.html',
-            'legal/privacy.html',
-            'legal/terms.html',
-            'legal/cookies.html',
-            'legal/ai-ethics.html'
-        ];
+    extractHTMLMetadata(doc) {
+        const metadata = {};
+        const metaTags = doc.querySelectorAll('meta[name^="graph-"]');
+        
+        if (metaTags.length === 0) {
+            return null; // Skip files without graph metadata
+        }
+
+        // Get title
+        metadata.title = doc.querySelector('title')?.textContent;
+
+        metaTags.forEach(tag => {
+            const name = tag.getAttribute('name').replace('graph-', '');
+            metadata[name] = tag.getAttribute('content') || this.getDefaultValue(name);
+        });
+
+        return this.normalizeMetadata(metadata);
     }
 
-    getMetaContent(doc, name) {
-        try {
-            const meta = doc.querySelector(`meta[name="${name}"]`);
-            if (!meta) {
-                console.warn(`[GraphDataLoader] Meta tag '${name}' not found`);
-                return null;
-            }
-            const content = meta.getAttribute('content');
-            if (!content) {
-                console.warn(`[GraphDataLoader] Meta tag '${name}' has no content`);
-                return null;
-            }
-            return content;
-        } catch (error) {
-            console.error(`[GraphDataLoader] Error getting meta content for '${name}':`, error);
+    extractMarkdownMetadata(text) {
+        const metadata = {};
+        const frontMatterMatch = text.match(/^---\s*\n([\s\S]*?)\n---/);
+        
+        if (!frontMatterMatch) {
             return null;
         }
-    }
 
-    async extractMetadata(html, filePath) {
-        console.log(`[GraphDataLoader] Extracting metadata from ${filePath}`);
-        try {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            if (!doc) {
-                throw new Error(`Failed to parse HTML document: ${filePath}`);
+        const frontMatter = frontMatterMatch[1];
+        const lines = frontMatter.split('\n');
+        
+        lines.forEach(line => {
+            const [key, ...valueParts] = line.split(':');
+            if (key && valueParts.length) {
+                const value = valueParts.join(':').trim();
+                metadata[key.trim()] = value;
             }
+        });
 
-            const baseDir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
-
-            // Extract required metadata with fallbacks
-            const metadata = {
-                id: filePath,
-                name: doc.querySelector('title')?.textContent || filePath,
-                metadata: {
-                    description: this.getMetaContent(doc, 'description') || '',
-                    category: this.getMetaContent(doc, 'graph-category') || 'uncategorized',
-                    tags: (this.getMetaContent(doc, 'graph-tags') || '').split(',').map(t => t.trim()).filter(Boolean),
-                    created: this.getMetaContent(doc, 'graph-created') || new Date().toISOString(),
-                    modified: this.getMetaContent(doc, 'graph-modified') || new Date().toISOString(),
-                    authors: (this.getMetaContent(doc, 'graph-authors') || 'system').split(',').map(a => a.trim()).filter(Boolean)
-                }
-            };
-
-            // Process connections
-            const connections = (this.getMetaContent(doc, 'graph-connections') || '').split(',')
-                .map(c => c.trim())
-                .filter(Boolean)
-                .map(c => {
-                    if (c.startsWith('/')) return c.substring(1);
-                    if (c.startsWith('./')) return this.normalizePath(baseDir + c.substring(2));
-                    if (c.startsWith('../')) return this.normalizePath(baseDir + c);
-                    return this.normalizePath(baseDir + c);
-                });
-            metadata.metadata.connections = connections;
-
-            // Validate required fields
-            if (!metadata.metadata.category) {
-                console.warn(`[GraphDataLoader] Missing category in ${filePath}, using 'uncategorized'`);
-                metadata.metadata.category = 'uncategorized';
+        // Extract title from first heading if not in frontmatter
+        if (!metadata.title) {
+            const titleMatch = text.match(/^#\s+(.+)$/m);
+            if (titleMatch) {
+                metadata.title = titleMatch[1];
             }
-
-            console.log(`[GraphDataLoader] Successfully extracted metadata for ${filePath}:`, metadata);
-            return metadata;
-        } catch (error) {
-            console.error(`[GraphDataLoader] Error extracting metadata from ${filePath}:`, error);
-            // Return basic metadata instead of null
-            return {
-                id: filePath,
-                name: filePath,
-                metadata: {
-                    description: '',
-                    category: 'uncategorized',
-                    tags: [],
-                    connections: [],
-                    created: new Date().toISOString(),
-                    modified: new Date().toISOString(),
-                    authors: ['system']
-                }
-            };
         }
+
+        return this.normalizeMetadata(metadata);
     }
 
-    createEdges(nodes) {
-        console.log('[GraphDataLoader] Creating edges from node connections');
-        const edges = [];
-        const nodeMap = new Map(nodes.map(node => [node.id, node]));
+    normalizeMetadata(metadata) {
+        // Ensure required metadata fields have values
+        const normalized = {
+            title: metadata.title || '',
+            category: metadata.category || 'uncategorized',
+            tags: metadata.tags || '',
+            connections: this.validateConnections(metadata.connections),
+            created: metadata.created || new Date().toISOString(),
+            modified: metadata.modified || metadata.created,
+            authors: metadata.authors || 'unknown',
+            status: metadata.status || 'active'
+        };
 
-        for (const node of nodes) {
-            if (Array.isArray(node.metadata.connections)) {
-                for (const connection of node.metadata.connections) {
-                    if (nodeMap.has(connection)) {
-                        edges.push({
+        return normalized;
+    }
+
+    validateConnections(connections) {
+        if (!connections) return '';
+        
+        return connections.split(',')
+            .map(conn => conn.trim())
+            .filter(conn => {
+                if (!conn.endsWith('.html') && !conn.endsWith('.md')) {
+                    this.logWarning(`Invalid connection format: ${conn}`);
+                    return false;
+                }
+                return true;
+            })
+            .join(',');
+    }
+
+    createEdges() {
+        this.edges = [];
+        this.nodes.forEach(node => {
+            if (node.metadata.connections) {
+                const connections = node.metadata.connections.split(',').map(c => c.trim());
+                connections.forEach(target => {
+                    // Handle both .html and .md extensions
+                    const targetHtml = target.replace('.md', '.html');
+                    const targetMd = target.replace('.html', '.md');
+                    
+                    if (this.nodes.has(target) || this.nodes.has(targetHtml) || this.nodes.has(targetMd)) {
+                        this.edges.push({
                             source: node.id,
-                            target: connection,
-                            type: 'connection'
+                            target: this.nodes.has(target) ? target : 
+                                   this.nodes.has(targetHtml) ? targetHtml : targetMd,
+                            weight: 1
                         });
-                    } else {
-                        console.warn(`[GraphDataLoader] Invalid connection in ${node.id}: ${connection}`);
                     }
-                }
+                });
             }
-        }
+        });
+    }
 
-        return edges;
+    getGraphData() {
+        return {
+            nodes: Array.from(this.nodes.values()),
+            edges: this.edges
+        };
+    }
+
+    getDefaultValue(field) {
+        const defaults = {
+            category: 'uncategorized',
+            tags: '',
+            connections: '',
+            created: new Date().toISOString(),
+            modified: new Date().toISOString(),
+            authors: 'unknown',
+            status: 'active'
+        };
+        return defaults[field] || '';
+    }
+
+    getFilenameFromPath(path) {
+        const parts = path.split('/');
+        const filename = parts[parts.length - 1];
+        return filename.replace(/\.(html|md)$/, '');
+    }
+
+    logError(message, error) {
+        console.error(`[GraphDataLoader] ${message}`, error);
+    }
+
+    logWarning(message, data = '') {
+        console.warn(`[GraphDataLoader] ${message}`, data);
+    }
+
+    reset() {
+        this.nodes.clear();
+        this.edges = [];
+        this.processedFiles.clear();
+        this.retryAttempts = 0;
+        this.isLoading = false;
     }
 } 

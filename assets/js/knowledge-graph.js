@@ -1,6 +1,120 @@
 import { GraphDataLoader } from './graph-data-loader.js';
 import { GraphSearch } from './search-graph.js';
 
+// Add styles
+const style = document.createElement('style');
+style.textContent = `
+    #knowledge-graph-container {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        border: 1px solid var(--border-color, #ccc);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #knowledge-graph {
+        width: 100%;
+        height: 100%;
+    }
+
+    .graph-controls {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+    }
+
+    .graph-controls button {
+        background: var(--control-bg, rgba(255, 255, 255, 0.9));
+        border: 1px solid var(--border-color, #ccc);
+        border-radius: 4px;
+        padding: 0.5rem;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        min-width: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--overlay-bg, rgba(255, 255, 255, 0.9));
+        z-index: 20;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--spinner-color, #f3f3f3);
+        border-top: 4px solid var(--accent-color, #3498db);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    .error-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--overlay-bg, rgba(255, 255, 255, 0.9));
+        z-index: 30;
+        padding: 2rem;
+    }
+
+    .error-message {
+        background: var(--error-bg, #fff);
+        border: 1px solid var(--error-border, #ff4444);
+        border-radius: 8px;
+        padding: 2rem;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .error-message h3 {
+        color: var(--error-text, #ff4444);
+        margin-bottom: 1rem;
+    }
+
+    .error-message button {
+        margin-top: 1rem;
+        padding: 0.5rem 1.5rem;
+        background: var(--button-bg, #ff4444);
+        color: var(--button-text, #fff);
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .error-message button:hover {
+        background: var(--button-hover, #ff6666);
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
 export class KnowledgeGraph {
     constructor(containerId) {
         this.containerId = containerId;
@@ -335,87 +449,6 @@ export class KnowledgeGraph {
         this.isInitialized = false;
     }
 }
-
-// Add styles
-const style = document.createElement('style');
-style.textContent = `
-    #knowledge-graph-container {
-        position: relative;
-        width: 100%;
-        height: 600px;
-        background: var(--bg-color);
-        border-radius: 8px;
-        overflow: hidden;
-        margin: 2rem 0;
-    }
-    
-    #knowledge-graph {
-        width: 100%;
-        height: 100%;
-    }
-    
-    .graph-controls {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        display: flex;
-        gap: 0.5rem;
-        background: var(--bg-color);
-        padding: 0.5rem;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .search-container {
-        display: flex;
-        gap: 0.5rem;
-        margin-right: 1rem;
-    }
-    
-    #graph-search {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        background: var(--bg-color);
-        color: var(--text-color);
-    }
-    
-    #category-filter {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        background: var(--bg-color);
-        color: var(--text-color);
-    }
-    
-    .graph-controls button {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        background: var(--bg-color);
-        color: var(--text-color);
-        cursor: pointer;
-    }
-    
-    .graph-controls button:hover {
-        background: var(--hover-color);
-    }
-    
-    .graph-error {
-        padding: 2rem;
-        text-align: center;
-        color: var(--text-color);
-    }
-    
-    .graph-error pre {
-        margin-top: 1rem;
-        padding: 1rem;
-        background: var(--code-bg);
-        border-radius: 4px;
-        overflow-x: auto;
-    }
-`;
-document.head.appendChild(style);
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
