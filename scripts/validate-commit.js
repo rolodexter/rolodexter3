@@ -1,6 +1,5 @@
 // Commit Message Validator
 const validateCommitMessage = (message) => {
-<<<<<<< Updated upstream
     // Check for manual override
     if (message.startsWith('Manual:')) {
         return {
@@ -18,27 +17,14 @@ const validateCommitMessage = (message) => {
         length: {
             test: (msg) => msg.length <= 72, // Increased length limit for more descriptive messages
             message: 'Must be 72 characters or less'
-=======
-    const rules = {
-        startWithAction: {
-            test: (msg) => /^(Add|Fix|Update|Remove|Refactor|Optimize|Document) .+/.test(msg),
-            message: 'Must start with an action verb (Add, Fix, Update, Remove, Refactor, Optimize, Document)'
-        },
-        length: {
-            test: (msg) => msg.length <= 50,
-            message: 'Must be 50 characters or less'
->>>>>>> Stashed changes
         },
         noPeriod: {
             test: (msg) => !msg.endsWith('.'),
             message: 'Must not end with a period'
-<<<<<<< Updated upstream
-=======
         },
         presentTense: {
             test: (msg) => !/\b(ed|fixed|added|updated|removed|refactored|optimized|documented)\b/.test(msg),
             message: 'Must use present tense'
->>>>>>> Stashed changes
         }
     };
 
