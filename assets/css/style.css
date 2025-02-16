@@ -174,8 +174,13 @@ footer {
     padding: 0;
 }
 
+.footer-links-row span.separator::after {
+    content: " ";
+    white-space: pre;
+}
+
 .footer-links-row > *:not(:last-child) {
-    margin-right: 0.35rem;
+    margin-right: 0;
 }
 
 .footer-legal {
