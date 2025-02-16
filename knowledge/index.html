@@ -68,7 +68,12 @@
     </header>
 
     <main class="container">
-        <div id="knowledge-graph" class="graph-container"></div>
+        <div id="graph-container" class="graph-container">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Loading knowledge graph...</p>
+            </div>
+        </div>
         <div class="graph-controls">
             <button id="zoom-in" class="graph-btn">+</button>
             <button id="zoom-out" class="graph-btn">-</button>
@@ -155,6 +160,46 @@
             const content = document.getElementById("overlayContent");
             content.classList.toggle("hidden");
         }
+    </script>
+
+    <!-- Graph Scripts -->
+    <script type="module">
+        import { KnowledgeGraph } from '../assets/js/knowledge-graph.js';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[App] DOM Content Loaded');
+            try {
+                const container = document.getElementById('graph-container');
+                if (!container) {
+                    throw new Error('Graph container element not found');
+                }
+                
+                console.log('[App] Creating Knowledge Graph instance');
+                const graph = new KnowledgeGraph('graph-container');
+                
+                console.log('[App] Initializing graph');
+                const success = await graph.initGraph();
+                
+                if (!success) {
+                    console.error('[App] Failed to initialize graph');
+                }
+            } catch (error) {
+                console.error('[App] Fatal error:', error);
+                const container = document.getElementById('graph-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="error-container">
+                            <div class="error-message">
+                                <h3>Fatal Error</h3>
+                                <p>${error.message}</p>
+                                <pre class="error-details">${error.stack}</pre>
+                                <button onclick="location.reload()">Retry</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        });
     </script>
 </body>
 </html>
