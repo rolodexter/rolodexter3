@@ -1751,13 +1751,13 @@ a:focus-visible {
 .page-content {
     opacity: 0;
     transform: translateY(20px);
+    transition: opacity var(--duration-slow) var(--transition-timing),
+                transform var(--duration-slow) var(--transition-timing);
 }
 
 .page-content.loaded {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity var(--duration-slow) var(--transition-timing),
-                transform var(--duration-slow) var(--transition-timing);
 }
 
 /* Scroll-Based Animations */
@@ -1863,5 +1863,126 @@ a:focus-visible {
         transition: none !important;
         animation: none !important;
         transform: none !important;
+    }
+}
+
+/* Performance Optimizations */
+.will-animate {
+    will-change: transform, opacity;
+}
+
+/* Enhanced Mobile Menu with Performance Optimizations */
+.menu-toggle {
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    transition: transform var(--duration-fast) var(--transition-bounce);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.menu-toggle:hover {
+    transform: scale(var(--scale-hover));
+}
+
+.menu-toggle svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    will-change: transform;
+    transition: transform var(--duration-fast) var(--transition-timing);
+}
+
+/* Enhanced Mobile Navigation */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: var(--header-height, 60px);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-primary);
+        padding: 1rem;
+        transform: translateX(-100%);
+        opacity: 0;
+        visibility: hidden;
+        will-change: transform, opacity, visibility;
+        transition: transform var(--duration-normal) var(--transition-timing),
+                    opacity var(--duration-normal) var(--transition-timing),
+                    visibility var(--duration-normal) var(--transition-timing);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 1000;
+    }
+
+    .nav-links.active {
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    body.menu-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* Focus Management */
+.menu-toggle:focus-visible,
+.nav-links a:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    background: var(--bg-secondary);
+}
+
+/* ARIA States */
+[aria-expanded="true"] .menu-toggle {
+    background: var(--bg-secondary);
+}
+
+/* Contrast Enhancements */
+[data-theme="dark"] .nav-links {
+    background: var(--dark-bg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .nav-links a {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .nav-links a:hover,
+[data-theme="dark"] .nav-links a:focus-visible {
+    background: var(--dark-bg-secondary);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .page-content,
+    .animate-on-scroll,
+    .menu-toggle,
+    .nav-links,
+    .nav-links a {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+
+    .will-animate {
+        will-change: auto;
     }
 }
