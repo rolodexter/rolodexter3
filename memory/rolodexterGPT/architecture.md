@@ -1,3 +1,10 @@
+# DEPRECATED
+This file has been converted to HTML format. Please visit the new location:
+[System Architecture](architecture.html)
+
+The markdown version of this file is no longer maintained.
+Last Updated: 2025-02-16
+
 # System Architecture Overview
 Latest Update: 2025-02-16 18:30 UTC
 

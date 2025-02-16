@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - rolodexter Labs</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../assets/brand/favicon_io/favicon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/documentation.css">
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="System architecture overview for rolodexter Labs platform">
+    <meta name="keywords" content="architecture, system design, token gating, caching, security">
+    <meta name="graph-tags" content="architecture, system-design, documentation">
+    <meta name="graph-category" content="documentation">
+    <meta name="graph-connections" content="memories/index.html, feature-implementation.html, system-state.html">
+    <meta name="graph-created" content="2025-02-16T18:30:00Z">
+    <meta name="graph-modified" content="2025-02-16T18:30:00Z">
+    <meta name="graph-authors" content="rolodexterGPT">
+    <meta name="graph-status" content="active">
+</head>
+<body class="documentation-page">
+    <main class="container">
+        <article class="memory-content">
+            <h1>System Architecture Overview</h1>
+            
+            <section class="architecture-core">
+                <h2>Core Architecture Decisions</h2>
+
+                <div class="architecture-section">
+                    <h3>Token Gating Implementation</h3>
+                    <div class="mermaid-diagram">
+                        <pre class="mermaid">
+graph TD
+    A[Client Request] --> B[Wallet Auth via Solana]
+    B --> C{Token Verification}
+    C --> |Valid| D[Role Assignment]
+    C --> |Invalid| E[Access Denied]
+    D --> F[Cache w/ Redis]
+    F --> G[WebSocket Subscribe]
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="architecture-section">
+                    <h3>Caching Strategy</h3>
+                    <h4>Redis Layer</h4>
+                    <ul>
+                        <li>5-minute TTL for token balances</li>
+                        <li>Session & role caching</li>
+                        <li>WebSocket notifications for real-time updates</li>
+                    </ul>
+                </div>
+
+                <div class="architecture-section">
+                    <h3>RPC Management</h3>
+                    <div class="mermaid-diagram">
+                        <pre class="mermaid">
+graph LR
+    A[User Request] --> B{Health Check}
+    B --> |Healthy| C[Primary RPC]
+    B --> |Unhealthy| D[Failover RPC]
+    D --> |Failed| E[Secondary Failover]
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="architecture-section">
+                    <h3>Navigation Architecture</h3>
+                    <div class="mermaid-diagram">
+                        <pre class="mermaid">
+graph TD
+    A[Header Nav] --> B[Active State Tracker]
+    B --> C[Route Handler]
+    C --> D[Content Loader]
+    D --> E[Theme Manager]
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="integration-points">
+                <h2>Integration Points</h2>
+                <ul>
+                    <li><strong>Solana:</strong> for on-chain token checks, real-time validation</li>
+                    <li><strong>Redis:</strong> for session caching, rate limiting, and WebSocket triggers</li>
+                </ul>
+            </section>
+
+            <section class="security-measures">
+                <h2>Security Measures</h2>
+                <ol>
+                    <li>
+                        <h3>Rate Limiting</h3>
+                        <ul>
+                            <li>Standard: 100/15min</li>
+                            <li>Premium: 300/15min</li>
+                            <li>IP-based checks</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <h3>Authentication</h3>
+                        <ul>
+                            <li>Wallet signatures</li>
+                            <li>Token-based gating</li>
+                            <li>NFT validation</li>
+                        </ul>
+                    </li>
+                </ol>
+            </section>
+
+            <section class="performance">
+                <h2>Performance Optimizations</h2>
+                <ol>
+                    <li><strong>Caching:</strong> Minimizing RPC calls with a 5-minute TTL</li>
+                    <li><strong>RPC Management:</strong> Automatic failover, pooled connections</li>
+                    <li><strong>WebSockets:</strong> Real-time updates for token balances</li>
+                </ol>
+            </section>
+
+            <section class="guidelines">
+                <h2>Development Guidelines</h2>
+                <ul>
+                    <li><strong>Feature-Based</strong> directory structure</li>
+                    <li><strong>Centralized Config</strong> for environment variables</li>
+                    <li><strong>Type-Safe Interfaces</strong> to reduce runtime errors</li>
+                    <li><strong>Debug Toggles</strong> for easier troubleshooting</li>
+                </ul>
+            </section>
+
+            <section class="future">
+                <h2>Future Considerations</h2>
+                <ul>
+                    <li>Horizontal scaling of Redis</li>
+                    <li>Additional AI-driven features for <strong>rolodexter3</strong></li>
+                    <li>Potential decentralized storage integration</li>
+                </ul>
+            </section>
+
+            <section class="identity">
+                <h2>Identities</h2>
+                <ul>
+                    <li><strong>rolodexter3:</strong> The website/application</li>
+                    <li><strong>rolodexterGPT:</strong> Chat-based AI assistant</li>
+                    <li><strong>rolodexterVS:</strong> IDE-based agent</li>
+                    <li><strong>rolodexter Labs, LLC:</strong> Legal entity in California</li>
+                </ul>
+            </section>
+
+            <footer class="task-footer">
+                <div class="status-block">
+                    <p class="status-item"><span class="status-label">Last Updated:</span> 2025-02-16 18:30 UTC</p>
+                    <p class="status-item"><span class="status-label">Status:</span> ✓ Architecture consistent with rolodexter Labs, LLC standards</p>
+                    <p class="status-item"><span class="status-label">Signed by:</span> rolodexterGPT</p>
+                </div>
+            </footer>
+        </article>
+    </main>
+
+    <script src="../../assets/js/script.js"></script>
+    <script src="../../assets/js/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html>
