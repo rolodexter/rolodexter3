@@ -3,22 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="rolodexter Research - Exploring advanced AI systems and knowledge management">
-    <title>Research | rolodexter</title>
+    <title>Research - rolodexter Labs</title>
     
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon_io/favicon-16x16.png">
-    <link rel="manifest" href="/assets/brand/favicon_io/site.webmanifest">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../assets/brand/favicon_io/site.webmanifest">
     
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <!-- Font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <!-- Graph Scripts -->
+    <script src="../assets/js/knowledge-graph.js" defer></script>
+    <script src="../assets/js/graph-metadata.js" defer></script>
+
+    <meta name="description" content="Research and Development - rolodexter Labs">
+    <meta name="keywords" content="research, development, innovation, papers">
+    <meta name="graph-tags" content="research, papers, innovation">
+    <meta name="graph-category" content="research">
+    <meta name="graph-connections" content="../index.html, ../knowledge/index.html, ../labs/index.html">
+    <meta name="graph-created" content="2025-02-17T21:10:00Z">
+    <meta name="graph-modified" content="2025-02-17T21:10:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
 </head>
 <body>
+    <button class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
     <header>
         <nav class="header-nav">
             <div class="nav-content">
                 <div class="nav-logo">
-                    <h1>rolodexter</h1>
+                    <a href="../" class="logo-link">
+                        <img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                        <span class="visually-hidden">rolodexter Labs</span>
+                    </a>
                 </div>
                 <button class="menu-toggle" aria-label="Toggle navigation menu">
                     <svg width="24" height="24" viewBox="0 0 24 24">
@@ -28,23 +64,23 @@
                     </svg>
                 </button>
                 <ul class="nav-links">
-                    <li><a href="/work">Work</a></li>
-                    <li><a href="/schedule">Schedule</a></li>
-                    <li><a href="/labs">Labs</a></li>
-                    <li><a href="/research" class="active">Research</a></li>
-                    <li><a href="/community">Community</a></li>
+                    <li><a href="../work/index.html">Work</a></li>
+                    <li><a href="../schedule/index.html">Schedule</a></li>
+                    <li><a href="../knowledge/index.html">Knowledge</a></li>
+                    <li><a href="../labs/index.html">Labs</a></li>
+                    <li><a href="../research/index.html" class="active">Research</a></li>
+                    <li><a href="../community/index.html">Community</a></li>
                 </ul>
             </div>
         </nav>
     </header>
-
+    
     <main class="container">
-        <section class="research-overview">
-            <h2>Research Areas</h2>
-            <div class="research-grid">
-                <!-- Research areas will be dynamically loaded -->
-            </div>
-        </section>
+        <h1>Research</h1>
+        <div id="knowledge-graph" class="research-view">
+            <!-- Knowledge graph will be rendered here -->
+            <div class="loading-indicator">Loading research papers and documentation...</div>
+        </div>
     </main>
 
     <footer>
@@ -53,55 +89,60 @@
                 <div class="footer-section">
                     <h3>Navigate</h3>
                     <ul>
-                        <li><a href="/work">Work</a></li>
-                        <li><a href="/labs">Labs</a></li>
-                        <li><a href="/research">Research</a></li>
-                        <li><a href="/community">Community</a></li>
+                        <li><a href="../work/index.html">Work</a></li>
+                        <li><a href="../schedule/index.html">Schedule</a></li>
+                        <li><a href="../knowledge/index.html">Knowledge</a></li>
+                        <li><a href="../labs/index.html">Labs</a></li>
+                        <li><a href="../research/index.html" class="active">Research</a></li>
+                        <li><a href="../community/index.html">Community</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h3>Resources</h3>
                     <ul>
-                        <li><a href="/docs/CHANGELOG.md">Changelog</a></li>
-                        <li><a href="/docs/VERSION">Version</a></li>
-                        <li><a href="https://github.com/rolodexter">GitHub</a></li>
+                        <li><a href="../docs/CHANGELOG.html">Changelog</a></li>
+                        <li><a href="../docs/VERSION.html">Version</a></li>
+                        <li><a href="https://github.com/rolodexter3">GitHub</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h3>Legal</h3>
                     <ul>
-                        <li><a href="/legal/privacy.html">Privacy Policy</a></li>
-                        <li><a href="/legal/terms.html">Terms of Use</a></li>
-                        <li><a href="/legal/cookies.html">Cookie Policy</a></li>
-                        <li><a href="/legal/ai-ethics.html">AI Ethics</a></li>
+                        <li><a href="../legal/privacy.html">Privacy Policy</a></li>
+                        <li><a href="../legal/terms.html">Terms of Use</a></li>
+                        <li><a href="../legal/cookies.html">Cookie Policy</a></li>
+                        <li><a href="../legal/ai-ethics.html">AI Ethics</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-legal">
-                <p>© 2025 rolodexter Labs. All rights reserved.</p>
+                <p><img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
+                <p class="legal-text">By using this site, you agree to our <a href="../legal/privacy.html">Privacy Policy</a> and <a href="../legal/terms.html">Terms of Use</a>.</p>
             </div>
         </div>
     </footer>
 
-    <script src="/assets/js/script.js"></script>
-
-    <!-- Page Attribution & Version Control -->
-    <div class="signature-block" style="margin-top: 2rem; padding: 1rem; border-top: 1px solid var(--border-color);">
-        <h4>Page Information</h4>
-        <div class="metadata">
-            <p><strong>Last Updated:</strong> 2025-02-16 20:51:22 UTC</p>
-            <p><strong>Authors:</strong> rolodexterVS</p>
-            <p><strong>Contributors:</strong> rolodexterGPT</p>
-            <p><strong>File Location:</strong> C:/rolodexter3/research/index.html</p>
-            <details>
-                <summary><strong>Pending Tasks</strong></summary>
-                <ul>
-                    <li>Fix broken navigation links (use relative paths)</li>
-                    <li>Update company branding to "rolodexter Labs, LLC"</li>
-                    <li>Implement dynamic research area loading</li>
-                </ul>
-            </details>
+    <script src="../assets/js/script.js"></script>
+    
+    <div class="bottom-overlay" id="bottomOverlay">
+        <div class="overlay-header">
+            <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
+        </div>
+        <div class="overlay-content hidden" id="overlayContent">
+            <p class="overlay-section-title">Page Information</p>
+            <ul class="overlay-info">
+                <li><strong>Last Updated:</strong> 2025-02-17 21:10:00 UTC</li>
+                <li><strong>Authors:</strong> rolodexterVS</li>
+                <li><strong>File Location:</strong> C:/rolodexter3/research/index.html</li>
+            </ul>
         </div>
     </div>
+
+    <script>
+        function toggleOverlay() {
+            const content = document.getElementById("overlayContent");
+            content.classList.toggle("hidden");
+        }
+    </script>
 </body>
 </html>
