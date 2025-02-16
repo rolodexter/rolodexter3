@@ -275,6 +275,45 @@ a:hover {
     margin: 0.5rem 0;
 }
 
+/* Knowledge Graph Theme Variables */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --border-color: #e0e0e0;
+    --hover-color: #f5f5f5;
+    --code-bg: #f8f9fa;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --border-color: #404040;
+    --hover-color: #2a2a2a;
+    --code-bg: #2d2d2d;
+}
+
+/* Knowledge Graph Styles */
+.knowledge-graph {
+    background-color: var(--bg-color);
+}
+
+.knowledge-graph .links line {
+    stroke: var(--border-color);
+    stroke-opacity: 0.6;
+}
+
+.knowledge-graph .nodes circle {
+    stroke: var(--bg-color);
+    stroke-width: 1.5px;
+}
+
+.knowledge-graph .labels text {
+    fill: var(--text-color);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    pointer-events: none;
+}
+
 /* Knowledge Graph */
 .graph-container {
     border: 1px solid var(--border-color);
@@ -289,10 +328,6 @@ a:hover {
 }
 
 /* Knowledge Graph Enhancements */
-.knowledge-graph {
-    background: var(--bg-primary);
-}
-
 .node {
     cursor: pointer;
 }

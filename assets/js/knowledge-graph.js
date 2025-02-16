@@ -172,3 +172,175 @@ document.addEventListener('DOMContentLoaded', () => {
     const graph = new KnowledgeGraph('#knowledge-graph');
     graph.initGraph();
 });
+
+// Knowledge Graph Initialization
+import { KnowledgeGraph } from '../../scripts/knowledge-graph.js';
+import { GraphDataLoader } from '../../scripts/graph-data-loader.js';
+import { GraphSearch } from '../../scripts/search-graph.js';
+
+// Initialize components
+let graph, dataLoader, search;
+
+async function initializeKnowledgeGraph() {
+    try {
+        // Initialize the graph
+        const container = document.getElementById('knowledge-graph');
+        graph = new KnowledgeGraph(container);
+        
+        // Load data
+        dataLoader = new GraphDataLoader();
+        await dataLoader.loadDirectory('.');
+        const graphData = dataLoader.getGraphData();
+        
+        // Update graph with data
+        graph.update(graphData);
+        
+        // Initialize search
+        search = new GraphSearch(graph);
+        
+        // Set up controls
+        setupControls();
+        
+    } catch (error) {
+        console.error('Error initializing knowledge graph:', error);
+        const container = document.getElementById('knowledge-graph');
+        container.innerHTML = `
+            <div class="graph-error">
+                <h3>Error Loading Knowledge Graph</h3>
+                <p>There was an error initializing the knowledge graph. Please try refreshing the page.</p>
+                <pre>${error.message}</pre>
+            </div>
+        `;
+    }
+}
+
+function setupControls() {
+    // Zoom controls
+    document.getElementById('zoom-in').addEventListener('click', () => {
+        const transform = d3.zoomTransform(graph.svg.node());
+        graph.svg.call(graph.zoom.transform, transform.scale(transform.k * 1.5));
+    });
+    
+    document.getElementById('zoom-out').addEventListener('click', () => {
+        const transform = d3.zoomTransform(graph.svg.node());
+        graph.svg.call(graph.zoom.transform, transform.scale(transform.k / 1.5));
+    });
+    
+    document.getElementById('reset-view').addEventListener('click', () => {
+        graph.svg.call(graph.zoom.transform, d3.zoomIdentity);
+    });
+    
+    // Add search input
+    const controls = document.querySelector('.graph-controls');
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-container';
+    searchContainer.innerHTML = `
+        <input type="text" id="graph-search" placeholder="Search knowledge graph...">
+        <select id="category-filter">
+            <option value="">All Categories</option>
+            <option value="core">Core</option>
+            <option value="documentation">Documentation</option>
+            <option value="research">Research</option>
+            <option value="feature">Feature</option>
+            <option value="legal">Legal</option>
+            <option value="community">Community</option>
+            <option value="labs">Labs</option>
+        </select>
+    `;
+    controls.insertBefore(searchContainer, controls.firstChild);
+    
+    // Set up search handlers
+    const searchInput = document.getElementById('graph-search');
+    searchInput.addEventListener('input', (e) => {
+        search.search(e.target.value);
+    });
+    
+    const categoryFilter = document.getElementById('category-filter');
+    categoryFilter.addEventListener('change', (e) => {
+        search.filterByCategory(e.target.value);
+    });
+}
+
+// Add styles
+const style = document.createElement('style');
+style.textContent = `
+    #knowledge-graph-container {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        background: var(--bg-color);
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+    
+    #knowledge-graph {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .graph-controls {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        background: var(--bg-color);
+        padding: 0.5rem;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .search-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-right: 1rem;
+    }
+    
+    #graph-search {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    #category-filter {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    .graph-controls button {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--bg-color);
+        color: var(--text-color);
+        cursor: pointer;
+    }
+    
+    .graph-controls button:hover {
+        background: var(--hover-color);
+    }
+    
+    .graph-error {
+        padding: 2rem;
+        text-align: center;
+        color: var(--text-color);
+    }
+    
+    .graph-error pre {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--code-bg);
+        border-radius: 4px;
+        overflow-x: auto;
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeKnowledgeGraph);
