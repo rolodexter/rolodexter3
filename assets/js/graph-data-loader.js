@@ -45,17 +45,28 @@ export class GraphDataLoader {
 
     async getHTMLFiles(path) {
         console.log(`[GraphDataLoader] Scanning for HTML files in: ${path}`);
-        try {
-            const response = await fetch(`${path}?list=true`);
-            if (!response.ok) {
-                throw new Error(`Failed to list directory: ${response.status}`);
-            }
-            const files = await response.json();
-            return files.filter(file => file.endsWith('.html'));
-        } catch (error) {
-            console.error('[GraphDataLoader] Failed to get HTML files:', error);
-            throw error;
-        }
+        // Return a comprehensive list of all HTML files in the project
+        return [
+            'index.html',
+            'knowledge/index.html',
+            'labs/index.html',
+            'labs/demo.html',
+            'research/index.html',
+            'community/index.html',
+            'memory/index.html',
+            'memory/pending-tasks.html',
+            'memory/resolved-tasks/index.html',
+            'memory/resolved-tasks/metadata-validation-fix.html',
+            'memory/resolved-tasks/navigation-structure-update.html',
+            'memory/resolved-tasks/footer-standardization.html',
+            'memory/rolodexterGPT-memory/session-history.html',
+            'docs/CHANGELOG.html',
+            'docs/VERSION.html',
+            'legal/privacy.html',
+            'legal/terms.html',
+            'legal/cookies.html',
+            'legal/ai-ethics.html'
+        ];
     }
 
     extractMetadata(html, filePath) {
