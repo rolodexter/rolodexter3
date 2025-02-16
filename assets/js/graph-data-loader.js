@@ -4,6 +4,21 @@ export class GraphDataLoader {
         this.cache = new Map();
     }
 
+    // Normalize path to remove ../ and ./ references
+    normalizePath(path) {
+        const parts = path.split('/');
+        const stack = [];
+        for (const part of parts) {
+            if (part === '.' || part === '') continue;
+            if (part === '..') {
+                stack.pop();
+            } else {
+                stack.push(part);
+            }
+        }
+        return stack.join('/');
+    }
+
     async loadDirectory() {
         console.log('[GraphDataLoader] Starting directory load');
         try {
@@ -101,23 +116,38 @@ export class GraphDataLoader {
                 throw new Error(`Failed to parse HTML document: ${filePath}`);
             }
 
+            const baseDir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
+
             // Extract required metadata with fallbacks
             const metadata = {
                 id: filePath,
-                title: doc.querySelector('title')?.textContent || filePath,
-                description: this.getMetaContent(doc, 'description') || '',
-                category: this.getMetaContent(doc, 'graph-category') || 'uncategorized',
-                tags: (this.getMetaContent(doc, 'graph-tags') || '').split(',').map(t => t.trim()).filter(Boolean),
-                connections: (this.getMetaContent(doc, 'graph-connections') || '').split(',').map(c => c.trim()).filter(Boolean),
-                created: this.getMetaContent(doc, 'graph-created') || new Date().toISOString(),
-                modified: this.getMetaContent(doc, 'graph-modified') || new Date().toISOString(),
-                authors: (this.getMetaContent(doc, 'graph-authors') || 'system').split(',').map(a => a.trim()).filter(Boolean)
+                name: doc.querySelector('title')?.textContent || filePath,
+                metadata: {
+                    description: this.getMetaContent(doc, 'description') || '',
+                    category: this.getMetaContent(doc, 'graph-category') || 'uncategorized',
+                    tags: (this.getMetaContent(doc, 'graph-tags') || '').split(',').map(t => t.trim()).filter(Boolean),
+                    created: this.getMetaContent(doc, 'graph-created') || new Date().toISOString(),
+                    modified: this.getMetaContent(doc, 'graph-modified') || new Date().toISOString(),
+                    authors: (this.getMetaContent(doc, 'graph-authors') || 'system').split(',').map(a => a.trim()).filter(Boolean)
+                }
             };
 
+            // Process connections
+            const connections = (this.getMetaContent(doc, 'graph-connections') || '').split(',')
+                .map(c => c.trim())
+                .filter(Boolean)
+                .map(c => {
+                    if (c.startsWith('/')) return c.substring(1);
+                    if (c.startsWith('./')) return this.normalizePath(baseDir + c.substring(2));
+                    if (c.startsWith('../')) return this.normalizePath(baseDir + c);
+                    return this.normalizePath(baseDir + c);
+                });
+            metadata.metadata.connections = connections;
+
             // Validate required fields
-            if (!metadata.category) {
+            if (!metadata.metadata.category) {
                 console.warn(`[GraphDataLoader] Missing category in ${filePath}, using 'uncategorized'`);
-                metadata.category = 'uncategorized';
+                metadata.metadata.category = 'uncategorized';
             }
 
             console.log(`[GraphDataLoader] Successfully extracted metadata for ${filePath}:`, metadata);
@@ -127,14 +157,16 @@ export class GraphDataLoader {
             // Return basic metadata instead of null
             return {
                 id: filePath,
-                title: filePath,
-                description: '',
-                category: 'uncategorized',
-                tags: [],
-                connections: [],
-                created: new Date().toISOString(),
-                modified: new Date().toISOString(),
-                authors: ['system']
+                name: filePath,
+                metadata: {
+                    description: '',
+                    category: 'uncategorized',
+                    tags: [],
+                    connections: [],
+                    created: new Date().toISOString(),
+                    modified: new Date().toISOString(),
+                    authors: ['system']
+                }
             };
         }
     }
@@ -145,8 +177,8 @@ export class GraphDataLoader {
         const nodeMap = new Map(nodes.map(node => [node.id, node]));
 
         for (const node of nodes) {
-            if (Array.isArray(node.connections)) {
-                for (const connection of node.connections) {
+            if (Array.isArray(node.metadata.connections)) {
+                for (const connection of node.metadata.connections) {
                     if (nodeMap.has(connection)) {
                         edges.push({
                             source: node.id,

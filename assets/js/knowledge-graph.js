@@ -6,6 +6,12 @@ export class KnowledgeGraph {
         console.log('[KnowledgeGraph] Initializing with container:', containerId);
         this.containerId = containerId;
         this.container = document.getElementById(containerId);
+        
+        if (!this.container) {
+            console.error(`[KnowledgeGraph] Container not found: ${containerId}`);
+            return;
+        }
+        
         this.width = this.container.clientWidth;
         this.height = Math.max(500, window.innerHeight * 0.6);
         this.dataLoader = new GraphDataLoader();
@@ -84,8 +90,7 @@ export class KnowledgeGraph {
             .force('link', d3.forceLink().id(d => d.id).distance(100))
             .force('charge', d3.forceManyBody().strength(-300))
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-            .force('collision', d3.forceCollide().radius(30))
-            .on('tick', () => this.tick());
+            .force('collision', d3.forceCollide().radius(30));
     }
     
     renderGraph(nodes, edges) {
@@ -130,6 +135,7 @@ export class KnowledgeGraph {
         // Update simulation
         this.simulation
             .nodes(nodes)
+            .force('link', d3.forceLink(edges).id(d => d.id))
             .on('tick', () => {
                 link
                     .attr('x1', d => d.source.x)
@@ -138,10 +144,9 @@ export class KnowledgeGraph {
                     .attr('y2', d => d.target.y);
                     
                 node
-                    .attr('transform', d => `translate(${d.x},${d.y})`);
+                    .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
             });
             
-        this.simulation.force('link').links(edges);
         this.simulation.alpha(1).restart();
     }
     
@@ -153,9 +158,10 @@ export class KnowledgeGraph {
             'feature': '#32CD32',    // Lime
             'legal': '#9370DB',      // Purple
             'community': '#FF7F50',  // Coral
-            'labs': '#20B2AA'        // Light Sea Green
+            'labs': '#20B2AA',       // Light Sea Green
+            'uncategorized': '#999999' // Gray
         };
-        return colors[category] || '#999999';
+        return colors[category] || colors.uncategorized;
     }
     
     initControls() {
@@ -221,28 +227,17 @@ export class KnowledgeGraph {
     }
     
     showError(message) {
-        this.container.innerHTML = `
-            <div class="error-container">
-                <div class="error-message">
-                    <h3>Error Loading Knowledge Graph</h3>
-                    <p>${message}</p>
-                    <button onclick="location.reload()">Retry</button>
-                </div>
+        this.hideLoading();
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'error-container';
+        errorContainer.innerHTML = `
+            <div class="error-message">
+                <h3>Error Loading Knowledge Graph</h3>
+                <p>${message}</p>
+                <button onclick="location.reload()">Retry</button>
             </div>
         `;
-    }
-    
-    tick() {
-        if (!this.g) return;
-        
-        this.g.selectAll('.link')
-            .attr('x1', d => d.source.x)
-            .attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x)
-            .attr('y2', d => d.target.y);
-
-        this.g.selectAll('.node')
-            .attr('transform', d => `translate(${d.x},${d.y})`);
+        this.container.appendChild(errorContainer);
     }
 }
 
