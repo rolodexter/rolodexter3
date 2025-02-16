@@ -1,14 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rolodexter Labs - Feature Demo</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../assets/brand/favicon_io/site.webmanifest">
+    
+    <!-- Font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    
+    <!-- Graph Scripts -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="../assets/js/knowledge-graph.js" defer></script>
+    <script src="../assets/js/graph-metadata.js" defer></script>
+    
+    <meta name="description" content="Feature Demonstration - rolodexter Labs">
+    <meta name="keywords" content="demo, features, knowledge-graph, media-gallery">
+    <meta name="graph-tags" content="demo, features, visualization">
+    <meta name="graph-category" content="labs">
+    <meta name="graph-connections" content="../index.html, ../labs/index.html">
+    <meta name="graph-created" content="2025-02-16T20:49:55Z">
+    <meta name="graph-modified" content="2025-02-17T22:30:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
 </head>
 <body>
-    <div class="container">
+    <button class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
+    <header>
+        <nav class="header-nav">
+            <div class="nav-content">
+                <div class="nav-logo">
+                    <a href="../" class="logo-link">
+                        <img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                        <span class="visually-hidden">rolodexter Labs</span>
+                    </a>
+                </div>
+                <button class="menu-toggle" aria-label="Toggle navigation menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M3 12H21" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 6H21" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 18H21" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="../labs/index.html" class="active">Labs</a></li>
+                    <li><a href="../research/index.html">Research</a></li>
+                    <li><a href="../community/index.html">Community</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
         <h1>Feature Demonstration</h1>
         
         <section id="knowledge-demo">
@@ -45,60 +110,60 @@
                 <button class="page-next">Next</button>
             </div>
         </section>
-    </div>
+    </main>
 
-    <script src="/assets/js/knowledge-graph.js"></script>
-    <script src="/assets/js/graph-demo.js"></script>
-    <script src="/assets/js/media-gallery.js"></script>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <div class="footer-links-row">
+                    <a href="../docs/CHANGELOG.html">Changelog</a><span class="separator">,</span>
+                    <a href="../docs/VERSION.html">Version</a><span class="separator">,</span>
+                    <a href="https://github.com/rolodexter3">GitHub</a>
+                </div>
+                <div class="footer-links-row">
+                    <a href="../legal/privacy.html">Privacy Policy</a><span class="separator">,</span>
+                    <a href="../legal/terms.html">Terms of Use</a><span class="separator">,</span>
+                    <a href="../legal/cookies.html">Cookie Policy</a><span class="separator">,</span>
+                    <a href="../legal/ai-ethics.html">AI Ethics</a>
+                </div>
+            </div>
+            <div class="footer-legal">
+                <p><img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
+                <p class="legal-text">By using this site, you agree to our <a href="../legal/privacy.html">Privacy Policy</a> and <a href="../legal/terms.html">Terms of Use</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/graph-demo.js"></script>
+    <script src="../assets/js/media-gallery.js"></script>
     
+    <div class="bottom-overlay" id="bottomOverlay">
+        <div class="overlay-header">
+            <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
+        </div>
+        <div class="overlay-content hidden" id="overlayContent">
+            <p class="overlay-section-title">Page Information</p>
+            <ul class="overlay-info">
+                <li><strong>Last Updated:</strong> 2025-02-17 22:30:00 UTC</li>
+                <li><strong>Authors:</strong> rolodexterVS</li>
+                <li><strong>File Location:</strong> C:/rolodexter3/labs/demo.html</li>
+            </ul>
+
+            <p class="overlay-section-title">Pending Tasks</p>
+            <ul class="overlay-info">
+                <li>Implement performance monitoring improvements</li>
+                <li>Update media gallery to use new data structure</li>
+                <li>Add error handling for resource loading</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
-        // Initialize performance monitoring
-        const performanceMonitor = new PerformanceObserver((list) => {
-            for (const entry of list.getEntries()) {
-                console.log(`Performance Entry: ${entry.name}`, {
-                    type: entry.entryType,
-                    duration: entry.duration,
-                    size: entry.transferSize
-                });
-            }
-        });
-        
-        performanceMonitor.observe({
-            entryTypes: ['resource', 'measure', 'navigation']
-        });
+        function toggleOverlay() {
+            const content = document.getElementById("overlayContent");
+            content.classList.toggle("hidden");
+        }
     </script>
-
-    <!-- Page Attribution & Version Control -->
-    <div class="signature-block" style="margin-top: 2rem; padding: 1rem; border-top: 1px solid var(--border-color);">
-        <h4>Page Information</h4>
-        <div class="metadata">
-            <p><strong>Last Updated:</strong> 2025-02-16 20:49:55 UTC</p>
-            <p><strong>Authors:</strong> rolodexterVS</p>
-            <p><strong>Contributors:</strong> rolodexterGPT</p>
-            <p><strong>File Location:</strong> C:/rolodexter3/labs/demo.html</p>
-            <details>
-                <summary><strong>Pending Tasks</strong></summary>
-                <ul>
-                    <li>Implement performance monitoring improvements</li>
-                    <li>Update media gallery to use new data structure</li>
-                    <li>Add error handling for resource loading</li>
-                </ul>
-            </details>
-        </div>
-    </div>
-
-    <div class="footer-links">
-        <div class="footer-links-row">
-            <a href="../docs/CHANGELOG.html">Changelog</a><span class="separator">,</span>
-            <a href="../docs/VERSION.html">Version</a><span class="separator">,</span>
-            <a href="https://github.com/rolodexter3">GitHub</a>
-        </div>
-        <div class="footer-links-row">
-            <a href="../legal/privacy.html">Privacy Policy</a><span class="separator">,</span>
-            <a href="../legal/terms.html">Terms of Use</a><span class="separator">,</span>
-            <a href="../legal/cookies.html">Cookie Policy</a><span class="separator">,</span>
-            <a href="../legal/ai-ethics.html">AI Ethics</a>
-        </div>
-    </div>
 </body>
 </html>
