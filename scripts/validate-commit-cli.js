@@ -14,16 +14,25 @@ if (!input) {
 
 // Handle Windows-style paths and file reading
 try {
-    if (fs.existsSync(input)) {
-        commitMsg = fs.readFileSync(input, 'utf8').trim();
+    const normalizedPath = path.normalize(input);
+    
+    // Check if input is a file path and exists
+    if (fs.existsSync(normalizedPath) && fs.statSync(normalizedPath).isFile()) {
+        commitMsg = fs.readFileSync(normalizedPath, 'utf8').trim();
         // Handle Windows CRLF line endings
         commitMsg = commitMsg.replace(/\r\n/g, '\n').split('\n')[0];
     } else {
+        // If not a file or doesn't exist, treat as direct message
         commitMsg = input;
     }
 } catch (err) {
-    console.error('❌ Error reading commit message file:', err.message);
-    process.exit(1);
+    if (err.code === 'EISDIR') {
+        // If it's a directory, treat the input as the commit message
+        commitMsg = input;
+    } else {
+        console.error('❌ Error reading commit message:', err.message);
+        process.exit(1);
+    }
 }
 
 // Run validation
