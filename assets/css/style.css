@@ -1986,3 +1986,133 @@ a:focus-visible {
         will-change: auto;
     }
 }
+
+/* Footer Styles */
+.site-footer {
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.footer-section {
+    padding: 1rem;
+}
+
+.footer-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    opacity: 0.9;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+    color: var(--text-primary);
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity var(--transition-speed), color var(--transition-speed);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-links a:hover {
+    color: var(--accent-color);
+    opacity: 1;
+    text-decoration: none;
+}
+
+.session-status {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin: 1rem 0;
+}
+
+.last-update {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 2rem auto 0;
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.footer-meta {
+    margin-top: 0.5rem;
+    opacity: 0.8;
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .footer-section {
+        padding: 0.5rem;
+        text-align: center;
+    }
+
+    .footer-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer-links a {
+        justify-content: center;
+    }
+}
+
+/* Enhanced Session Links */
+.session-links li {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+.session-links li:nth-child(1) { animation-delay: 0s; }
+.session-links li:nth-child(2) { animation-delay: 0.1s; }
+.session-links li:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .session-links li {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
