@@ -130,7 +130,8 @@ export class KnowledgeGraph {
         this.autoRetry = true;
 
         if (!this.container) {
-            console.error(`[KnowledgeGraph] Container #${containerId} not found`);
+            console.warn(`[KnowledgeGraph] Container #${containerId} not found, creating fallback`);
+            this.container = this.createFallbackContainer();
             return;
         }
 
@@ -442,26 +443,67 @@ export class KnowledgeGraph {
         const errorMessage = document.createElement('div');
         errorMessage.className = 'error-message';
         
-        const title = document.createElement('h3');
-        title.textContent = 'Error Loading Knowledge Graph';
+        let title, message, actionButton;
         
-        const message = document.createElement('p');
-        message.textContent = error.message || 'An unexpected error occurred';
+        if (error.message.includes('Failed to load graph data') || error.message.includes('No graph data available')) {
+            title = '⚠️ Data Loading Error';
+            message = 'Unable to load the knowledge graph data. This might be due to:';
+            const reasons = document.createElement('ul');
+            reasons.innerHTML = `
+                <li>Missing or inaccessible data files</li>
+                <li>Network connectivity issues</li>
+                <li>Server configuration problems</li>
+            `;
+            actionButton = {
+                text: 'Try Again',
+                action: async () => {
+                    errorContainer.remove();
+                    this.retryAttempts++;
+                    await this.initGraph();
+                }
+            };
+        } else if (error.message.includes('Container not initialized')) {
+            title = '⚠️ Initialization Error';
+            message = 'The knowledge graph container could not be initialized.';
+            actionButton = {
+                text: 'Reload Page',
+                action: () => window.location.reload()
+            };
+        } else {
+            title = '⚠️ Unexpected Error';
+            message = error.message || 'An unexpected error occurred';
+            actionButton = {
+                text: 'Retry',
+                action: async () => {
+                    errorContainer.remove();
+                    this.retryAttempts++;
+                    await this.initGraph();
+                }
+            };
+        }
         
-        const retryButton = document.createElement('button');
-        retryButton.textContent = 'Retry';
-        retryButton.onclick = async () => {
-            errorContainer.remove();
-            this.retryAttempts++;
-            await this.initGraph();
-        };
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = title;
         
-        errorMessage.appendChild(title);
-        errorMessage.appendChild(message);
-        errorMessage.appendChild(retryButton);
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        
+        const button = document.createElement('button');
+        button.textContent = actionButton.text;
+        button.onclick = actionButton.action;
+        
+        errorMessage.appendChild(titleElement);
+        errorMessage.appendChild(messageElement);
+        if (reasons) errorMessage.appendChild(reasons);
+        errorMessage.appendChild(button);
         errorContainer.appendChild(errorMessage);
         
         this.container.appendChild(errorContainer);
+        
+        // Show warning banner if configured
+        if (config.debug.logToUI) {
+            this.showWarningBanner(error.message);
+        }
     }
 
     destroy() {
@@ -473,6 +515,148 @@ export class KnowledgeGraph {
         }
         this.container.innerHTML = '';
         this.isInitialized = false;
+    }
+
+    createFallbackContainer() {
+        const fallback = document.createElement('div');
+        fallback.className = 'knowledge-graph-fallback';
+        fallback.innerHTML = `
+            <div class="fallback-message">
+                <h3>⚠️ Knowledge Graph Container Not Found</h3>
+                <p>The knowledge graph container element is missing. Please ensure your HTML includes:</p>
+                <pre><code>&lt;div id="knowledge-graph"&gt;&lt;/div&gt;</code></pre>
+                <button onclick="window.location.reload()">Reload Page</button>
+            </div>
+        `;
+        
+        // Add fallback styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .knowledge-graph-fallback {
+                padding: 2rem;
+                border: 1px solid var(--border-color, #ccc);
+                border-radius: 8px;
+                background: var(--bg-color, #fff);
+                text-align: center;
+            }
+            
+            .fallback-message {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            
+            .fallback-message h3 {
+                color: var(--warning-color, #ff9800);
+                margin-bottom: 1rem;
+            }
+            
+            .fallback-message pre {
+                background: var(--code-bg, #f5f5f5);
+                padding: 1rem;
+                border-radius: 4px;
+                margin: 1rem 0;
+                text-align: left;
+                overflow-x: auto;
+            }
+            
+            .fallback-message button {
+                background: var(--primary-color, #4a90e2);
+                color: white;
+                border: none;
+                padding: 0.5rem 1.5rem;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 500;
+            }
+            
+            .fallback-message button:hover {
+                background: var(--primary-hover, #357abd);
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Insert after the missing container's expected location
+        const script = document.currentScript;
+        script.parentNode.insertBefore(fallback, script);
+        
+        return fallback;
+    }
+
+    showWarningBanner(message) {
+        const banner = document.createElement('div');
+        banner.className = 'warning-banner';
+        banner.innerHTML = `
+            <div class="warning-content">
+                <span class="warning-icon">⚠️</span>
+                <span class="warning-message">${message}</span>
+                <button class="warning-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        // Add banner styles if not already added
+        if (!document.querySelector('#warning-banner-styles')) {
+            const style = document.createElement('style');
+            style.id = 'warning-banner-styles';
+            style.textContent = `
+                .warning-banner {
+                    position: fixed;
+                    top: 1rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 10000;
+                    background: var(--warning-bg, #fff3cd);
+                    border: 1px solid var(--warning-border, #ffeeba);
+                    border-radius: 4px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    animation: slideDown 0.3s ease-out;
+                }
+                
+                .warning-content {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.75rem 1rem;
+                    gap: 0.5rem;
+                }
+                
+                .warning-icon {
+                    font-size: 1.25rem;
+                }
+                
+                .warning-message {
+                    color: var(--warning-text, #856404);
+                    font-weight: 500;
+                }
+                
+                .warning-close {
+                    background: none;
+                    border: none;
+                    color: var(--warning-text, #856404);
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    padding: 0 0.5rem;
+                    margin-left: auto;
+                }
+                
+                .warning-close:hover {
+                    color: var(--warning-text-hover, #533f03);
+                }
+                
+                @keyframes slideDown {
+                    from { transform: translate(-50%, -100%); }
+                    to { transform: translate(-50%, 0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(banner);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (banner.parentElement) {
+                banner.remove();
+            }
+        }, 5000);
     }
 }
 
