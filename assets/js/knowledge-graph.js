@@ -7,15 +7,26 @@ style.textContent = `
     #knowledge-graph-container {
         position: relative;
         width: 100%;
-        height: 600px;
+        height: 100vh;
+        max-height: 80vh;
         border: 1px solid var(--border-color, #ccc);
         border-radius: 8px;
         overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+        #knowledge-graph-container {
+            height: calc(100vh - 120px);
+            max-height: none;
+            margin: 0.5rem 0;
+        }
     }
 
     #knowledge-graph {
         width: 100%;
         height: 100%;
+        touch-action: manipulation;
     }
 
     .graph-controls {
@@ -23,8 +34,52 @@ style.textContent = `
         bottom: 1rem;
         right: 1rem;
         display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
         z-index: 10;
+        background: var(--bg-primary, rgba(255, 255, 255, 0.9));
+        padding: 0.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .graph-controls {
+            bottom: 0.5rem;
+            right: 0.5rem;
+            left: 0.5rem;
+            justify-content: center;
+        }
+    }
+
+    .search-container {
+        display: flex;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    @media (max-width: 768px) {
+        .search-container {
+            flex-basis: 100%;
+            order: -1;
+        }
+    }
+
+    #graph-search {
+        flex: 1;
+        min-width: 150px;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color, #ccc);
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    #category-filter {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color, #ccc);
+        border-radius: 4px;
+        font-size: 14px;
     }
 
     .graph-controls button {
@@ -35,10 +90,19 @@ style.textContent = `
         cursor: pointer;
         font-size: 1rem;
         line-height: 1;
-        min-width: 2rem;
+        min-width: 2.5rem;
+        height: 2.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .graph-controls button {
+            min-width: 3rem;
+            height: 3rem;
+            font-size: 1.2rem;
+        }
     }
 
     .loading-container {
@@ -168,29 +232,63 @@ export class KnowledgeGraph {
 
             this.showLoading();
 
+            // Make container responsive
+            const resizeObserver = new ResizeObserver(entries => {
+                for (const entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    this.width = width;
+                    this.height = height;
+                    if (this.svg) {
+                        this.svg
+                            .attr('width', width)
+                            .attr('height', height);
+                        
+                        // Update force center
+                        this.simulation.force('center')
+                            .x(width / 2)
+                            .y(height / 2);
+                        
+                        this.simulation.alpha(0.3).restart();
+                    }
+                }
+            });
+            
+            resizeObserver.observe(this.container);
+
             // Initialize SVG and simulation first
             this.initSVG();
             this.initSimulation();
             
-            // Load data with retry mechanism
-            const data = await this.loadDataWithRetry();
-            if (!data || !data.nodes || !data.nodes.length) {
-                throw new Error('No graph data available');
+            // Enable touch support
+            if ('ontouchstart' in window) {
+                this.enableTouchSupport();
             }
-
-            // Render the graph
-            this.renderGraph(data.nodes, data.edges);
             
-            // Initialize controls after successful render
-            this.initControls();
-            
-            this.hideLoading();
-            this.isInitialized = true;
-            
-            return true;
+            // Load data with retry mechanism
+            return this.loadDataWithRetry()
+                .then(data => {
+                    if (!data || !data.nodes || !data.nodes.length) {
+                        throw new Error('No graph data available');
+                    }
+                    
+                    // Render the graph
+                    this.renderGraph(data.nodes, data.edges);
+                    
+                    // Initialize controls after successful render
+                    this.initControls();
+                    
+                    this.hideLoading();
+                    this.isInitialized = true;
+                    
+                    return true;
+                })
+                .catch(error => {
+                    this.handleError(error);
+                    return false;
+                });
         } catch (error) {
             this.handleError(error);
-            return false;
+            return Promise.resolve(false);
         }
     }
 
@@ -289,6 +387,9 @@ export class KnowledgeGraph {
 
     renderGraph(nodes, edges) {
         try {
+            // Adjust node size based on screen size
+            const baseRadius = window.innerWidth <= 768 ? 8 : 5;
+            
             // Create edges
             const link = this.g.selectAll('.link')
                 .data(edges)
@@ -306,20 +407,33 @@ export class KnowledgeGraph {
 
             // Add circles to nodes
             node.append('circle')
-                .attr('r', 5)
+                .attr('r', baseRadius)
                 .attr('fill', d => this.getCategoryColor(d.metadata?.category));
 
             // Add labels to nodes
             node.append('text')
                 .attr('class', 'node-label')
-                .attr('dx', 8)
+                .attr('dx', baseRadius + 3)
                 .attr('dy', '.35em')
-                .text(d => d.name);
+                .text(d => d.name)
+                .style('font-size', window.innerWidth <= 768 ? '14px' : '12px');
 
             // Update simulation
             this.simulation
                 .nodes(nodes)
                 .force('link').links(edges);
+
+            // Adjust force strengths for mobile
+            if (window.innerWidth <= 768) {
+                this.simulation
+                    .force('charge')
+                    .strength(-300)
+                    .distanceMax(200);
+                
+                this.simulation
+                    .force('link')
+                    .distance(150);
+            }
 
             // Restart simulation
             this.simulation.alpha(1).restart();
@@ -657,6 +771,29 @@ export class KnowledgeGraph {
                 banner.remove();
             }
         }, 5000);
+    }
+
+    enableTouchSupport() {
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => {
+                if (this.g) {
+                    this.g.attr('transform', event.transform);
+                }
+            });
+
+        this.svg
+            .call(zoom)
+            .on('touchstart', (event) => {
+                if (event.touches.length === 1) {
+                    event.preventDefault();
+                }
+            })
+            .on('touchmove', (event) => {
+                if (event.touches.length === 1) {
+                    event.preventDefault();
+                }
+            });
     }
 }
 

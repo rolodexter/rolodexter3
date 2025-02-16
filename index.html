@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rolodexter Labs - Project Memory</title>
     
     <!-- Favicon -->
@@ -80,6 +80,26 @@
         <section class="knowledge-graph-section">
             <div class="container">
                 <h2>Knowledge Graph</h2>
+                <div id="knowledge-graph-container">
+                    <div id="knowledge-graph"></div>
+                    <div class="graph-controls">
+                        <div class="search-container">
+                            <input type="text" id="graph-search" placeholder="Search nodes...">
+                            <select id="category-filter">
+                                <option value="">All Categories</option>
+                                <option value="core">Core</option>
+                                <option value="documentation">Documentation</option>
+                                <option value="research">Research</option>
+                                <option value="feature">Feature</option>
+                                <option value="legal">Legal</option>
+                                <option value="community">Community</option>
+                                <option value="labs">Labs</option>
+                            </select>
+                        </div>
+                        <div class="zoom-controls">
+                            <button id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+                            <button id="zoom-out" aria-label="Zoom out" title="Zoom out">-</button>
+                            <button id="reset-view" aria-label="Reset view" title="Reset view">
                 <div id="knowledge-graph"></div>
                 <div class="graph-controls">
                     <div class="search-container">

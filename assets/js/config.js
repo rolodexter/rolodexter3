@@ -1,7 +1,8 @@
-export const config = {
+// Initialize base config first
+const defaultConfig = {
     // Environment detection with manual override support
     environment: {
-        mode: detectEnvironment(),
+        mode: 'local', // Default to local, will be updated after detection
         forceMode: null,
         basePath: null,
         debug: {
@@ -48,6 +49,10 @@ export const config = {
     }
 };
 
+// Export the config object
+export const config = defaultConfig;
+
+// Environment detection function
 function detectEnvironment() {
     if (typeof window === 'undefined') return 'local';
     
@@ -80,9 +85,13 @@ function detectEnvironment() {
     return 'unknown';
 }
 
+// Initialize environment after config is created
+config.environment.mode = detectEnvironment();
+
+// Export utility functions
 export function setEnvironmentMode(mode) {
-    if (mode !== 'github-pages' && mode !== 'local') {
-        throw new Error('Invalid environment mode. Use "github-pages" or "local"');
+    if (mode !== 'github-pages' && mode !== 'local' && mode !== 'custom-domain') {
+        throw new Error('Invalid environment mode. Use "github-pages", "local", or "custom-domain"');
     }
     config.environment.forceMode = mode;
     debugLog('Environment', `Mode set to: ${mode}`);
@@ -144,10 +153,10 @@ export function getBasePath() {
     return basePath;
 }
 
+// Helper functions for path resolution
 function resolveGitHubPagesPath() {
     if (config.githubPages.autoDetectRepo) {
         const pathSegments = window.location.pathname.split('/');
-        // Remove empty segments, index.html, and other file names
         const repoPath = pathSegments
             .filter(segment => segment && !segment.includes('.'))
             .join('/');
@@ -157,20 +166,17 @@ function resolveGitHubPagesPath() {
 }
 
 function resolveCustomDomainPath() {
-    // For custom domains, use the pathname up to the last directory
     const pathname = window.location.pathname;
     const lastSlashIndex = pathname.lastIndexOf('/');
     return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
 }
 
 function resolveLocalPath() {
-    // For local development, use the origin plus any base directory
     const baseDir = window.location.pathname.split('/')[1];
     return baseDir ? `${window.location.origin}/${baseDir}` : window.location.origin;
 }
 
 function resolveFallbackPath() {
-    // Default to current directory
     const pathname = window.location.pathname;
     const lastSlashIndex = pathname.lastIndexOf('/');
     return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
@@ -308,7 +314,7 @@ function showMissingDataWarning(url) {
     document.body.appendChild(warningContainer);
 }
 
-// Enhanced debug logging utility
+// Debug logging utility
 export function debugLog(category, message, data = null) {
     if (!config.debug.enabled) return;
     
@@ -331,11 +337,8 @@ export function debugLog(category, message, data = null) {
 
 // UI Debug logging
 function appendToDebugUI(category, message, data) {
-    const debugContainer = document.getElementById('debug-log-container');
-    if (!debugContainer) {
-        createDebugUI();
-        return appendToDebugUI(category, message, data);
-    }
+    const debugContainer = document.getElementById('debug-log-container') || createDebugUI();
+    if (!debugContainer) return;
 
     const entry = document.createElement('div');
     entry.className = 'debug-log-entry';
@@ -379,60 +382,65 @@ function appendToDebugUI(category, message, data) {
 }
 
 function createDebugUI() {
-    const style = document.createElement('style');
-    style.textContent = `
-        #debug-log-container {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 400px;
-            height: 300px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 10px;
-            overflow-y: auto;
-            z-index: 9999;
-            display: none;
-        }
-        
-        #debug-log-container.visible {
-            display: block;
-        }
-        
-        .debug-log-entry {
-            margin-bottom: 5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 5px;
-        }
-        
-        .debug-timestamp {
-            color: #888;
-            margin-right: 8px;
-        }
-        
-        .debug-category {
-            color: #4a9eff;
-            margin-right: 8px;
-        }
-        
-        .debug-message {
-            color: #fff;
-        }
-        
-        .debug-log-entry pre {
-            margin: 5px 0;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow-x: auto;
-        }
-    `;
-    document.head.appendChild(style);
-    
     const container = document.createElement('div');
     container.id = 'debug-log-container';
+    
+    // Add styles if not already present
+    if (!document.getElementById('debug-log-styles')) {
+        const style = document.createElement('style');
+        style.id = 'debug-log-styles';
+        style.textContent = `
+            #debug-log-container {
+                position: fixed;
+                bottom: 0;
+                right: 0;
+                width: 400px;
+                height: 300px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #fff;
+                font-family: monospace;
+                font-size: 12px;
+                padding: 10px;
+                overflow-y: auto;
+                z-index: 9999;
+                display: none;
+            }
+            
+            #debug-log-container.visible {
+                display: block;
+            }
+            
+            .debug-log-entry {
+                margin-bottom: 5px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding-bottom: 5px;
+            }
+            
+            .debug-timestamp {
+                color: #888;
+                margin-right: 8px;
+            }
+            
+            .debug-category {
+                color: #4a9eff;
+                margin-right: 8px;
+            }
+            
+            .debug-message {
+                color: #fff;
+            }
+            
+            .debug-log-entry pre {
+                margin: 5px 0;
+                padding: 5px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+                overflow-x: auto;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
     document.body.appendChild(container);
     
     // Add toggle button
@@ -452,4 +460,6 @@ function createDebugUI() {
     toggle.textContent = 'Toggle Debug Log';
     toggle.onclick = () => container.classList.toggle('visible');
     document.body.appendChild(toggle);
+    
+    return container;
 } 
