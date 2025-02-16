@@ -1,4 +1,77 @@
 // Knowledge Graph Metadata Manager
+export class GraphMetadata {
+    constructor() {
+        this.metadataCache = new Map();
+        this.categoryColors = {
+            core: 'var(--neural-gold)',
+            documentation: 'var(--hyperglow-cyan)',
+            research: 'var(--neural-purple)',
+            feature: 'var(--hyperglow-blue)',
+            legal: 'var(--text-secondary)',
+            community: 'var(--neural-green)',
+            labs: 'var(--neural-red)'
+        };
+    }
+
+    async parseHtmlMetaTags(content) {
+        const metadata = {};
+        const metaTags = content.match(/<meta name="graph-[^>]+>/g) || [];
+        
+        metaTags.forEach(tag => {
+            const name = tag.match(/name="graph-([^"]+)"/)?.[1];
+            const content = tag.match(/content="([^"]+)"/)?.[1];
+            if (name && content) {
+                metadata[name] = content;
+            }
+        });
+        
+        return metadata;
+    }
+
+    async parseMdFrontmatter(content) {
+        const frontmatter = content.match(/^---\n([\s\S]*?)\n---/)?.[1] || '';
+        const metadata = {};
+        
+        frontmatter.split('\n').forEach(line => {
+            const [key, ...values] = line.split(':').map(s => s.trim());
+            if (key && values.length) {
+                metadata[key.replace('graph-', '')] = values.join(':');
+            }
+        });
+        
+        return metadata;
+    }
+
+    getCategoryColor(category) {
+        return this.categoryColors[category] || 'var(--text-primary)';
+    }
+
+    getNodeSize(metadata) {
+        const baseSize = 5;
+        const weights = {
+            core: 2,
+            documentation: 1.5,
+            feature: 1.3
+        };
+        return baseSize * (weights[metadata.category] || 1);
+    }
+
+    async cacheMetadata(filepath, metadata) {
+        this.metadataCache.set(filepath, {
+            ...metadata,
+            lastUpdated: new Date().toISOString()
+        });
+    }
+
+    async getMetadata(filepath) {
+        return this.metadataCache.get(filepath);
+    }
+
+    clearCache() {
+        this.metadataCache.clear();
+    }
+}
+
 const graphMetadata = {
     tags: {
         ai: ['machine-learning', 'neural-networks', 'nlp', 'chatbot'],
