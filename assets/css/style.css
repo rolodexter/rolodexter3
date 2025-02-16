@@ -23,8 +23,8 @@
     --dark-surface: #232323;
     --dark-accent: #63b3ed;
     --dark-accent-hover: #4299e1;
-    --dark-link: #63b3ed;
-    --dark-link-hover: #4299e1;
+    --dark-link: #7cc0ff;
+    --dark-link-hover: #99d1ff;
     --dark-code-bg: #2d2d2d;
     --dark-overlay-bg: rgba(26, 26, 26, 0.95);
 
@@ -86,11 +86,13 @@ body {
 
 a {
     color: var(--link-color);
+    text-decoration: none;
     transition: color var(--transition-speed);
 }
 
 a:hover {
     color: var(--link-hover);
+    text-decoration: underline;
 }
 
 /* Theme Toggle Button */
@@ -140,6 +142,14 @@ a:hover {
 
 .nav-links a {
     color: var(--text-primary);
+    opacity: 0.9;
+    transition: color var(--transition-speed), opacity var(--transition-speed);
+}
+
+.nav-links a:hover {
+    color: var(--link-color);
+    opacity: 1;
+    text-decoration: none;
 }
 
 /* Footer */
@@ -201,13 +211,6 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0;
 }
 
-.nav-links a {
-    color: var(--text-primary);
-    text-decoration: none;
-    font-size: 0.9rem;
-    position: relative;
-}
-
 .nav-links a.active {
     color: var(--accent-color);
     font-weight: 500;
@@ -222,10 +225,6 @@ h1, h2, h3, h4, h5, h6 {
     height: 2px;
     background-color: var(--accent-color);
     border-radius: 1px;
-}
-
-.nav-links a:hover {
-    color: var(--accent-color);
 }
 
 /* Main Content */
@@ -263,12 +262,14 @@ footer {
     color: var(--text-primary);
     text-decoration: none;
     opacity: 0.8;
-    transition: opacity 0.2s;
+    transition: color var(--transition-speed), opacity var(--transition-speed);
 }
 
 .footer-links a:hover,
 .footer-legal a:hover {
+    color: var(--link-color);
     opacity: 1;
+    text-decoration: none;
 }
 
 .footer-copyright {
@@ -1093,12 +1094,14 @@ footer {
     color: var(--text-primary);
     text-decoration: none;
     opacity: 0.8;
-    transition: opacity 0.2s;
+    transition: color var(--transition-speed), opacity var(--transition-speed);
 }
 
 .footer-links a:hover,
 .footer-legal a:hover {
+    color: var(--link-color);
     opacity: 1;
+    text-decoration: none;
 }
 
 .footer-copyright {
