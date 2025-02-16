@@ -789,3 +789,123 @@ input, textarea {
         padding-top: var(--spacing-unit);
     }
 }
+
+.graph-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    max-height: 80vh;
+    background: var(--bg-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.loading-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-color);
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.error-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-color);
+    z-index: 10;
+}
+
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    background: var(--error-bg);
+    border-radius: 8px;
+    max-width: 90%;
+}
+
+.error-message h3 {
+    color: var(--error-text);
+    margin-bottom: 1rem;
+}
+
+.error-message button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--accent-color);
+    border: none;
+    border-radius: 4px;
+    color: var(--bg-color);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .graph-container {
+        height: 70vh;
+    }
+
+    .graph-controls {
+        flex-direction: column;
+        padding: 0.5rem;
+    }
+
+    .search-container {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    #graph-search,
+    #category-filter {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .graph-controls button {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .loading-container,
+[data-theme="dark"] .error-container {
+    background: var(--dark-bg);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .error-message {
+    background: var(--dark-error-bg);
+}
+
+[data-theme="dark"] .error-message button {
+    background: var(--dark-accent);
+    color: var(--dark-text);
+}
