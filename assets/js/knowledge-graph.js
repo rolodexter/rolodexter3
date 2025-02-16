@@ -3,241 +3,336 @@ import { GraphSearch } from './search-graph.js';
 
 export class KnowledgeGraph {
     constructor(containerId) {
-        console.log('[KnowledgeGraph] Initializing with container:', containerId);
         this.containerId = containerId;
         this.container = document.getElementById(containerId);
-        
+        this.width = 0;
+        this.height = 0;
+        this.svg = null;
+        this.simulation = null;
+        this.dataLoader = new GraphDataLoader();
+        this.isInitialized = false;
+        this.retryAttempts = 0;
+        this.maxRetries = 3;
+        this.autoRetry = true;
+
         if (!this.container) {
-            console.error(`[KnowledgeGraph] Container not found: ${containerId}`);
+            console.error(`[KnowledgeGraph] Container #${containerId} not found`);
             return;
         }
+
+        // Initialize container with loading state
+        this.showLoading();
         
-        this.width = this.container.clientWidth;
-        this.height = Math.max(500, window.innerHeight * 0.6);
-        this.dataLoader = new GraphDataLoader();
-        
-        // Add resize handler
-        window.addEventListener('resize', () => {
-            this.width = this.container.clientWidth;
-            this.height = Math.max(500, window.innerHeight * 0.6);
-            if (this.svg) {
-                this.svg
-                    .attr('width', this.width)
-                    .attr('height', this.height);
-                this.simulation.force('center', d3.forceCenter(this.width / 2, this.height / 2));
-                this.simulation.alpha(0.3).restart();
+        // Set up error boundary
+        this.setupErrorBoundary();
+    }
+
+    setupErrorBoundary() {
+        window.addEventListener('error', (event) => {
+            if (event.target === this.container || this.container.contains(event.target)) {
+                event.preventDefault();
+                this.handleError(event.error);
+                return false;
             }
         });
     }
-    
+
     async initGraph() {
-        console.log('[KnowledgeGraph] Starting initialization');
         try {
+            if (!this.container) {
+                throw new Error('Container not initialized');
+            }
+
             this.showLoading();
-            
+
             // Initialize SVG and simulation first
             this.initSVG();
             this.initSimulation();
             
-            console.log('[KnowledgeGraph] Loading graph data');
-            const data = await this.dataLoader.loadDirectory();
-            
-            if (!data || !data.nodes || data.nodes.length === 0) {
-                throw new Error('No valid graph data found');
+            // Load data with retry mechanism
+            const data = await this.loadDataWithRetry();
+            if (!data || !data.nodes || !data.nodes.length) {
+                throw new Error('No graph data available');
             }
-            
-            console.log(`[KnowledgeGraph] Loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
-            
+
             // Render the graph
             this.renderGraph(data.nodes, data.edges);
-            this.hideLoading();
             
-            // Initialize controls after successful load
+            // Initialize controls after successful render
             this.initControls();
+            
+            this.hideLoading();
+            this.isInitialized = true;
             
             return true;
         } catch (error) {
-            console.error('[KnowledgeGraph] Initialization failed:', error);
-            this.showError(`Failed to load knowledge graph: ${error.message}`);
+            this.handleError(error);
             return false;
         }
     }
-    
-    initSVG() {
-        console.log('[KnowledgeGraph] Initializing SVG');
-        this.svg = d3.select(`#${this.containerId}`)
-            .append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .attr('viewBox', [0, 0, this.width, this.height])
-            .attr('style', 'max-width: 100%; height: auto;');
 
-        this.g = this.svg.append('g');
-        
-        // Add zoom behavior
-        this.zoom = d3.zoom()
-            .scaleExtent([0.1, 4])
-            .on('zoom', (event) => {
-                this.g.attr('transform', event.transform);
-            });
-            
-        this.svg.call(this.zoom);
+    async loadDataWithRetry(attempt = 1) {
+        try {
+            const data = await this.dataLoader.loadDirectory(window.location.origin);
+            return data;
+        } catch (error) {
+            if (attempt < this.maxRetries && this.autoRetry) {
+                console.debug(`[KnowledgeGraph] Retrying data load (${attempt}/${this.maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+                return this.loadDataWithRetry(attempt + 1);
+            }
+            throw error;
+        }
     }
-    
+
+    initSVG() {
+        try {
+            // Clear any existing content
+            this.container.innerHTML = '';
+            
+            // Get container dimensions
+            const rect = this.container.getBoundingClientRect();
+            this.width = rect.width;
+            this.height = rect.height;
+
+            // Create SVG element
+            this.svg = d3.select(`#${this.containerId}`)
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .attr('viewBox', [0, 0, this.width, this.height]);
+
+            // Add zoom behavior
+            this.svg.call(d3.zoom()
+                .extent([[0, 0], [this.width, this.height]])
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    this.svg.selectAll('g').attr('transform', event.transform);
+                }));
+
+            // Create main group for graph elements
+            this.g = this.svg.append('g');
+        } catch (error) {
+            throw new Error(`Failed to initialize SVG: ${error.message}`);
+        }
+    }
+
     initSimulation() {
-        console.log('[KnowledgeGraph] Initializing force simulation');
-        this.simulation = d3.forceSimulation()
-            .force('link', d3.forceLink().id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-300))
-            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-            .force('collision', d3.forceCollide().radius(30));
+        try {
+            this.simulation = d3.forceSimulation()
+                .force('link', d3.forceLink().id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-200))
+                .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+                .force('collision', d3.forceCollide().radius(30))
+                .on('tick', () => this.updateGraphPositions());
+        } catch (error) {
+            throw new Error(`Failed to initialize simulation: ${error.message}`);
+        }
     }
-    
+
+    updateGraphPositions() {
+        try {
+            this.svg.selectAll('.link')
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            this.svg.selectAll('.node')
+                .attr('transform', d => `translate(${d.x},${d.y})`);
+        } catch (error) {
+            console.warn('[KnowledgeGraph] Error updating positions:', error);
+            // Don't throw - just log warning to prevent breaking the simulation
+        }
+    }
+
     renderGraph(nodes, edges) {
-        // Clear existing graph
-        this.g.selectAll('*').remove();
-        
-        // Create links
-        const link = this.g.selectAll('.link')
-            .data(edges)
-            .join('line')
-            .attr('class', 'link')
-            .attr('stroke', '#999')
-            .attr('stroke-opacity', 0.6)
-            .attr('stroke-width', d => Math.sqrt(d.weight || 1));
-            
-        // Create nodes
-        const node = this.g.selectAll('.node')
-            .data(nodes)
-            .join('g')
-            .attr('class', 'node')
-            .call(this.drag());
-            
-        // Add circles to nodes
-        node.append('circle')
-            .attr('r', 10)
-            .attr('fill', d => this.getCategoryColor(d.metadata.category))
-            .attr('stroke', '#fff')
-            .attr('stroke-width', 1.5);
-            
-        // Add labels to nodes
-        node.append('text')
-            .attr('class', 'node-label')
-            .attr('dx', 12)
-            .attr('dy', '.35em')
-            .text(d => d.name)
-            .on('click', (event, d) => {
-                event.preventDefault();
-                event.stopPropagation();
-                window.location.href = d.id;
-            });
-            
-        // Update simulation
-        this.simulation
-            .nodes(nodes)
-            .force('link', d3.forceLink(edges).id(d => d.id))
-            .on('tick', () => {
-                link
-                    .attr('x1', d => d.source.x)
-                    .attr('y1', d => d.source.y)
-                    .attr('x2', d => d.target.x)
-                    .attr('y2', d => d.target.y);
-                    
-                node
-                    .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
-            });
-            
-        this.simulation.alpha(1).restart();
+        try {
+            // Create edges
+            const link = this.g.selectAll('.link')
+                .data(edges)
+                .join('line')
+                .attr('class', 'link')
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6);
+
+            // Create nodes
+            const node = this.g.selectAll('.node')
+                .data(nodes)
+                .join('g')
+                .attr('class', 'node')
+                .call(this.drag());
+
+            // Add circles to nodes
+            node.append('circle')
+                .attr('r', 5)
+                .attr('fill', d => this.getCategoryColor(d.metadata?.category));
+
+            // Add labels to nodes
+            node.append('text')
+                .attr('class', 'node-label')
+                .attr('dx', 8)
+                .attr('dy', '.35em')
+                .text(d => d.name);
+
+            // Update simulation
+            this.simulation
+                .nodes(nodes)
+                .force('link').links(edges);
+
+            // Restart simulation
+            this.simulation.alpha(1).restart();
+        } catch (error) {
+            throw new Error(`Failed to render graph: ${error.message}`);
+        }
     }
-    
+
     getCategoryColor(category) {
         const colors = {
-            'core': '#00FFFF',      // Cyan
-            'documentation': '#FFD700', // Gold
-            'research': '#FF69B4',   // Pink
-            'feature': '#32CD32',    // Lime
-            'legal': '#9370DB',      // Purple
-            'community': '#FF7F50',  // Coral
-            'labs': '#20B2AA',       // Light Sea Green
-            'uncategorized': '#999999' // Gray
+            core: '#ff4444',
+            documentation: '#44ff44',
+            research: '#4444ff',
+            feature: '#ffff44',
+            legal: '#ff44ff',
+            community: '#44ffff',
+            labs: '#ff8844'
         };
-        return colors[category] || colors.uncategorized;
+        return colors[category] || '#999999';
     }
-    
+
     initControls() {
-        // Zoom controls
-        d3.select('#zoom-in').on('click', () => {
-            this.svg.transition().call(
-                this.zoom.scaleBy, 1.5
-            );
-        });
-        
-        d3.select('#zoom-out').on('click', () => {
-            this.svg.transition().call(
-                this.zoom.scaleBy, 0.75
-            );
-        });
-        
-        d3.select('#reset-view').on('click', () => {
-            this.svg.transition().call(
-                this.zoom.transform,
-                d3.zoomIdentity
-            );
-        });
+        try {
+            const controls = document.createElement('div');
+            controls.className = 'graph-controls';
+            
+            // Add zoom controls
+            const zoomIn = document.createElement('button');
+            zoomIn.textContent = '+';
+            zoomIn.onclick = () => this.zoom(1.2);
+            
+            const zoomOut = document.createElement('button');
+            zoomOut.textContent = '-';
+            zoomOut.onclick = () => this.zoom(0.8);
+            
+            const reset = document.createElement('button');
+            reset.textContent = 'Reset';
+            reset.onclick = () => this.resetView();
+            
+            controls.appendChild(zoomIn);
+            controls.appendChild(zoomOut);
+            controls.appendChild(reset);
+            
+            this.container.parentNode.appendChild(controls);
+        } catch (error) {
+            console.warn('[KnowledgeGraph] Failed to initialize controls:', error);
+            // Don't throw - controls are not critical for graph function
+        }
     }
-    
+
+    zoom(scale) {
+        const transform = d3.zoomTransform(this.svg.node());
+        this.svg.transition().duration(300).call(
+            d3.zoom().transform,
+            transform.scale(scale)
+        );
+    }
+
+    resetView() {
+        this.svg.transition().duration(300).call(
+            d3.zoom().transform,
+            d3.zoomIdentity
+        );
+    }
+
     drag() {
-        const simulation = this.simulation;
-        
-        function dragstarted(event) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            event.subject.fx = event.subject.x;
-            event.subject.fy = event.subject.y;
-        }
-        
-        function dragged(event) {
-            event.subject.fx = event.x;
-            event.subject.fy = event.y;
-        }
-        
-        function dragended(event) {
-            if (!event.active) simulation.alphaTarget(0);
-            event.subject.fx = null;
-            event.subject.fy = null;
-        }
-        
         return d3.drag()
-            .on('start', dragstarted)
-            .on('drag', dragged)
-            .on('end', dragended);
+            .on('start', this.dragstarted.bind(this))
+            .on('drag', this.dragged.bind(this))
+            .on('end', this.dragended.bind(this));
     }
-    
+
+    dragstarted(event) {
+        if (!event.active) this.simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+
+    dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+    }
+
+    dragended(event) {
+        if (!event.active) this.simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+
     showLoading() {
-        const loadingContainer = this.container.querySelector('.loading-container');
-        if (loadingContainer) {
-            loadingContainer.style.display = 'flex';
-        }
+        const loadingContainer = document.createElement('div');
+        loadingContainer.className = 'loading-container';
+        loadingContainer.innerHTML = `
+            <div class="loading-spinner"></div>
+            <p>Loading knowledge graph...</p>
+        `;
+        this.container.appendChild(loadingContainer);
     }
-    
+
     hideLoading() {
         const loadingContainer = this.container.querySelector('.loading-container');
         if (loadingContainer) {
-            loadingContainer.style.display = 'none';
+            loadingContainer.remove();
         }
     }
-    
-    showError(message) {
+
+    handleError(error) {
+        console.error('[KnowledgeGraph] Error:', error);
+        
         this.hideLoading();
+        
+        // Clear any existing error messages
+        const existingError = this.container.querySelector('.error-container');
+        if (existingError) {
+            existingError.remove();
+        }
+
         const errorContainer = document.createElement('div');
         errorContainer.className = 'error-container';
-        errorContainer.innerHTML = `
-            <div class="error-message">
-                <h3>Error Loading Knowledge Graph</h3>
-                <p>${message}</p>
-                <button onclick="location.reload()">Retry</button>
-            </div>
-        `;
+        
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'error-message';
+        
+        const title = document.createElement('h3');
+        title.textContent = 'Error Loading Knowledge Graph';
+        
+        const message = document.createElement('p');
+        message.textContent = error.message || 'An unexpected error occurred';
+        
+        const retryButton = document.createElement('button');
+        retryButton.textContent = 'Retry';
+        retryButton.onclick = async () => {
+            errorContainer.remove();
+            this.retryAttempts++;
+            await this.initGraph();
+        };
+        
+        errorMessage.appendChild(title);
+        errorMessage.appendChild(message);
+        errorMessage.appendChild(retryButton);
+        errorContainer.appendChild(errorMessage);
+        
         this.container.appendChild(errorContainer);
+    }
+
+    destroy() {
+        if (this.simulation) {
+            this.simulation.stop();
+        }
+        if (this.svg) {
+            this.svg.remove();
+        }
+        this.container.innerHTML = '';
+        this.isInitialized = false;
     }
 }
 
