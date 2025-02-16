@@ -210,13 +210,13 @@ export class KnowledgeGraph {
         if (!this.container) return;
 
         window.addEventListener('error', (event) => {
-            if (!event.target) return;
-            
             try {
-                if (this.container.contains(event.target)) {
-                    event.preventDefault();
-                    this.handleError(event.error);
-                    return false;
+                if (event.target instanceof Node && this.container instanceof Node) {
+                    if (this.container === event.target || this.container.contains(event.target)) {
+                        event.preventDefault();
+                        this.handleError(event.error);
+                        return false;
+                    }
                 }
             } catch (error) {
                 console.warn('Error in error boundary:', error);
@@ -387,12 +387,34 @@ export class KnowledgeGraph {
 
     renderGraph(nodes, edges) {
         try {
+            // Format nodes to ensure they are objects
+            const nodeObjects = nodes.map(node => {
+                if (typeof node === 'string') {
+                    return {
+                        id: node,
+                        name: node.split('/').pop().replace('.html', ''),
+                        type: 'default'
+                    };
+                }
+                return node;
+            });
+
+            // Create a map for quick node lookup
+            const nodeMap = new Map(nodeObjects.map(node => [node.id, node]));
+
+            // Format edges to ensure they use node objects
+            const edgeObjects = edges.map(edge => ({
+                source: nodeMap.get(edge.source) || edge.source,
+                target: nodeMap.get(edge.target) || edge.target,
+                weight: edge.weight || 1
+            }));
+
             // Adjust node size based on screen size
             const baseRadius = window.innerWidth <= 768 ? 8 : 5;
             
             // Create edges
             const link = this.g.selectAll('.link')
-                .data(edges)
+                .data(edgeObjects)
                 .join('line')
                 .attr('class', 'link')
                 .attr('stroke', '#999')
@@ -400,7 +422,7 @@ export class KnowledgeGraph {
 
             // Create nodes
             const node = this.g.selectAll('.node')
-                .data(nodes)
+                .data(nodeObjects)
                 .join('g')
                 .attr('class', 'node')
                 .call(this.drag());
@@ -418,10 +440,12 @@ export class KnowledgeGraph {
                 .text(d => d.name)
                 .style('font-size', window.innerWidth <= 768 ? '14px' : '12px');
 
-            // Update simulation
+            // Update simulation with the formatted data
             this.simulation
-                .nodes(nodes)
-                .force('link').links(edges);
+                .nodes(nodeObjects);
+            
+            this.simulation.force('link')
+                .links(edgeObjects);
 
             // Adjust force strengths for mobile
             if (window.innerWidth <= 768) {
@@ -438,7 +462,8 @@ export class KnowledgeGraph {
             // Restart simulation
             this.simulation.alpha(1).restart();
         } catch (error) {
-            throw new Error(`Failed to render graph: ${error.message}`);
+            console.error('Failed to render graph:', error);
+            this.handleError(error);
         }
     }
 
