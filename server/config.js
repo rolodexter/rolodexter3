@@ -4,7 +4,6 @@ const path = require('path');
 // Import routes
 const authRoutes = require('./routes/auth');
 const monitorRoutes = require('./routes/monitor');
-const graphRoutes = require('./routes/graph');
 const repositoryRouter = require('./routes/repository');
 
 // Server config
@@ -16,7 +15,6 @@ const config = {
     configureRoutes: (app) => {
         app.use('/api/auth', authRoutes);
         app.use('/api/monitor', monitorRoutes);
-        app.use('/api/graph', graphRoutes);
         app.use('/api/repository', repositoryRouter);
     },
     
