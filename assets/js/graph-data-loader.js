@@ -1,51 +1,49 @@
 export class GraphDataLoader {
     constructor() {
-        console.log('[GraphDataLoader] Initializing data loader');
+        console.log('[GraphDataLoader] Initializing');
         this.cache = new Map();
     }
 
-    async loadDirectory(path) {
-        console.log(`[GraphDataLoader] Loading directory: ${path}`);
+    async loadDirectory() {
+        console.log('[GraphDataLoader] Starting directory load');
         try {
-            const files = await this.getHTMLFiles(path);
-            console.log(`[GraphDataLoader] Found ${files.length} HTML files`);
-            
+            const htmlFiles = await this.getHTMLFiles();
+            console.log(`[GraphDataLoader] Found ${htmlFiles.length} HTML files`);
+
             const nodes = [];
             const edges = [];
-            
-            for (const file of files) {
-                console.log(`[GraphDataLoader] Processing file: ${file}`);
+
+            for (const file of htmlFiles) {
                 try {
+                    console.log(`[GraphDataLoader] Processing file: ${file}`);
                     const response = await fetch(file);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
                     const html = await response.text();
-                    const metadata = this.extractMetadata(html, file);
-                    
-                    if (metadata) {
-                        nodes.push(metadata);
-                        if (metadata.connections) {
-                            edges.push(...this.createEdges(metadata));
-                        }
-                    }
-                } catch (fileError) {
-                    console.error(`[GraphDataLoader] Error processing file ${file}:`, fileError);
+                    const metadata = await this.extractMetadata(html, file);
+                    nodes.push(metadata);
+                } catch (error) {
+                    console.error(`[GraphDataLoader] Error processing file ${file}:`, error);
                 }
             }
+
+            if (nodes.length === 0) {
+                throw new Error('No valid nodes found in the directory');
+            }
+
+            console.log(`[GraphDataLoader] Successfully loaded ${nodes.length} nodes`);
             
-            console.log(`[GraphDataLoader] Successfully loaded ${nodes.length} nodes and ${edges.length} edges`);
-            return { nodes, edges };
-            
+            // Create edges after all nodes are loaded
+            const graphEdges = this.createEdges(nodes);
+            console.log(`[GraphDataLoader] Created ${graphEdges.length} edges`);
+
+            return { nodes, edges: graphEdges };
         } catch (error) {
-            console.error('[GraphDataLoader] Failed to load directory:', error);
-            throw new Error(`Failed to load graph data: ${error.message}`);
+            console.error('[GraphDataLoader] Error loading directory:', error);
+            throw error;
         }
     }
 
-    async getHTMLFiles(path) {
-        console.log(`[GraphDataLoader] Scanning for HTML files in: ${path}`);
-        // Return a comprehensive list of all HTML files in the project
+    async getHTMLFiles() {
+        console.log('[GraphDataLoader] Scanning for HTML files');
         return [
             'index.html',
             'knowledge/index.html',
@@ -69,38 +67,64 @@ export class GraphDataLoader {
         ];
     }
 
-    extractMetadata(html, filePath) {
-        console.log(`[GraphDataLoader] Extracting metadata from: ${filePath}`);
-        try {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            const metadata = {
-                id: filePath,
-                title: doc.title || filePath,
-                category: this.getMetaContent(doc, 'graph-category'),
-                tags: this.getMetaContent(doc, 'graph-tags')?.split(',').map(t => t.trim()) || [],
-                connections: this.getMetaContent(doc, 'graph-connections')?.split(',').map(c => c.trim()) || [],
-                created: this.getMetaContent(doc, 'graph-created'),
-                modified: this.getMetaContent(doc, 'graph-modified'),
-                authors: this.getMetaContent(doc, 'graph-authors')?.split(',').map(a => a.trim()) || []
-            };
-            
-            console.log(`[GraphDataLoader] Successfully extracted metadata for: ${filePath}`);
-            return metadata;
-            
-        } catch (error) {
-            console.error(`[GraphDataLoader] Failed to extract metadata from ${filePath}:`, error);
-            return null;
-        }
+    getMetaContent(doc, name) {
+        const meta = doc.querySelector(`meta[name="${name}"]`);
+        return meta ? meta.getAttribute('content') : null;
     }
 
-    getGraphData() {
-        return {
-            nodes: Array.from(this.nodes.values()),
-            edges: this.edges.filter(edge => 
-                this.nodes.has(edge.source) && this.nodes.has(edge.target)
-            )
+    async extractMetadata(html, filePath) {
+        console.log(`[GraphDataLoader] Extracting metadata from ${filePath}`);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        if (!doc) {
+            throw new Error(`Failed to parse HTML document: ${filePath}`);
+        }
+
+        const title = doc.querySelector('title')?.textContent || filePath;
+        const description = this.getMetaContent(doc, 'description') || '';
+        const category = this.getMetaContent(doc, 'graph-category') || 'uncategorized';
+        const tags = this.getMetaContent(doc, 'graph-tags')?.split(',').map(t => t.trim()) || [];
+        const connections = this.getMetaContent(doc, 'graph-connections')?.split(',').map(c => c.trim()) || [];
+        const created = this.getMetaContent(doc, 'graph-created') || new Date().toISOString();
+        const modified = this.getMetaContent(doc, 'graph-modified') || created;
+        const authors = this.getMetaContent(doc, 'graph-authors')?.split(',').map(a => a.trim()) || ['system'];
+
+        const metadata = {
+            id: filePath,
+            title,
+            description,
+            category,
+            tags,
+            connections,
+            created,
+            modified,
+            authors
         };
+
+        console.log(`[GraphDataLoader] Successfully extracted metadata for ${filePath}`);
+        return metadata;
+    }
+
+    createEdges(nodes) {
+        console.log('[GraphDataLoader] Creating edges from node connections');
+        const edges = [];
+        const nodeMap = new Map(nodes.map(node => [node.id, node]));
+
+        for (const node of nodes) {
+            for (const connection of node.connections) {
+                if (nodeMap.has(connection)) {
+                    edges.push({
+                        source: node.id,
+                        target: connection,
+                        type: 'connection'
+                    });
+                } else {
+                    console.warn(`[GraphDataLoader] Invalid connection in ${node.id}: ${connection}`);
+                }
+            }
+        }
+
+        return edges;
     }
 } 

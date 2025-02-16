@@ -75,6 +75,19 @@
             </div>
         </div>
         <div class="graph-controls">
+            <div class="search-container">
+                <input type="text" id="graph-search" placeholder="Search nodes...">
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                    <option value="core">Core</option>
+                    <option value="documentation">Documentation</option>
+                    <option value="research">Research</option>
+                    <option value="feature">Feature</option>
+                    <option value="legal">Legal</option>
+                    <option value="community">Community</option>
+                    <option value="labs">Labs</option>
+                </select>
+            </div>
             <button id="zoom-in" class="graph-btn">+</button>
             <button id="zoom-out" class="graph-btn">-</button>
             <button id="reset-view" class="graph-btn">Reset</button>
@@ -182,6 +195,15 @@
                 
                 if (!success) {
                     console.error('[App] Failed to initialize graph');
+                    container.innerHTML = `
+                        <div class="error-container">
+                            <div class="error-message">
+                                <h3>Error Loading Knowledge Graph</h3>
+                                <p>Failed to initialize the graph. Please check the console for details.</p>
+                                <button onclick="location.reload()">Retry</button>
+                            </div>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('[App] Fatal error:', error);
