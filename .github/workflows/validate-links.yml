@@ -1,0 +1,65 @@
+name: Validate Links
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight
+
+jobs:
+  validate-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm install node-fetch
+      
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/validate-links-cli.js
+          chmod +x scripts/validate-links.js
+      
+      - name: Validate internal links
+        run: node scripts/validate-links-cli.js --no-external
+      
+      - name: Validate all links
+        if: github.event_name == 'schedule'
+        run: node scripts/validate-links-cli.js
+      
+      - name: Create issue for broken links
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Read the validation output from the previous step
+            const validationOutput = fs.readFileSync(path.join(process.env.GITHUB_WORKSPACE, 'link-validation.log'), 'utf8');
+            
+            // Create an issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              title: '🔗 Broken Links Detected',
+              body: `Link validation has detected broken links in the codebase.
+              
+              ### Validation Output
+              \`\`\`
+              ${validationOutput}
+              \`\`\`
+              
+              Please review and fix these broken links.
+              
+              This issue was automatically created by the link validation workflow.`
+            }); 
