@@ -1,25 +1,38 @@
 /* Base Theme Variables */
 :root {
-    /* Light Mode */
+    /* Light Mode Colors */
     --light-bg: #ffffff;
+    --light-bg-secondary: #f8f8f8;
     --light-text: #1a1a1a;
     --light-text-secondary: #666666;
     --light-border: #e0e0e0;
     --light-surface: #f8f8f8;
     --light-accent: #2c5282;
+    --light-accent-hover: #2a4365;
+    --light-link: #2c5282;
+    --light-link-hover: #2a4365;
+    --light-code-bg: #f5f5f5;
+    --light-overlay-bg: rgba(255, 255, 255, 0.95);
 
-    /* Dark Mode */
+    /* Dark Mode Colors */
     --dark-bg: #1a1a1a;
+    --dark-bg-secondary: #232323;
     --dark-text: #f0f0f0;
     --dark-text-secondary: #a0a0a0;
     --dark-border: #333333;
     --dark-surface: #232323;
     --dark-accent: #63b3ed;
+    --dark-accent-hover: #4299e1;
+    --dark-link: #63b3ed;
+    --dark-link-hover: #4299e1;
+    --dark-code-bg: #2d2d2d;
+    --dark-overlay-bg: rgba(26, 26, 26, 0.95);
 
     /* Common */
     --spacing-unit: 1rem;
     --max-width: 65ch;
     --border-radius: 4px;
+    --transition-speed: 0.3s;
 
     /* New styles from the code block */
     --primary-color: #4a90e2;
@@ -30,26 +43,116 @@
     --warning-bg: #332b00;
     --warning-border: #664400;
     --warning-text: #ffb74d;
-    --code-bg: #2d2d2d;
 }
 
-/* Theme Mode Variables */
+/* Default Light Theme */
 :root {
     --bg-primary: var(--light-bg);
+    --bg-secondary: var(--light-bg-secondary);
     --text-primary: var(--light-text);
     --text-secondary: var(--light-text-secondary);
     --border-color: var(--light-border);
     --surface-color: var(--light-surface);
     --accent-color: var(--light-accent);
+    --accent-hover: var(--light-accent-hover);
+    --link-color: var(--light-link);
+    --link-hover: var(--light-link-hover);
+    --code-bg: var(--light-code-bg);
+    --overlay-bg: var(--light-overlay-bg);
 }
 
+/* Dark Theme */
 [data-theme="dark"] {
     --bg-primary: var(--dark-bg);
+    --bg-secondary: var(--dark-bg-secondary);
     --text-primary: var(--dark-text);
     --text-secondary: var(--dark-text-secondary);
     --border-color: var(--dark-border);
     --surface-color: var(--dark-surface);
     --accent-color: var(--dark-accent);
+    --accent-hover: var(--dark-accent-hover);
+    --link-color: var(--dark-link);
+    --link-hover: var(--dark-link-hover);
+    --code-bg: var(--dark-code-bg);
+    --overlay-bg: var(--dark-overlay-bg);
+}
+
+/* Base Styles */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+a {
+    color: var(--link-color);
+    transition: color var(--transition-speed);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.theme-toggle:hover {
+    background: var(--bg-secondary);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-primary);
+    fill: none;
+    transition: stroke var(--transition-speed);
+}
+
+.theme-toggle .moon {
+    display: none;
+}
+
+.theme-toggle .moon path {
+    fill: var(--text-primary);
+}
+
+/* Navigation */
+.header-nav {
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.nav-links a {
+    color: var(--text-primary);
+}
+
+/* Footer */
+footer {
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+/* Bottom Overlay */
+.bottom-overlay {
+    background-color: var(--overlay-bg);
+    transition: background-color var(--transition-speed);
 }
 
 /* Typography */
@@ -58,8 +161,6 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
-    color: var(--text-color);
-    background-color: var(--bg-color);
     margin: 0;
     padding: 0;
 }
@@ -101,7 +202,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-links a {
-    color: var(--text-color);
+    color: var(--text-primary);
     text-decoration: none;
     font-size: 0.9rem;
     position: relative;
@@ -159,7 +260,7 @@ footer {
 
 .footer-links a,
 .footer-legal a {
-    color: var(--text-color);
+    color: var(--text-primary);
     text-decoration: none;
     opacity: 0.8;
     transition: opacity 0.2s;
@@ -177,7 +278,7 @@ footer {
 
 /* Links */
 a {
-    color: var(--accent-color);
+    color: var(--link-color);
     text-decoration: none;
 }
 
@@ -1035,7 +1136,7 @@ footer {
 
 .footer-links a,
 .footer-legal a {
-    color: var(--text-color);
+    color: var(--text-primary);
     text-decoration: none;
     opacity: 0.8;
     transition: opacity 0.2s;
