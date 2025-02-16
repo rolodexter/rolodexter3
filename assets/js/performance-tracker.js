@@ -13,6 +13,11 @@ class PerformanceMonitor {
             errorRate: 0.05       // 5% error rate
         };
         this.isGitHubPages = window.location.hostname.includes('github.io');
+        this.observers = [];
+        this.initialized = false;
+        this.sessionId = crypto.randomUUID();
+        this.lastCleanup = Date.now();
+        this.cleanupInterval = 1000 * 60 * 60; // 1 hour
         this.initialize();
     }
 
@@ -160,84 +165,103 @@ class PerformanceMonitor {
     }
 
     async logMetric(metric) {
-        if (this.isGitHubPages) {
-            // Store metrics locally when on GitHub Pages
-            const key = `metric_${Date.now()}`;
-            try {
-                localStorage.setItem(key, JSON.stringify(metric));
-                // Keep only last 100 metrics
-                this.cleanupStorage('metric_', 100);
-            } catch (error) {
-                console.debug('Local storage full or unavailable:', error);
-            }
-            return;
-        }
-
         try {
-            const response = await fetch('/api/monitor/performance', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(metric)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            const data = {
+                ...metric,
+                timestamp: new Date().toISOString(),
+                sessionId: this.sessionId
+            };
+
+            if (this.isGitHubPages) {
+                this.storeLocally('metric', data);
+                console.debug('[PerformanceMonitor] Metric stored locally:', data);
+            } else {
+                const response = await fetch('/api/monitor/performance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
             }
         } catch (error) {
-            console.debug('Failed to log metric:', error);
-            // Fallback to local storage
+            console.debug('[PerformanceMonitor] Metric logging failed, storing locally:', error);
             this.storeLocally('metric', metric);
         }
     }
 
     async logSessionEvent(event) {
-        if (this.isGitHubPages) {
-            // Store session events locally when on GitHub Pages
-            const key = `session_${Date.now()}`;
-            try {
-                localStorage.setItem(key, JSON.stringify(event));
-                // Keep only last 50 session events
-                this.cleanupStorage('session_', 50);
-            } catch (error) {
-                console.debug('Local storage full or unavailable:', error);
-            }
-            return;
-        }
-
         try {
-            const response = await fetch('/api/monitor/session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(event)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            const data = {
+                event,
+                timestamp: new Date().toISOString(),
+                sessionId: this.sessionId
+            };
+
+            if (this.isGitHubPages) {
+                this.storeLocally('session', data);
+                console.debug('[PerformanceMonitor] Session event stored locally:', data);
+            } else {
+                const response = await fetch('/api/monitor/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
             }
         } catch (error) {
-            console.debug('Failed to log session event:', error);
-            // Fallback to local storage
+            console.debug('[PerformanceMonitor] Session logging failed, storing locally:', error);
             this.storeLocally('session', event);
         }
     }
 
     storeLocally(type, data) {
         try {
-            const key = `${type}_${Date.now()}`;
-            localStorage.setItem(key, JSON.stringify(data));
-            this.cleanupStorage(`${type}_`, type === 'metric' ? 100 : 50);
+            const key = type === 'metric' ? 'performanceMetrics' : 'sessionEvents';
+            const stored = JSON.parse(localStorage.getItem(key) || '[]');
+            stored.push({
+                ...data,
+                timestamp: new Date().toISOString(),
+                sessionId: this.sessionId
+            });
+
+            // Keep only the last 100 metrics or 50 session events
+            const limit = type === 'metric' ? 100 : 50;
+            if (stored.length > limit) {
+                stored.splice(0, stored.length - limit);
+            }
+
+            localStorage.setItem(key, JSON.stringify(stored));
+
+            // Cleanup old data periodically
+            const now = Date.now();
+            if (now - this.lastCleanup > this.cleanupInterval) {
+                this.cleanupStorage();
+                this.lastCleanup = now;
+            }
         } catch (error) {
-            console.debug('Local storage full or unavailable:', error);
+            console.debug(`[PerformanceMonitor] Local storage failed for ${type}:`, error);
         }
     }
 
-    cleanupStorage(prefix, limit) {
-        const keys = Object.keys(localStorage)
-            .filter(key => key.startsWith(prefix))
-            .sort()
-            .slice(0, -limit);
-        
-        keys.forEach(key => localStorage.removeItem(key));
+    cleanupStorage() {
+        try {
+            // Keep only last 24 hours of data
+            const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            
+            ['performanceMetrics', 'sessionEvents'].forEach(key => {
+                const stored = JSON.parse(localStorage.getItem(key) || '[]');
+                const filtered = stored.filter(item => item.timestamp >= cutoff);
+                localStorage.setItem(key, JSON.stringify(filtered));
+            });
+        } catch (error) {
+            console.debug('[PerformanceMonitor] Storage cleanup failed:', error);
+        }
     }
 
     logWarning(message, data) {
