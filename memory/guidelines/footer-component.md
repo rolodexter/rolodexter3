@@ -7,9 +7,7 @@
     <div class="footer-links-row">
         <a href="../docs/CHANGELOG.html">Changelog</a><span class="separator">,</span>
         <a href="../docs/VERSION.html">Version</a><span class="separator">,</span>
-        <a href="https://github.com/rolodexter3">GitHub</a>
-    </div>
-    <div class="footer-links-row">
+        <a href="https://github.com/rolodexter3">GitHub</a><span class="separator">,</span>
         <a href="../legal/privacy.html">Privacy Policy</a><span class="separator">,</span>
         <a href="../legal/terms.html">Terms of Use</a><span class="separator">,</span>
         <a href="../legal/cookies.html">Cookie Policy</a><span class="separator">,</span>
@@ -26,13 +24,18 @@
    - Commas wrapped in `<span class="separator">,</span>`
    - Links and commas must be directly adjacent in HTML
 
-2. Row Organization
-   - First row: Resource links (Changelog, Version, GitHub)
-   - Second row: Legal links (Privacy, Terms, Cookies, Ethics)
+2. Link Order
+   - Changelog
+   - Version
+   - GitHub
+   - Privacy Policy
+   - Terms of Use
+   - Cookie Policy
+   - AI Ethics
 
 3. CSS Requirements
    - Left-aligned text
-   - Proper wrapping on mobile
+   - Natural wrapping on mobile
    - Consistent spacing between link-comma pairs
    - Comma color using `--text-secondary`
    - No gap or padding between link and comma
@@ -41,7 +44,7 @@
 ## Implementation Notes
 
 - Always use relative paths for internal links
-- Maintain consistent order of links within rows
+- Maintain consistent order of links
 - Ensure all links are valid and accessible
 - Include dark/light mode contrast support
 - Never add spaces in HTML between links and commas
@@ -80,9 +83,9 @@
 
 - Links must be keyboard navigable
 - Proper color contrast for both themes
-- Clear visual separation between rows
+- Clear visual separation between links
 - Ensure readable text size (0.85rem minimum)
 
 ---
-Last Updated: 2025-02-17 22:15 UTC
+Last Updated: 2025-02-17 22:30 UTC
 Signed by: rolodexterVS 🔧
