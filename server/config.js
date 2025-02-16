@@ -6,6 +6,9 @@ const authRoutes = require('./routes/auth');
 const monitorRoutes = require('./routes/monitor');
 const repositoryRouter = require('./routes/repository');
 
+// Note: Knowledge Graph routes have been removed as the graph now runs entirely client-side
+// for GitHub Pages compatibility. See /docs/knowledge-graph.md for implementation details.
+
 // Server config
 const config = {
     port: process.env.PORT || 3000,

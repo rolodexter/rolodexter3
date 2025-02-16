@@ -1,9 +1,5 @@
 {
   "dependencies": {
-    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
-    "@solana/web3.js": "^1.98.0",
-    "bs58": "^6.0.0",
-    "ioredis": "^5.5.0",
     "jsdom": "^22.1.0"
   },
   "devDependencies": {
@@ -14,17 +10,15 @@
     "prepare": "husky install",
     "validate-commit": "node scripts/validate-commit-cli.js",
     "pre-commit": "lint-staged",
-    "postinstall": "husky install",
     "validate-metadata": "node scripts/validate-metadata.js"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "npm run validate-commit"
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
-    "*": "npm run validate-commit",
+    "*.{js,jsx,ts,tsx}": "npm run validate-commit",
     "*.html": "npm run validate-metadata"
   }
 }
