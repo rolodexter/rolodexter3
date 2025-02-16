@@ -1,36 +1,19 @@
-# 📁 Deprecated Files Archive
+# Deprecated Files Archive
 
-This directory contains files that have been deprecated as part of the migration to HTML-based documentation and task tracking.
+This directory contains deprecated files that are no longer in active use.
+Files are retained for historical reference but should not be linked in the main system.
 
-## 🗄️ Archived Files
+## Structure
+- `memory-review.html` (Replaced by `memories/memory-review.html`)
+- `memory-review.md` (Converted to HTML format)
 
-### Session History
+## Archival Policy
+- Deprecated files are **moved here for reference** instead of being deleted.
+- If a deprecated file is **no longer needed**, it may be fully removed after 6 months.
+- Each deprecated file should have a metadata tag indicating its replacement.
 
-- `session-history.md` - Replaced by HTML-based session logs in `/memories/sessions/`
-- `memory-review.md` - Functionality moved to memory-system.html
-
-### Task Management
-
-- `task-progress.md` - Consolidated into rolodexterVS-pending-tasks.html
-- `pending-tasks.md` - Migrated to HTML format
-
-### Documentation
-
-- Various .md files replaced by their HTML counterparts with proper metadata and graph connections
-
-## 📝 Archival Notes
-
-- Files archived on: 2025-02-17
-- Reason: Migration to HTML-based system with proper metadata and graph connections
-- New Location: All functionality moved to corresponding .html files in the main directory structure
-
-## 🔍 Finding Current Files
-
-- Session Logs: `/memories/sessions/`
-- Task Tracking: `rolodexterVS-pending-tasks.html`
-- Memory System: `memory-system.html`
-- Website Updates: `website-updates.html`
-
-## ⚠️ Important Note
-
-These files are kept for historical reference only. Please use the current HTML-based system for all active development and documentation.
+## Current Deprecated Files
+| File | Replacement | Deprecation Date |
+|------|------------|------------------|
+| memory-review.html | memories/memory-review.html | 2025-02-16 |
+| memory-review.md | memories/memory-review.html | 2025-02-16 |
