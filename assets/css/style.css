@@ -1124,3 +1124,22 @@ footer {
         text-align: center;
     }
 }
+
+/* Author Signature */
+.author-signature {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.author-signature .agent-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.author-signature .timestamp {
+    font-size: 0.9em;
+    margin-top: 0.5rem;
+}
