@@ -149,8 +149,11 @@ footer {
 .footer-links-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0 0.5rem;
+    gap: 0.25rem 0.35rem;
     line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    text-align: left;
 }
 
 .footer-links-row a {
@@ -167,6 +170,8 @@ footer {
 .footer-links-row span.separator {
     color: var(--text-secondary);
     font-size: 0.85rem;
+    margin: 0;
+    padding-left: 0;
 }
 
 .footer-legal {
@@ -184,6 +189,7 @@ footer {
 .footer-legal p {
     margin: 0;
     text-align: left;
+    line-height: 1.6;
 }
 
 /* Links */
@@ -364,12 +370,13 @@ a:hover {
     }
     
     .footer-links-row {
-        gap: 0.5rem 0.25rem;
+        gap: 0.25rem;
+        padding: 0 var(--spacing-unit);
     }
     
     .footer-legal {
         margin-top: var(--spacing-unit);
-        padding-top: var(--spacing-unit);
+        padding: var(--spacing-unit) var(--spacing-unit) 0;
     }
 }
 
