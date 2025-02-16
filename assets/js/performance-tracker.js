@@ -223,22 +223,40 @@ class PerformanceMonitor {
     storeLocally(type, data) {
         try {
             const key = type === 'metric' ? 'performanceMetrics' : 'sessionEvents';
-            const stored = JSON.parse(localStorage.getItem(key) || '[]');
+            const maxItems = type === 'metric' ? 100 : 50;
+            
+            // Get stored items with error handling
+            let stored = [];
+            try {
+                stored = JSON.parse(localStorage.getItem(key) || '[]');
+                if (!Array.isArray(stored)) stored = [];
+            } catch (e) {
+                console.debug(`[PerformanceMonitor] Error parsing ${key}, resetting:`, e);
+                stored = [];
+            }
+
+            // Add new item with proper timestamp and session ID
             stored.push({
                 ...data,
                 timestamp: new Date().toISOString(),
                 sessionId: this.sessionId
             });
 
-            // Keep only the last 100 metrics or 50 session events
-            const limit = type === 'metric' ? 100 : 50;
-            if (stored.length > limit) {
-                stored.splice(0, stored.length - limit);
+            // Keep only the most recent items
+            if (stored.length > maxItems) {
+                stored = stored.slice(-maxItems);
+            }
+
+            // Check storage quota before saving
+            const storageData = JSON.stringify(stored);
+            if (storageData.length * 2 > 5242880) { // 5MB limit
+                stored = stored.slice(-Math.floor(maxItems / 2)); // Reduce by half if near limit
+                console.debug(`[PerformanceMonitor] Storage quota near limit, reducing ${key} items`);
             }
 
             localStorage.setItem(key, JSON.stringify(stored));
 
-            // Cleanup old data periodically
+            // Cleanup old data if needed
             const now = Date.now();
             if (now - this.lastCleanup > this.cleanupInterval) {
                 this.cleanupStorage();
@@ -246,6 +264,12 @@ class PerformanceMonitor {
             }
         } catch (error) {
             console.debug(`[PerformanceMonitor] Local storage failed for ${type}:`, error);
+            // If storage fails, try to clear old data
+            try {
+                localStorage.removeItem(key);
+            } catch (e) {
+                console.debug('[PerformanceMonitor] Failed to clear storage:', e);
+            }
         }
     }
 
@@ -255,9 +279,18 @@ class PerformanceMonitor {
             const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
             
             ['performanceMetrics', 'sessionEvents'].forEach(key => {
-                const stored = JSON.parse(localStorage.getItem(key) || '[]');
-                const filtered = stored.filter(item => item.timestamp >= cutoff);
-                localStorage.setItem(key, JSON.stringify(filtered));
+                try {
+                    const stored = JSON.parse(localStorage.getItem(key) || '[]');
+                    if (!Array.isArray(stored)) {
+                        localStorage.setItem(key, '[]');
+                        return;
+                    }
+                    const filtered = stored.filter(item => item.timestamp >= cutoff);
+                    localStorage.setItem(key, JSON.stringify(filtered));
+                } catch (e) {
+                    console.debug(`[PerformanceMonitor] Error cleaning up ${key}:`, e);
+                    localStorage.setItem(key, '[]');
+                }
             });
         } catch (error) {
             console.debug('[PerformanceMonitor] Storage cleanup failed:', error);

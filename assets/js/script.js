@@ -2,6 +2,16 @@
 import { performanceMonitor } from './performance-tracker.js';
 import { KnowledgeGraph } from './knowledge-graph.js';
 
+// Filter out third-party script errors
+window.onerror = function (message, source, lineno, colno, error) {
+    // Ignore Web3 extension errors
+    if (source && (source.includes('evmAsk.js') || source.includes('ethereum'))) {
+        return true;
+    }
+    // Log other errors normally
+    return false;
+};
+
 // Add smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Website loaded successfully!');

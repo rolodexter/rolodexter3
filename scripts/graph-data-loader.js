@@ -17,16 +17,32 @@ export class GraphDataLoader {
             const sitemap = parser.parseFromString(text, 'text/xml');
             const urls = Array.from(sitemap.querySelectorAll('url loc')).map(loc => loc.textContent);
             
-            await Promise.all(urls.map(url => this.loadPage(url)));
+            // Process files in parallel but handle errors individually
+            const results = await Promise.allSettled(urls.map(url => this.loadPage(url)));
+            
+            // Log only actual errors, not 404s for optional files
+            results.forEach((result, index) => {
+                if (result.status === 'rejected' && !result.reason.message.includes('404')) {
+                    console.warn(`[GraphDataLoader] Failed to load ${urls[index]}:`, result.reason);
+                }
+            });
         } catch (error) {
-            console.error('Error loading directory:', error);
-            throw error;
+            console.warn('[GraphDataLoader] Error loading directory:', error);
+            // Continue with any successfully loaded data
         }
     }
 
     async loadPage(url) {
         try {
             const response = await fetch(url);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    // Silently skip 404s for optional files
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const text = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(text, 'text/html');
@@ -59,7 +75,12 @@ export class GraphDataLoader {
                 });
             }
         } catch (error) {
-            console.error(`Error loading page ${url}:`, error);
+            if (error.message.includes('404')) {
+                // Silently ignore 404s
+                return;
+            }
+            console.debug(`[GraphDataLoader] Error loading page ${url}:`, error);
+            throw error; // Re-throw non-404 errors
         }
     }
 
