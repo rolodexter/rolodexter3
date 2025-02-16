@@ -185,13 +185,10 @@ footer {
 
 .footer-legal {
     margin-top: 0.5rem;
-    padding-top: 1rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--border-color);
     font-size: 0.85rem;
     color: var(--text-secondary);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
     text-align: left;
 }
 
@@ -199,6 +196,15 @@ footer {
     margin: 0;
     text-align: left;
     line-height: 1.6;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.footer-legal .site-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.15rem;
 }
 
 /* Links */
@@ -385,7 +391,7 @@ a:hover {
     
     .footer-legal {
         margin-top: var(--spacing-unit);
-        padding: var(--spacing-unit) var(--spacing-unit) 0;
+        padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit) 0;
     }
 }
 
