@@ -261,7 +261,7 @@ footer {
 .footer-links-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 1.5rem;
     justify-content: center;
     padding: 0 var(--spacing-unit);
 }
@@ -300,13 +300,18 @@ footer {
 }
 
 .separator {
-    opacity: 0.5;
+    display: none;
 }
 
 /* Responsive Footer Adjustments */
 @media (max-width: 768px) {
     .footer-links-row {
+        gap: 1rem;
         padding: 0 0.5rem;
+    }
+    
+    .footer-links a {
+        font-size: 0.9rem;
     }
     
     .footer-legal {
