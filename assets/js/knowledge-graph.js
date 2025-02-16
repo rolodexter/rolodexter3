@@ -1,10 +1,12 @@
 import { graphMetadata } from './graph-metadata.js';
+import { GraphDataLoader } from '../../scripts/graph-data-loader.js';
+import { GraphSearch } from '../../scripts/search-graph.js';
 
 class KnowledgeGraph {
     constructor(containerId) {
         this.container = d3.select(containerId);
         this.width = this.container.node().getBoundingClientRect().width;
-        this.height = this.container.node().getBoundingClientRect().height;
+        this.height = this.container.node().getBoundingClientRect().height || 600;
         
         this.svg = this.container.append('svg')
             .attr('width', this.width)
@@ -29,20 +31,71 @@ class KnowledgeGraph {
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))
             .force('collision', d3.forceCollide().radius(30));
             
-        // Initialize controls
+        // Initialize data loader and search
+        this.dataLoader = new GraphDataLoader();
+        this.search = new GraphSearch(this);
+        
+        // Initialize controls and start loading data
         this.initControls();
+        this.initGraph();
     }
     
     async initGraph() {
         try {
             this.showLoading();
-            const { nodes, edges } = await graphMetadata.buildGraphData();
-            this.renderGraph(nodes, edges);
+            const graphData = await this.collectGraphData();
+            this.renderGraph(graphData.nodes, graphData.edges);
             this.hideLoading();
         } catch (error) {
             console.error('Failed to initialize graph:', error);
             this.showError();
         }
+    }
+    
+    async collectGraphData() {
+        // Collect metadata from all HTML files
+        const nodes = [];
+        const edges = [];
+        const nodeMap = new Map();
+        
+        // Function to process metadata from a page
+        const processPage = (doc) => {
+            const metaTags = doc.querySelectorAll('meta[name^="graph-"]');
+            if (metaTags.length === 0) return;
+            
+            const metadata = {};
+            metaTags.forEach(tag => {
+                const name = tag.getAttribute('name').replace('graph-', '');
+                metadata[name] = tag.getAttribute('content');
+            });
+            
+            const id = doc.location.pathname;
+            const name = doc.title || id;
+            
+            // Add node if it doesn't exist
+            if (!nodeMap.has(id)) {
+                const node = { id, name, metadata };
+                nodes.push(node);
+                nodeMap.set(id, node);
+            }
+            
+            // Process connections
+            if (metadata.connections) {
+                const connections = metadata.connections.split(',').map(c => c.trim());
+                connections.forEach(target => {
+                    edges.push({
+                        source: id,
+                        target,
+                        weight: 1
+                    });
+                });
+            }
+        };
+        
+        // Process current page
+        processPage(document);
+        
+        return { nodes, edges };
     }
     
     renderGraph(nodes, edges) {
@@ -64,8 +117,8 @@ class KnowledgeGraph {
             
         // Add circles to nodes
         node.append('circle')
-            .attr('r', d => graphMetadata.getNodeSize(d.metadata))
-            .attr('fill', d => graphMetadata.getCategoryColor(d.metadata.category))
+            .attr('r', 10)
+            .attr('fill', d => this.getCategoryColor(d.metadata.category))
             .attr('stroke', '#fff')
             .attr('stroke-width', 1.5);
             
@@ -96,6 +149,19 @@ class KnowledgeGraph {
             });
             
         this.simulation.force('link').links(edges);
+    }
+    
+    getCategoryColor(category) {
+        const colors = {
+            'core': '#00FFFF',      // Cyan
+            'documentation': '#FFD700', // Gold
+            'research': '#FF69B4',   // Pink
+            'feature': '#32CD32',    // Lime
+            'legal': '#9370DB',      // Purple
+            'community': '#FF7F50',  // Coral
+            'labs': '#20B2AA'        // Light Sea Green
+        };
+        return colors[category] || '#999999';
     }
     
     initControls() {
@@ -165,100 +231,6 @@ class KnowledgeGraph {
                 <button onclick="location.reload()">Retry</button>
             `);
     }
-}
-
-// Initialize graph when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const graph = new KnowledgeGraph('#knowledge-graph');
-    graph.initGraph();
-});
-
-// Knowledge Graph Initialization
-import { KnowledgeGraph } from '../../scripts/knowledge-graph.js';
-import { GraphDataLoader } from '../../scripts/graph-data-loader.js';
-import { GraphSearch } from '../../scripts/search-graph.js';
-
-// Initialize components
-let graph, dataLoader, search;
-
-async function initializeKnowledgeGraph() {
-    try {
-        // Initialize the graph
-        const container = document.getElementById('knowledge-graph');
-        graph = new KnowledgeGraph(container);
-        
-        // Load data
-        dataLoader = new GraphDataLoader();
-        await dataLoader.loadDirectory('.');
-        const graphData = dataLoader.getGraphData();
-        
-        // Update graph with data
-        graph.update(graphData);
-        
-        // Initialize search
-        search = new GraphSearch(graph);
-        
-        // Set up controls
-        setupControls();
-        
-    } catch (error) {
-        console.error('Error initializing knowledge graph:', error);
-        const container = document.getElementById('knowledge-graph');
-        container.innerHTML = `
-            <div class="graph-error">
-                <h3>Error Loading Knowledge Graph</h3>
-                <p>There was an error initializing the knowledge graph. Please try refreshing the page.</p>
-                <pre>${error.message}</pre>
-            </div>
-        `;
-    }
-}
-
-function setupControls() {
-    // Zoom controls
-    document.getElementById('zoom-in').addEventListener('click', () => {
-        const transform = d3.zoomTransform(graph.svg.node());
-        graph.svg.call(graph.zoom.transform, transform.scale(transform.k * 1.5));
-    });
-    
-    document.getElementById('zoom-out').addEventListener('click', () => {
-        const transform = d3.zoomTransform(graph.svg.node());
-        graph.svg.call(graph.zoom.transform, transform.scale(transform.k / 1.5));
-    });
-    
-    document.getElementById('reset-view').addEventListener('click', () => {
-        graph.svg.call(graph.zoom.transform, d3.zoomIdentity);
-    });
-    
-    // Add search input
-    const controls = document.querySelector('.graph-controls');
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-container';
-    searchContainer.innerHTML = `
-        <input type="text" id="graph-search" placeholder="Search knowledge graph...">
-        <select id="category-filter">
-            <option value="">All Categories</option>
-            <option value="core">Core</option>
-            <option value="documentation">Documentation</option>
-            <option value="research">Research</option>
-            <option value="feature">Feature</option>
-            <option value="legal">Legal</option>
-            <option value="community">Community</option>
-            <option value="labs">Labs</option>
-        </select>
-    `;
-    controls.insertBefore(searchContainer, controls.firstChild);
-    
-    // Set up search handlers
-    const searchInput = document.getElementById('graph-search');
-    searchInput.addEventListener('input', (e) => {
-        search.search(e.target.value);
-    });
-    
-    const categoryFilter = document.getElementById('category-filter');
-    categoryFilter.addEventListener('change', (e) => {
-        search.filterByCategory(e.target.value);
-    });
 }
 
 // Add styles
@@ -343,4 +315,9 @@ style.textContent = `
 document.head.appendChild(style);
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initializeKnowledgeGraph);
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('knowledge-graph');
+    if (container) {
+        new KnowledgeGraph('#knowledge-graph');
+    }
+});
