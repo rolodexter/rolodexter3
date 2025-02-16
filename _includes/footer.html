@@ -2,16 +2,17 @@
 <footer class="site-footer">
     <div class="footer-content">
         <div class="footer-section">
-            <h3>🧠 Memory System</h3>
+            <h3>🛠️ Development</h3>
             <ul class="footer-links">
-                <li><a href="/memory/rolodexterVS/memory-system.html">Memory System Overview</a></li>
-                <li><a href="/memory/rolodexterVS/tasks/rolodexterVS-pending-tasks.html">Pending Tasks</a></li>
-                <li><a href="/memory/rolodexterVS/tasks/memory-system-reorganization.html">System Reorganization</a></li>
+                <li><a href="/memory/rolodexterVS/memory-system.html">🧠 Memory System Overview</a></li>
+                <li><a href="/memory/rolodexterVS/tasks/rolodexterVS-pending-tasks.html">📋 Website Development & Tasks</a></li>
+                <li><a href="/memory/rolodexterVS/system-state.html">🔍 System State & Architecture</a></li>
+                <li><a href="/memory/rolodexterVS/feature-roadmap.html">🚀 Feature Roadmap</a></li>
             </ul>
         </div>
 
         <div class="footer-section" id="recentSessions">
-            <h3>📝 Recent Session Logs</h3>
+            <h3>📝 Recent Sessions</h3>
             <ul class="footer-links session-links">
                 <!-- Session links will be dynamically populated -->
             </ul>
@@ -22,9 +23,10 @@
         <div class="footer-section">
             <h3>📚 Resources</h3>
             <ul class="footer-links">
-                <li><a href="/memory/index.html">Memory Home</a></li>
+                <li><a href="/memory/index.html">Memory Log Index</a></li>
                 <li><a href="/memory/rolodexterVS/memories/sessions/index.html">Session Archive</a></li>
-                <li><a href="/knowledge/index.html">Knowledge Base</a></li>
+                <li><a href="/privacy.html">Privacy Policy</a></li>
+                <li><a href="/terms.html">Terms of Service</a></li>
             </ul>
         </div>
     </div>
@@ -46,6 +48,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return date.toISOString().replace('T', ' ').slice(0, -5) + ' UTC';
     }
 
+    function formatDisplayDate(dateStr) {
+        const date = new Date(dateStr);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    }
+
     function updateSessionLinks() {
         const sessionList = document.querySelector('.session-links');
         const sessionStatus = document.querySelector('.session-status');
@@ -61,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
             const formattedDate = formatDate(date);
+            const displayDate = formatDisplayDate(formattedDate);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
@@ -70,10 +79,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const link = document.createElement('a');
             
             link.href = sessionURL;
-            link.textContent = `${formattedDate} Session`;
+            link.innerHTML = `📝 Session Log (${displayDate})`;
             link.setAttribute('data-session-date', formattedDate);
             
-            // Add event listener to check if session exists
+            // Add error handling for non-existent sessions
             link.addEventListener('error', function() {
                 this.parentElement.style.display = 'none';
             });
@@ -95,4 +104,4 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update every hour
     setInterval(updateSessionLinks, 3600000);
 });
-</script> 
+</script>
