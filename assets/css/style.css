@@ -1153,12 +1153,6 @@ footer {
     border: 1px solid var(--border-color);
 }
 
-.task-overview h2 {
-    margin-bottom: 2rem;
-    font-size: 1.8rem;
-    color: var(--text-primary);
-}
-
 .task-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -1167,7 +1161,7 @@ footer {
 }
 
 .task-column h3 {
-    margin-bottom: 1rem;
+    margin: 0 0 1rem;
     font-size: 1.2rem;
     color: var(--text-secondary);
 }
