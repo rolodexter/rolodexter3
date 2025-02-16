@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -18,6 +18,53 @@
 
     <!-- Scripts -->
     <script type="module" src="./assets/js/script.js"></script>
+    
+    <script>
+        // Theme handling
+        function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme-preference', theme);
+            updateThemeToggleIcons(theme);
+        }
+
+        function updateThemeToggleIcons(theme) {
+            const sunIcon = document.querySelector('.theme-toggle .sun');
+            const moonIcon = document.querySelector('.theme-toggle .moon');
+            if (theme === 'dark') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme-preference');
+        const initialTheme = savedTheme || getSystemTheme();
+        setTheme(initialTheme);
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme-preference')) {
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.querySelector('.theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+            });
+        });
+    </script>
 
     <meta name="description" content="rolodexter3 - AI-powered knowledge management system">
     <meta name="keywords" content="ai, knowledge-graph, web3, solana, blockchain">
