@@ -7,14 +7,60 @@ export class GraphDataLoader {
         this.retryCount = 0;
         this.maxRetries = 3;
         this.retryDelay = 1000; // 1 second
+        this.lastLoadAttempt = null;
+        this.minRetryInterval = 5000; // 5 seconds between manual retries
+        
+        // Create and attach the reload button
+        this.createReloadButton();
+    }
+
+    createReloadButton() {
+        const button = document.createElement('button');
+        button.className = 'graph-reload-button';
+        button.innerHTML = '🔄 Reload Graph Data';
+        button.style.display = 'none'; // Hide initially
+        
+        button.onclick = async () => {
+            if (this.lastLoadAttempt && Date.now() - this.lastLoadAttempt < this.minRetryInterval) {
+                debugLog('GraphDataLoader', 'Reload rate limited. Please wait...');
+                return;
+            }
+            
+            this.lastLoadAttempt = Date.now();
+            this.retryCount = 0; // Reset retry count for manual reload
+            button.disabled = true;
+            button.innerHTML = '⏳ Loading...';
+            
+            try {
+                const data = await this.loadDirectory();
+                if (data) {
+                    debugLog('GraphDataLoader', 'Manual reload successful');
+                    this.hideError();
+                    // Dispatch event for the graph to update
+                    window.dispatchEvent(new CustomEvent('graphDataReloaded', { detail: data }));
+                }
+            } catch (error) {
+                this.showError('Failed to reload graph data', error);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '🔄 Reload Graph Data';
+            }
+        };
+        
+        // Add to document
+        document.body.appendChild(button);
+        this.reloadButton = button;
     }
 
     async loadDirectory() {
         try {
+            this.lastLoadAttempt = Date.now();
+            
             // First try to load from local data directory
             debugLog('GraphDataLoader', 'Attempting to load from local data directory');
             const data = await this.loadGraphData();
             if (data) {
+                this.hideError();
                 return data;
             }
 
@@ -22,6 +68,7 @@ export class GraphDataLoader {
             debugLog('GraphDataLoader', 'Local data not found, attempting to load fallback data');
             const fallbackData = await this.loadFallbackData();
             if (fallbackData) {
+                this.showWarning('Using fallback data');
                 return fallbackData;
             }
 
@@ -34,6 +81,12 @@ export class GraphDataLoader {
                 this.logWarning(`Retrying data load (${this.retryCount}/${this.maxRetries})`);
                 await new Promise(resolve => setTimeout(resolve, this.retryDelay));
                 return this.loadDirectory();
+            }
+
+            // Show error UI and reload button
+            this.showError('Failed to load graph data', error);
+            if (this.reloadButton) {
+                this.reloadButton.style.display = 'block';
             }
 
             // Create a minimal fallback dataset if all attempts fail
@@ -111,5 +164,134 @@ export class GraphDataLoader {
     logWarning(message, error = null) {
         console.warn(`[GraphDataLoader] ${message}`, error);
         debugLog('GraphDataLoader', message, error ? { error: error.message } : null);
+    }
+
+    showError(message, error) {
+        const container = document.createElement('div');
+        container.className = 'graph-error-container';
+        container.innerHTML = `
+            <div class="graph-error-message">
+                <h3>⚠️ ${message}</h3>
+                <p>${error.message}</p>
+                <div class="graph-error-details">
+                    <p>Troubleshooting steps:</p>
+                    <ul>
+                        <li>Check your internet connection</li>
+                        <li>Verify the data files exist in the correct location</li>
+                        <li>Try refreshing the page</li>
+                        <li>Check the browser console for detailed errors</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        // Add styles if not already present
+        if (!document.getElementById('graph-error-styles')) {
+            const style = document.createElement('style');
+            style.id = 'graph-error-styles';
+            style.textContent = `
+                .graph-error-container {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: var(--error-bg, rgba(255, 0, 0, 0.1));
+                    border: 1px solid var(--error-border, #ff4444);
+                    border-radius: 8px;
+                    padding: 2rem;
+                    max-width: 90%;
+                    width: 400px;
+                    text-align: center;
+                    z-index: 1000;
+                }
+
+                .graph-error-message h3 {
+                    color: var(--error-text, #ff4444);
+                    margin-bottom: 1rem;
+                }
+
+                .graph-error-details {
+                    text-align: left;
+                    margin-top: 1rem;
+                    font-size: 0.9em;
+                }
+
+                .graph-reload-button {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: var(--primary-color, #4a90e2);
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 0.5rem 1rem;
+                    cursor: pointer;
+                    font-weight: 500;
+                    z-index: 1001;
+                }
+
+                .graph-reload-button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .graph-warning-banner {
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: var(--warning-bg, #fff3cd);
+                    border: 1px solid var(--warning-border, #ffeeba);
+                    border-radius: 4px;
+                    padding: 0.75rem 1rem;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    animation: slideDown 0.3s ease-out;
+                }
+
+                @keyframes slideDown {
+                    from { transform: translate(-50%, -100%); }
+                    to { transform: translate(-50%, 0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Remove any existing error container
+        const existingError = document.querySelector('.graph-error-container');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        document.body.appendChild(container);
+    }
+
+    showWarning(message) {
+        const banner = document.createElement('div');
+        banner.className = 'graph-warning-banner';
+        banner.innerHTML = `
+            <span>⚠️ ${message}</span>
+            <button onclick="this.parentElement.remove()">×</button>
+        `;
+        document.body.appendChild(banner);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (banner.parentElement) {
+                banner.remove();
+            }
+        }, 5000);
+    }
+
+    hideError() {
+        const errorContainer = document.querySelector('.graph-error-container');
+        if (errorContainer) {
+            errorContainer.remove();
+        }
+        if (this.reloadButton) {
+            this.reloadButton.style.display = 'none';
+        }
     }
 } 
