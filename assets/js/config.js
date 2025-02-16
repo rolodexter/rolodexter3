@@ -26,10 +26,10 @@ export const config = {
         owner: 'rolodexter',
         repo: 'rolodexter3',
         branch: 'gh-pages-data',
-        autoDetectRepo: true // Will try to detect repo from current path
+        autoDetectRepo: true
     },
 
-    // Paths
+    // Paths (relative to base path)
     paths: {
         index: 'assets/data/index.json',
         graphData: 'assets/data/graph-data.json',
@@ -38,10 +38,12 @@ export const config = {
 
     // Debug settings
     debug: {
-        enabled: false,
-        logLevel: 'warn', // 'debug' | 'info' | 'warn' | 'error'
+        enabled: true,
+        logLevel: 'debug',
         logToConsole: true,
-        logToUI: true
+        logToUI: true,
+        logPathResolution: true,
+        logCacheOperations: true
     }
 };
 
@@ -62,7 +64,7 @@ function detectEnvironment() {
         });
     }
     
-    return isLocalhost ? 'local' : 'github-pages';
+    return isLocalhost ? 'local' : isGitHubPages ? 'github-pages' : 'local';
 }
 
 export function setEnvironmentMode(mode) {
@@ -70,6 +72,7 @@ export function setEnvironmentMode(mode) {
         throw new Error('Invalid environment mode. Use "github-pages" or "local"');
     }
     config.environment.forceMode = mode;
+    debugLog('Environment', `Mode set to: ${mode}`);
 }
 
 export function enableDebug(options = {}) {
@@ -99,9 +102,10 @@ export function getBasePath() {
             basePath = `${window.location.origin}/${repoPath}`;
         } else {
             // Use configured repo
-            basePath = `${window.location.origin}/${config.githubPages.repo}`;
+            basePath = `${window.location.origin}/${config.githubPages.owner}/${config.githubPages.repo}`;
         }
     } else {
+        // For local development, use the current origin with no additional path
         basePath = window.location.origin;
     }
     
@@ -110,7 +114,9 @@ export function getBasePath() {
             mode,
             detected: basePath,
             configured: config.environment.basePath,
-            autoDetect: config.githubPages.autoDetectRepo
+            autoDetect: config.githubPages.autoDetectRepo,
+            origin: window.location.origin,
+            pathname: window.location.pathname
         });
     }
     

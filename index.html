@@ -76,32 +76,31 @@
     </header>
     
     <main class="container">
-        <div id="knowledge-graph-container">
-            <div id="knowledge-graph">
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <p>Loading knowledge graph...</p>
+        <!-- Knowledge Graph Container -->
+        <section class="knowledge-graph-section">
+            <div class="container">
+                <h2>Knowledge Graph</h2>
+                <div id="knowledge-graph"></div>
+                <div class="graph-controls">
+                    <div class="search-container">
+                        <input type="text" id="graph-search" placeholder="Search nodes...">
+                        <select id="category-filter">
+                            <option value="">All Categories</option>
+                            <option value="core">Core</option>
+                            <option value="documentation">Documentation</option>
+                            <option value="research">Research</option>
+                            <option value="feature">Feature</option>
+                            <option value="legal">Legal</option>
+                            <option value="community">Community</option>
+                            <option value="labs">Labs</option>
+                        </select>
+                    </div>
+                    <button id="zoom-in" aria-label="Zoom in">+</button>
+                    <button id="zoom-out" aria-label="Zoom out">-</button>
+                    <button id="reset-view" aria-label="Reset view">Reset</button>
                 </div>
             </div>
-            <div class="graph-controls">
-                <div class="search-container">
-                    <input type="text" id="graph-search" placeholder="Search nodes...">
-                    <select id="category-filter">
-                        <option value="">All Categories</option>
-                        <option value="core">Core</option>
-                        <option value="documentation">Documentation</option>
-                        <option value="research">Research</option>
-                        <option value="feature">Feature</option>
-                        <option value="legal">Legal</option>
-                        <option value="community">Community</option>
-                        <option value="labs">Labs</option>
-                    </select>
-                </div>
-                <button id="zoom-in" aria-label="Zoom in">+</button>
-                <button id="zoom-out" aria-label="Zoom out">-</button>
-                <button id="reset-view" aria-label="Reset view">Reset</button>
-            </div>
-        </div>
+        </section>
     </main>
 
     <footer>

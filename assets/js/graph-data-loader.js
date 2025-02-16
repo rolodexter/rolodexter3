@@ -1,64 +1,59 @@
-import { PathResolver } from './utils/path-resolver.js';
+import { config, debugLog } from './config.js';
+import { PathResolver } from './path-resolver.js';
 
 export class GraphDataLoader {
-    constructor(options = {}) {
-        this.nodes = new Map();
-        this.edges = [];
-        this.processedFiles = new Set();
-        this.retryAttempts = 0;
+    constructor() {
+        this.pathResolver = new PathResolver();
+        this.retryCount = 0;
         this.maxRetries = 3;
-        this.isLoading = false;
-        this.pathResolver = new PathResolver(options);
-        this.cache = new Map();
-        this.cacheExpiry = options.cacheExpiry || 5 * 60 * 1000; // 5 minutes
+        this.retryDelay = 1000; // 1 second
     }
 
     async loadDirectory() {
         try {
-            this.isLoading = true;
-            
-            // Try to load from cache first
-            const cachedData = this.getFromCache('graphData');
-            if (cachedData) {
-                return cachedData;
-            }
-
-            // Load the static graph data
+            // First try to load from local data directory
+            debugLog('GraphDataLoader', 'Attempting to load from local data directory');
             const data = await this.loadGraphData();
-            if (!data) {
-                // Try to load fallback data
-                const fallbackData = await this.loadFallbackData();
-                if (!fallbackData) {
-                    throw new Error('No graph data available');
-                }
-                return this.processAndCacheData(fallbackData);
+            if (data) {
+                return data;
             }
 
-            return this.processAndCacheData(data);
+            // If local data fails, try fallback data
+            debugLog('GraphDataLoader', 'Local data not found, attempting to load fallback data');
+            const fallbackData = await this.loadFallbackData();
+            if (fallbackData) {
+                return fallbackData;
+            }
+
+            throw new Error('No graph data available');
         } catch (error) {
             this.logError('Error loading graph data:', error);
-            if (this.retryAttempts < this.maxRetries) {
-                this.retryAttempts++;
-                this.logWarning(`Retrying data load (${this.retryAttempts}/${this.maxRetries})`);
-                await new Promise(resolve => setTimeout(resolve, this.retryAttempts * 1000));
+
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                this.logWarning(`Retrying data load (${this.retryCount}/${this.maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, this.retryDelay));
                 return this.loadDirectory();
             }
-            throw error;
-        } finally {
-            this.isLoading = false;
+
+            // Create a minimal fallback dataset if all attempts fail
+            return this.createMinimalFallback();
         }
     }
 
     async loadGraphData() {
         try {
-            const graphDataPath = this.pathResolver.resolveGraphDataPath();
-            this.logDebug(`Loading graph data from: ${graphDataPath}`);
+            const graphDataPath = this.pathResolver.resolvePath(config.paths.graphData);
+            debugLog('GraphDataLoader', `Loading graph data from: ${graphDataPath}`);
             
             const response = await fetch(graphDataPath);
             if (!response.ok) {
                 throw new Error(`Failed to load graph data: ${response.status} ${response.statusText}`);
             }
-            return await response.json();
+            
+            const data = await response.json();
+            debugLog('GraphDataLoader', 'Successfully loaded graph data');
+            return data;
         } catch (error) {
             this.logWarning('Failed to load primary graph data:', error);
             return null;
@@ -67,115 +62,54 @@ export class GraphDataLoader {
 
     async loadFallbackData() {
         try {
-            const indexPath = this.pathResolver.resolveIndexPath();
-            this.logDebug(`Loading fallback data from: ${indexPath}`);
+            const indexPath = this.pathResolver.resolvePath(config.paths.index);
+            debugLog('GraphDataLoader', `Loading fallback data from: ${indexPath}`);
             
             const response = await fetch(indexPath);
             if (!response.ok) {
-                throw new Error(`Failed to load index: ${response.status} ${response.statusText}`);
+                throw new Error('Failed to fetch index');
             }
             
-            const indexData = await response.json();
-            return this.buildGraphFromIndex(indexData);
+            const data = await response.json();
+            debugLog('GraphDataLoader', 'Successfully loaded fallback data');
+            return data;
         } catch (error) {
             this.logWarning('Failed to load fallback data:', error);
             return null;
         }
     }
 
-    buildGraphFromIndex(indexData) {
-        const nodes = [];
-        const edges = [];
-        
-        const processDirectory = (dir, path = '') => {
-            if (dir.files) {
-                Object.entries(dir.files).forEach(([filename, metadata]) => {
-                    const filePath = this.pathResolver.joinPaths(path, filename);
-                    nodes.push({
-                        id: filePath,
-                        name: metadata.title || filename,
-                        metadata: {
-                            ...metadata,
-                            category: metadata.category || 'uncategorized'
-                        }
-                    });
-                });
-            }
-            
-            if (dir.directories) {
-                dir.directories.forEach(subdir => {
-                    const subdirPath = this.pathResolver.joinPaths(path, subdir);
-                    if (dir[subdir]) {
-                        processDirectory(dir[subdir], subdirPath);
-                    }
-                });
-            }
-        };
-
-        processDirectory(indexData.structure);
-        return { nodes, edges };
-    }
-
-    processAndCacheData(data) {
-        // Process nodes
-        this.nodes.clear();
-        data.nodes.forEach(node => {
-            this.nodes.set(node.id, node);
-        });
-        
-        // Process edges
-        this.edges = data.edges;
-        
-        const processedData = this.getGraphData();
-        
-        // Cache the processed data
-        this.setCache('graphData', processedData);
-        
-        return processedData;
-    }
-
-    getGraphData() {
+    createMinimalFallback() {
+        debugLog('GraphDataLoader', 'Creating minimal fallback dataset');
         return {
-            nodes: Array.from(this.nodes.values()),
-            edges: this.edges
+            nodes: [
+                {
+                    id: 'root',
+                    label: 'Knowledge Graph',
+                    type: 'root',
+                    metadata: {
+                        description: 'Root node of the knowledge graph',
+                        created: new Date().toISOString(),
+                        status: 'generated'
+                    }
+                }
+            ],
+            edges: [],
+            metadata: {
+                generated: true,
+                timestamp: new Date().toISOString(),
+                message: 'Minimal fallback dataset generated due to data loading failure'
+            }
         };
-    }
-
-    getFromCache(key) {
-        const cached = this.cache.get(key);
-        if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-            return cached.data;
-        }
-        return null;
-    }
-
-    setCache(key, data) {
-        this.cache.set(key, {
-            data,
-            timestamp: Date.now()
-        });
     }
 
     logError(message, error) {
         console.error(`[GraphDataLoader] ${message}`, error);
+        debugLog('GraphDataLoader', message, { error: error.message, stack: error.stack });
     }
 
-    logWarning(message, data = '') {
-        console.warn(`[GraphDataLoader] ${message}`, data);
-    }
-
-    logDebug(message, data = '') {
-        if (config.debug.enabled) {
-            console.debug(`[GraphDataLoader] ${message}`, data);
-        }
-    }
-
-    reset() {
-        this.nodes.clear();
-        this.edges = [];
-        this.processedFiles.clear();
-        this.retryAttempts = 0;
-        this.isLoading = false;
-        this.cache.clear();
+    logWarning(message, error = null) {
+        console.warn(`[GraphDataLoader] ${message}`, error);
+        debugLog('GraphDataLoader', message, error ? { error: error.message } : null);
     }
 } 
