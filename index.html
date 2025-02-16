@@ -78,10 +78,24 @@
         <div id="knowledge-graph-container">
             <div id="knowledge-graph"></div>
             <div class="graph-controls">
+                <div class="search-container">
+                    <input type="text" id="graph-search" placeholder="Search nodes...">
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="core">Core</option>
+                        <option value="documentation">Documentation</option>
+                        <option value="research">Research</option>
+                        <option value="feature">Feature</option>
+                        <option value="legal">Legal</option>
+                        <option value="community">Community</option>
+                        <option value="labs">Labs</option>
+                    </select>
+                </div>
                 <button id="zoom-in" aria-label="Zoom in">+</button>
                 <button id="zoom-out" aria-label="Zoom out">-</button>
                 <button id="reset-view" aria-label="Reset view">Reset</button>
             </div>
+            <div class="loading-indicator">Loading knowledge graph...</div>
         </div>
     </main>
 
@@ -108,8 +122,30 @@
     </footer>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script type="module" src="./assets/js/graph-metadata.js"></script>
-    <script type="module" src="./assets/js/knowledge-graph.js"></script>
+    <script type="module">
+        import { GraphDataLoader } from './assets/js/graph-data-loader.js';
+        import { GraphSearch } from './assets/js/search-graph.js';
+        import { KnowledgeGraph } from './assets/js/knowledge-graph.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const graph = new KnowledgeGraph('knowledge-graph');
+                const dataLoader = new GraphDataLoader();
+                await dataLoader.loadDirectory('.');
+                const graphData = dataLoader.getGraphData();
+                await graph.renderGraph(graphData.nodes, graphData.edges);
+                
+                // Initialize search
+                const search = new GraphSearch(graph);
+                
+                // Initialize controls
+                graph.initControls();
+            } catch (error) {
+                console.error('Failed to initialize knowledge graph:', error);
+                document.querySelector('.loading-indicator').textContent = 'Error loading knowledge graph. Please try again.';
+            }
+        });
+    </script>
     <script src="./assets/js/script.js"></script>
     
     <div class="bottom-overlay" id="bottomOverlay">
