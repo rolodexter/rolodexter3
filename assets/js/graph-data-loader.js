@@ -51,9 +51,12 @@ export class GraphDataLoader {
 
     async loadGraphData() {
         try {
-            const response = await fetch(this.pathResolver.resolveGraphDataPath());
+            const graphDataPath = this.pathResolver.resolveGraphDataPath();
+            this.logDebug(`Loading graph data from: ${graphDataPath}`);
+            
+            const response = await fetch(graphDataPath);
             if (!response.ok) {
-                throw new Error('Failed to load graph data');
+                throw new Error(`Failed to load graph data: ${response.status} ${response.statusText}`);
             }
             return await response.json();
         } catch (error) {
@@ -64,7 +67,15 @@ export class GraphDataLoader {
 
     async loadFallbackData() {
         try {
-            const indexData = await this.pathResolver.fetchIndex();
+            const indexPath = this.pathResolver.resolveIndexPath();
+            this.logDebug(`Loading fallback data from: ${indexPath}`);
+            
+            const response = await fetch(indexPath);
+            if (!response.ok) {
+                throw new Error(`Failed to load index: ${response.status} ${response.statusText}`);
+            }
+            
+            const indexData = await response.json();
             return this.buildGraphFromIndex(indexData);
         } catch (error) {
             this.logWarning('Failed to load fallback data:', error);
@@ -151,6 +162,12 @@ export class GraphDataLoader {
 
     logWarning(message, data = '') {
         console.warn(`[GraphDataLoader] ${message}`, data);
+    }
+
+    logDebug(message, data = '') {
+        if (config.debug.enabled) {
+            console.debug(`[GraphDataLoader] ${message}`, data);
+        }
     }
 
     reset() {

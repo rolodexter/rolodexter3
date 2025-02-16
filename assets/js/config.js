@@ -38,8 +38,11 @@ export const config = {
 function detectEnvironment() {
     if (typeof window === 'undefined') return 'local';
     
-    const isGitHubPages = /\.github\.io$/.test(window.location.hostname);
-    return isGitHubPages ? 'github-pages' : 'local';
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'local';
+    }
+    return 'github-pages';
 }
 
 export function setEnvironmentMode(mode) {
@@ -65,7 +68,11 @@ export function getBasePath() {
     const mode = config.environment.forceMode || config.environment.mode;
     
     if (mode === 'github-pages') {
-        return `${window.location.origin}/${config.githubPages.repo}`;
+        // Use current path as base for GitHub Pages
+        const pathSegments = window.location.pathname.split('/');
+        // Remove empty segments and filename
+        const repoPath = pathSegments.filter(segment => segment && !segment.includes('.')).join('/');
+        return `${window.location.origin}/${repoPath}`;
     }
     
     return window.location.origin;

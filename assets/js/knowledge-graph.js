@@ -142,11 +142,19 @@ export class KnowledgeGraph {
     }
 
     setupErrorBoundary() {
+        if (!this.container) return;
+
         window.addEventListener('error', (event) => {
-            if (event.target === this.container || this.container.contains(event.target)) {
-                event.preventDefault();
-                this.handleError(event.error);
-                return false;
+            if (!event.target) return;
+            
+            try {
+                if (this.container.contains(event.target)) {
+                    event.preventDefault();
+                    this.handleError(event.error);
+                    return false;
+                }
+            } catch (error) {
+                console.warn('Error in error boundary:', error);
             }
         });
     }
@@ -469,21 +477,37 @@ export class KnowledgeGraph {
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+function initializeGraph() {
     const container = document.getElementById('knowledge-graph');
-    if (container) {
+    if (!container) {
+        console.warn('Knowledge graph container not found');
+        return;
+    }
+
+    try {
         const graph = new KnowledgeGraph('knowledge-graph');
         graph.initGraph().catch(error => {
             console.error('Failed to initialize graph:', error);
-            container.innerHTML = `
-                <div class="error-container">
-                    <div class="error-message">
-                        <h3>Error Loading Knowledge Graph</h3>
-                        <p>${error.message}</p>
-                        <button onclick="location.reload()">Retry</button>
+            if (container) {
+                container.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-message">
+                            <h3>Error Loading Knowledge Graph</h3>
+                            <p>${error.message}</p>
+                            <button onclick="window.location.reload()">Retry</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         });
+    } catch (error) {
+        console.error('Error creating knowledge graph:', error);
     }
-});
+}
+
+// Use a more reliable way to detect when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGraph);
+} else {
+    initializeGraph();
+}
