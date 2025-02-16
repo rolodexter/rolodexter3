@@ -187,7 +187,13 @@ export class KnowledgeGraph {
 
     async loadDataWithRetry(attempt = 1) {
         try {
-            const data = await this.dataLoader.loadDirectory(window.location.origin);
+            // Load data without using window.location.origin
+            const data = await this.dataLoader.loadDirectory();
+            
+            if (!data || !data.nodes || data.nodes.length === 0) {
+                throw new Error('No graph data available');
+            }
+            
             return data;
         } catch (error) {
             if (attempt < this.maxRetries && this.autoRetry) {
@@ -201,13 +207,18 @@ export class KnowledgeGraph {
 
     initSVG() {
         try {
+            // Ensure container exists
+            if (!this.container) {
+                throw new Error('Container not found');
+            }
+            
             // Clear any existing content
             this.container.innerHTML = '';
             
             // Get container dimensions
             const rect = this.container.getBoundingClientRect();
-            this.width = rect.width;
-            this.height = rect.height;
+            this.width = rect.width || 800; // Fallback width
+            this.height = rect.height || 600; // Fallback height
 
             // Create SVG element
             this.svg = d3.select(`#${this.containerId}`)
@@ -217,17 +228,24 @@ export class KnowledgeGraph {
                 .attr('viewBox', [0, 0, this.width, this.height]);
 
             // Add zoom behavior
-            this.svg.call(d3.zoom()
+            const zoom = d3.zoom()
                 .extent([[0, 0], [this.width, this.height]])
                 .scaleExtent([0.1, 4])
                 .on('zoom', (event) => {
-                    this.svg.selectAll('g').attr('transform', event.transform);
-                }));
+                    if (this.g) {
+                        this.g.attr('transform', event.transform);
+                    }
+                });
+
+            this.svg.call(zoom);
 
             // Create main group for graph elements
             this.g = this.svg.append('g');
+            
+            return true;
         } catch (error) {
-            throw new Error(`Failed to initialize SVG: ${error.message}`);
+            this.handleError(error);
+            return false;
         }
     }
 

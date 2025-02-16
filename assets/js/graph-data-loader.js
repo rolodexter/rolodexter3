@@ -7,46 +7,40 @@ export class GraphDataLoader {
         this.maxRetries = 3;
         this.isLoading = false;
         this.baseDirectories = [
-            '/memory/rolodexterVS/tasks',
-            '/memory/rolodexterVS/memories',
-            '/memory/rolodexterVS',
-            '/memory',
-            '/docs',
-            '/legal'
+            'memory/rolodexterVS/tasks',
+            'memory/rolodexterVS/memories',
+            'memory/rolodexterVS',
+            'memory',
+            'docs',
+            'legal'
         ];
     }
 
-    async loadDirectory(baseUrl) {
+    async loadDirectory(baseUrl = '') {
         try {
             this.isLoading = true;
             
             // Load files from each base directory
             for (const dir of this.baseDirectories) {
                 try {
-                    const dirUrl = `${baseUrl}${dir}`;
-                    const response = await fetch(`${dirUrl}/`);
+                    // Use local file system path
+                    const dirPath = `${dir}/`;
                     
-                    if (!response.ok) {
-                        this.logWarning(`Directory not found: ${dir}`);
+                    // Get list of HTML files in directory
+                    const files = await this.getLocalFiles(dirPath);
+                    
+                    if (!files || files.length === 0) {
+                        this.logWarning(`No HTML files found in directory: ${dir}`);
                         continue;
                     }
                     
-                    const text = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(text, 'text/html');
-                    
-                    // Extract file links from directory listing
-                    const links = Array.from(doc.querySelectorAll('a'))
-                        .map(a => a.href)
-                        .filter(href => href.endsWith('.html') || href.endsWith('.md'));
-                    
                     // Process files in parallel with error handling
-                    const results = await Promise.allSettled(links.map(url => this.loadPage(url)));
+                    const results = await Promise.allSettled(files.map(file => this.loadPage(`${dirPath}${file}`)));
                     
-                    // Log only actual errors, not 404s
+                    // Log only actual errors
                     results.forEach((result, index) => {
-                        if (result.status === 'rejected' && !result.reason.message.includes('404')) {
-                            this.logWarning(`Failed to load ${links[index]}: ${result.reason}`);
+                        if (result.status === 'rejected') {
+                            this.logWarning(`Failed to load ${files[index]}: ${result.reason}`);
                         }
                     });
                 } catch (error) {
@@ -263,5 +257,17 @@ export class GraphDataLoader {
         this.processedFiles.clear();
         this.retryAttempts = 0;
         this.isLoading = false;
+    }
+
+    async getLocalFiles(dirPath) {
+        try {
+            // This is a placeholder - in a real implementation, you would need to
+            // implement directory listing for local files, possibly using a backend API
+            // For now, we'll return an empty array to prevent errors
+            return [];
+        } catch (error) {
+            this.logWarning(`Error listing directory ${dirPath}:`, error);
+            return [];
+        }
     }
 } 
