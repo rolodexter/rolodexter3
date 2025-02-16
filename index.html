@@ -18,7 +18,8 @@
 
     <!-- D3.js for Knowledge Graph -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="./assets/css/style.css">
+    <script type="module" src="./assets/js/knowledge-graph.js"></script>
+    <script type="module" src="./assets/js/script.js"></script>
 
     <meta name="description" content="rolodexter3 - AI-powered knowledge management system">
     <meta name="keywords" content="ai, knowledge-graph, web3, solana, blockchain">
@@ -77,6 +78,10 @@
     <main class="container">
         <div id="knowledge-graph-container">
             <div id="knowledge-graph"></div>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Loading knowledge graph...</p>
+            </div>
             <div class="graph-controls">
                 <div class="search-container">
                     <input type="text" id="graph-search" placeholder="Search nodes...">
@@ -95,7 +100,6 @@
                 <button id="zoom-out" aria-label="Zoom out">-</button>
                 <button id="reset-view" aria-label="Reset view">Reset</button>
             </div>
-            <div class="loading-indicator">Loading knowledge graph...</div>
         </div>
     </main>
 
@@ -121,32 +125,6 @@
         </div>
     </footer>
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script type="module">
-        import { KnowledgeGraph } from './assets/js/knowledge-graph.js';
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const graph = new KnowledgeGraph('knowledge-graph');
-                
-                // Initialize controls first
-                graph.initControls();
-                
-                // Then initialize the graph
-                const success = await graph.initGraph();
-                
-                if (!success) {
-                    console.error('Failed to initialize knowledge graph');
-                }
-            } catch (error) {
-                console.error('Error setting up knowledge graph:', error);
-                document.querySelector('.loading-indicator').textContent = 
-                    'Error loading knowledge graph. Please check the console for details.';
-            }
-        });
-    </script>
-    <script src="./assets/js/script.js"></script>
-    
     <div class="bottom-overlay" id="bottomOverlay">
         <div class="overlay-header">
             <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
