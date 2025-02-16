@@ -222,6 +222,13 @@ class PerformanceMonitor {
 
     storeLocally(type, data) {
         try {
+            // Skip storage in restricted contexts
+            if (window.location.protocol === 'chrome-extension:' || 
+                document.documentElement.hasAttribute('webextension-installed')) {
+                console.debug('[PerformanceMonitor] Storage skipped in restricted context');
+                return;
+            }
+
             const key = type === 'metric' ? 'performanceMetrics' : 'sessionEvents';
             const maxItems = type === 'metric' ? 100 : 50;
             
@@ -254,7 +261,17 @@ class PerformanceMonitor {
                 console.debug(`[PerformanceMonitor] Storage quota near limit, reducing ${key} items`);
             }
 
-            localStorage.setItem(key, JSON.stringify(stored));
+            try {
+                localStorage.setItem(key, JSON.stringify(stored));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    // If quota exceeded, try to reduce items further
+                    stored = stored.slice(-Math.floor(maxItems / 4));
+                    localStorage.setItem(key, JSON.stringify(stored));
+                } else {
+                    throw e; // Re-throw other errors
+                }
+            }
 
             // Cleanup old data if needed
             const now = Date.now();
@@ -263,13 +280,8 @@ class PerformanceMonitor {
                 this.lastCleanup = now;
             }
         } catch (error) {
-            console.debug(`[PerformanceMonitor] Local storage failed for ${type}:`, error);
-            // If storage fails, try to clear old data
-            try {
-                localStorage.removeItem(key);
-            } catch (e) {
-                console.debug('[PerformanceMonitor] Failed to clear storage:', e);
-            }
+            // Only log storage errors at debug level
+            console.debug(`[PerformanceMonitor] Local storage operation failed:`, error);
         }
     }
 
