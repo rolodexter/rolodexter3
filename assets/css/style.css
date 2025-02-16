@@ -701,6 +701,11 @@ a:hover {
     100% { transform: rotate(360deg); }
 }
 
+/* Hide menu toggle by default on desktop */
+.menu-toggle {
+    display: none;
+}
+
 /* Mobile Navigation Styles */
 @media (max-width: 768px) {
     .nav-content {
