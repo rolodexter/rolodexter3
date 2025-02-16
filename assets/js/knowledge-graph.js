@@ -3,10 +3,22 @@ import { GraphSearch } from './search-graph.js';
 
 export class KnowledgeGraph {
     constructor(containerId) {
+        console.log(`[KnowledgeGraph] Initializing with container: ${containerId}`);
         this.container = d3.select(`#${containerId}`);
-        this.width = this.container.node().getBoundingClientRect().width;
-        this.height = this.container.node().getBoundingClientRect().height || 600;
+        if (!this.container.node()) {
+            throw new Error(`Container #${containerId} not found in DOM`);
+        }
         
+        this.dataLoader = new GraphDataLoader();
+        this.width = this.container.node().getBoundingClientRect().width;
+        this.height = 600;
+        
+        this.initSVG();
+        this.initSimulation();
+        console.log('[KnowledgeGraph] Constructor completed');
+    }
+    
+    initSVG() {
         this.svg = this.container.append('svg')
             .attr('width', this.width)
             .attr('height', this.height)
@@ -22,32 +34,42 @@ export class KnowledgeGraph {
             });
             
         this.svg.call(this.zoom);
-        
+    }
+    
+    initSimulation() {
         // Initialize simulation
         this.simulation = d3.forceSimulation()
             .force('link', d3.forceLink().id(d => d.id).distance(100))
             .force('charge', d3.forceManyBody().strength(-400))
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))
             .force('collision', d3.forceCollide().radius(30));
-            
-        // Initialize data loader
-        this.dataLoader = new GraphDataLoader();
     }
     
     async initGraph() {
+        console.log('[KnowledgeGraph] Starting graph initialization');
         try {
             this.showLoading();
+            console.log('[KnowledgeGraph] Loading data from directory');
             const data = await this.dataLoader.loadDirectory('.');
-            await this.renderGraph(data.nodes, data.edges);
-            this.hideLoading();
             
-            // Initialize search after graph is rendered
+            if (!data || !data.nodes || !data.edges) {
+                throw new Error('Invalid graph data structure received');
+            }
+            
+            console.log(`[KnowledgeGraph] Loaded ${data.nodes.length} nodes and ${data.edges.length} edges`);
+            
+            console.log('[KnowledgeGraph] Rendering graph');
+            await this.renderGraph(data.nodes, data.edges);
+            
+            this.hideLoading();
+            console.log('[KnowledgeGraph] Initializing search');
             this.search = new GraphSearch(this);
             
             return true;
         } catch (error) {
-            console.error('Failed to initialize graph:', error);
-            this.showError(error.message);
+            console.error('[KnowledgeGraph] Initialization failed:', error);
+            const errorMessage = `Failed to initialize graph: ${error.message}\n\nPlease check the console for detailed logs.`;
+            this.showError(errorMessage);
             return false;
         }
     }
@@ -182,17 +204,23 @@ export class KnowledgeGraph {
     }
     
     showError(message) {
-        this.container.select('.error-container').remove();
-        const error = this.container.append('div')
+        this.hideLoading();
+        const errorContainer = this.container.selectAll('.error-container').data([null]);
+        
+        const errorEnter = errorContainer.enter()
+            .append('div')
             .attr('class', 'error-container');
             
-        error.append('div')
+        errorEnter.append('div')
             .attr('class', 'error-message')
             .html(`
-                <p>Failed to load the knowledge graph:</p>
-                <p class="error-details">${message || 'Unknown error'}</p>
+                <h3>Error Loading Knowledge Graph</h3>
+                <p>${message}</p>
+                <pre class="error-details"></pre>
                 <button onclick="location.reload()">Retry</button>
             `);
+            
+        console.error('[KnowledgeGraph] Error:', message);
     }
 }
 
