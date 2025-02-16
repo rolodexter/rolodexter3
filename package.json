@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "jsdom": "^22.1.0"
+    "jsdom": "^22.1.0",
+    "glob": "^8.1.0"
   },
   "devDependencies": {
     "husky": "^8.0.3",
@@ -8,6 +9,7 @@
   },
   "scripts": {
     "prepare": "husky install",
+    "validate": "npm run validate-metadata",
     "validate-commit": "node scripts/validate-commit-cli.js",
     "pre-commit": "lint-staged",
     "validate-metadata": "node scripts/validate-metadata.js"
