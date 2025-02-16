@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work | rolodexter Labs</title>
+    <title>Work - rolodexter Labs</title>
     
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
@@ -11,19 +11,18 @@
     <link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon_io/favicon-16x16.png">
     <link rel="manifest" href="../assets/brand/favicon_io/site.webmanifest">
     
-    <!-- Styles -->
+    <!-- Font -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="../assets/css/style.css">
 
-    <!-- Meta Tags -->
-    <meta name="description" content="Project portfolio and work samples from rolodexter Labs">
-    <meta name="keywords" content="portfolio, projects, ai, blockchain, web3">
-    <meta name="graph-tags" content="portfolio, work-samples, projects">
+    <meta name="description" content="Work and Projects - rolodexter Labs">
+    <meta name="keywords" content="projects, portfolio, work, development">
+    <meta name="graph-tags" content="work, projects, portfolio">
     <meta name="graph-category" content="work">
-    <meta name="graph-connections" content="../index.html, ../labs/demo.html, ../community/index.html">
-    <meta name="graph-created" content="2025-02-17T20:00:00Z">
-    <meta name="graph-modified" content="2025-02-17T20:00:00Z">
+    <meta name="graph-connections" content="../index.html, ../knowledge/index.html, ../schedule/index.html">
+    <meta name="graph-created" content="2025-02-17T21:00:00Z">
+    <meta name="graph-modified" content="2025-02-17T21:00:00Z">
     <meta name="graph-authors" content="rolodexterVS">
 </head>
 <body>
@@ -119,5 +118,26 @@
     </footer>
 
     <script src="../assets/js/script.js"></script>
+    
+    <div class="bottom-overlay" id="bottomOverlay">
+        <div class="overlay-header">
+            <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
+        </div>
+        <div class="overlay-content hidden" id="overlayContent">
+            <p class="overlay-section-title">Page Information</p>
+            <ul class="overlay-info">
+                <li><strong>Last Updated:</strong> 2025-02-17 21:00:00 UTC</li>
+                <li><strong>Authors:</strong> rolodexterVS</li>
+                <li><strong>File Location:</strong> C:/rolodexter3/work/index.html</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleOverlay() {
+            const content = document.getElementById("overlayContent");
+            content.classList.toggle("hidden");
+        }
+    </script>
 </body>
 </html>
