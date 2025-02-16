@@ -313,6 +313,19 @@ function initMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
     
     if (menuToggle && navLinks) {
+        // Debounce function to prevent rapid firing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         // Function to handle menu state based on window width
         function handleMenuState() {
             if (window.innerWidth >= 768) {
@@ -320,14 +333,29 @@ function initMobileMenu() {
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
                 navLinks.style.display = ''; // Reset to CSS default
+                menuToggle.style.display = 'none'; // Ensure button is hidden
+            } else {
+                menuToggle.style.display = 'flex'; // Show button on mobile
+                // Always ensure menu is closed on mobile load/resize
+                navLinks.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
             }
         }
 
-        // Toggle menu on button click
-        menuToggle.addEventListener('click', (e) => {
+        // Debounced resize handler
+        const debouncedHandleMenuState = debounce(handleMenuState, 250);
+
+        // Toggle menu on button click and keyboard
+        function toggleMenu(e) {
+            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') {
+                return; // Only handle Enter and Space for keyboard
+            }
+            e.preventDefault();
             e.stopPropagation();
+            
+            const isExpanded = navLinks.classList.contains('active');
             navLinks.classList.toggle('active');
-            menuToggle.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
             
             // Add glitch effect on toggle
             const glitchDuration = 300;
@@ -336,13 +364,33 @@ function initMobileMenu() {
             setTimeout(() => {
                 menuToggle.style.animation = '';
             }, glitchDuration);
-        });
+
+            // If opening menu, focus first link
+            if (!isExpanded) {
+                const firstLink = navLinks.querySelector('a');
+                if (firstLink) {
+                    firstLink.focus();
+                }
+            }
+        }
+
+        // Add keyboard support
+        menuToggle.addEventListener('click', toggleMenu);
+        menuToggle.addEventListener('keydown', toggleMenu);
+
+        // Set proper ARIA attributes
+        menuToggle.setAttribute('role', 'button');
+        menuToggle.setAttribute('aria-controls', 'nav-links');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.setAttribute('tabindex', '0');
+        navLinks.id = 'nav-links';
 
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
-            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target) && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
+                menuToggle.focus(); // Return focus to toggle button
             }
         });
 
@@ -354,25 +402,36 @@ function initMobileMenu() {
             });
         });
 
-        // Handle touch events
+        // Handle touch events with improved scroll handling
         let touchStartY = 0;
+        let touchStartX = 0;
+        
         navLinks.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
         }, { passive: true });
 
         navLinks.addEventListener('touchmove', (e) => {
             const touchY = e.touches[0].clientY;
+            const touchX = e.touches[0].clientX;
             const scrollTop = navLinks.scrollTop;
             const scrollHeight = navLinks.scrollHeight;
             const clientHeight = navLinks.clientHeight;
 
-            // Prevent scrolling up when menu is at the top
-            if (scrollTop <= 0 && touchY > touchStartY) {
-                e.preventDefault();
-            }
-            // Prevent scrolling down when menu is at the bottom
-            if (scrollTop + clientHeight >= scrollHeight && touchY < touchStartY) {
-                e.preventDefault();
+            // Calculate touch angle to determine if scroll is more vertical than horizontal
+            const angleRad = Math.atan2(Math.abs(touchY - touchStartY), Math.abs(touchX - touchStartX));
+            const angleDeg = angleRad * 180 / Math.PI;
+            
+            // If scroll is more vertical (>45 degrees) and at bounds
+            if (angleDeg > 45) {
+                // Prevent scrolling up when at top
+                if (scrollTop <= 0 && touchY > touchStartY) {
+                    e.preventDefault();
+                }
+                // Prevent scrolling down when at bottom
+                if (scrollTop + clientHeight >= scrollHeight && touchY < touchStartY) {
+                    e.preventDefault();
+                }
             }
         }, { passive: false });
 
@@ -381,14 +440,22 @@ function initMobileMenu() {
             if (e.key === 'Escape' && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
                 menuToggle.setAttribute('aria-expanded', 'false');
+                menuToggle.focus(); // Return focus to toggle button
             }
         });
 
-        // Handle window resize
-        window.addEventListener('resize', handleMenuState);
+        // Handle window resize with debounce
+        window.addEventListener('resize', debouncedHandleMenuState);
         
         // Initial state check
         handleMenuState();
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                handleMenuState(); // Reset state when page becomes visible
+            }
+        });
     }
 }
 
