@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.2] - 2025-02-18
+
+### Fixed
+
+- Fixed metadata validation script bug showing double "graph-" prefixes
+- Verified and corrected metadata tags across all HTML files
+- Ensured valid categories in Knowledge Graph metadata
+- Resolved pre-commit hook validation errors
+
+### Changed
+
+- Updated Knowledge Graph metadata validation process
+- Standardized metadata implementation across all pages
+- Improved error reporting in validation scripts
+
 ## [1.1.1] - 2025-02-17
 
 ### Changed
