@@ -103,13 +103,19 @@
 
             <section class="knowledge-graph">
                 <h2>Knowledge Graph</h2>
-                <div id="memory-graph" class="graph-container">
-                    <!-- D3.js visualization will be rendered here -->
-                </div>
-                <div class="graph-controls">
-                    <button id="zoom-in" class="graph-btn">+</button>
-                    <button id="zoom-out" class="graph-btn">-</button>
-                    <button id="reset-view" class="graph-btn">Reset</button>
+                <div id="knowledge-graph-container">
+                    <div id="knowledge-graph">
+                        <!-- D3.js visualization will be rendered here -->
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <p>Loading knowledge graph...</p>
+                        </div>
+                    </div>
+                    <div class="graph-controls">
+                        <button id="zoom-in" class="graph-btn">+</button>
+                        <button id="zoom-out" class="graph-btn">-</button>
+                        <button id="reset-view" class="graph-btn">Reset</button>
+                    </div>
                 </div>
             </section>
 
