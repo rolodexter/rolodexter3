@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community - rolodexter Labs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Community - rolodexter3</title>
     
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
@@ -16,22 +16,38 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="../assets/css/style.css">
 
-    <!-- Chatbot Integration -->
-    <script src="../assets/js/chatbot.js" defer></script>
-
-    <meta name="description" content="Community Hub - rolodexter Labs">
-    <meta name="keywords" content="community, forum, discussion, collaboration">
-    <meta name="graph-tags" content="community, forum, collaboration">
+    <!-- Scripts -->
+    <script type="module" src="../assets/js/script.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="rolodexter3 Community - Join our growing ecosystem of developers and researchers">
+    <meta name="keywords" content="community, developers, researchers, collaboration, rolodexter">
+    <meta name="graph-tags" content="community, collaboration, ecosystem">
     <meta name="graph-category" content="community">
-    <meta name="graph-connections" content="../index.html, ../knowledge/index.html">
-    <meta name="graph-created" content="2025-02-17T21:15:00Z">
-    <meta name="graph-modified" content="2025-02-17T21:15:00Z">
-    <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-connections" content="../index.html, ../research/index.html, ../labs/index.html">
+    <meta name="graph-created" content="2025-02-18">
+    <meta name="graph-modified" content="2025-02-18">
+    <meta name="graph-authors" content="rolodexter">
+    <meta name="graph-status" content="active">
+    <meta name="graph-priority" content="high">
 </head>
 <body>
     <button class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 A7 7 0 0 0 21 12.79z"></path>
+        </svg>
     </button>
 
     <header>
@@ -39,7 +55,9 @@
             <div class="nav-content">
                 <div class="nav-logo">
                     <a href="../" class="logo-link">
-                        <img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                        <img src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" alt="rolodexter logo" class="site-logo" 
+                            data-light-src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" 
+                            data-dark-src="../assets/brand/logos/primary/DARK_LOGO.jpg">
                         <span class="visually-hidden">rolodexter Labs</span>
                     </a>
                 </div>
@@ -58,23 +76,65 @@
             </div>
         </nav>
     </header>
-
+    
     <main class="container">
-        <h1>Community</h1>
-        <div class="community-content">
-            <section class="chat-section">
-                <div id="chatbot-container">
-                    <!-- Chatbot will be rendered here -->
-                    <div class="loading-indicator">Initializing community features...</div>
+        <section class="community-welcome">
+            <h1>rolodexter Community</h1>
+            <p>Welcome to the rolodexter community hub. We're building a collaborative ecosystem of developers, researchers, and innovators working together to advance the future of AI-powered knowledge management.</p>
+        </section>
+
+        <section class="community-grid">
+            <div class="community-card">
+                <h2>🤝 Get Involved</h2>
+                <p>Join our growing community of contributors and collaborators. Whether you're a developer, researcher, or enthusiast, there's a place for you in the rolodexter ecosystem.</p>
+                <a href="./contribute/index.html" class="card-link">Learn how to contribute →</a>
+            </div>
+
+            <div class="community-card">
+                <h2>💡 Research & Development</h2>
+                <p>Explore our ongoing research initiatives and development projects. Collaborate with other community members on cutting-edge AI and knowledge management solutions.</p>
+                <a href="../research/index.html" class="card-link">View research projects →</a>
+            </div>
+
+            <div class="community-card">
+                <h2>📚 Resources</h2>
+                <p>Access documentation, guides, and learning materials to help you get started with rolodexter development and research.</p>
+                <a href="../docs/index.html" class="card-link">Browse resources →</a>
+            </div>
+        </section>
+
+        <section class="community-updates">
+            <h2>Latest Updates</h2>
+            <div class="updates-grid">
+                <div class="update-card">
+                    <span class="update-date">February 18, 2025</span>
+                    <h3>Community Guidelines Released</h3>
+                    <p>We've published our community guidelines and contribution standards to help foster a collaborative and inclusive environment.</p>
+                    <a href="./guidelines/index.html">Read more →</a>
                 </div>
-            </section>
-        </div>
+
+                <div class="update-card">
+                    <span class="update-date">February 17, 2025</span>
+                    <h3>Research Collaboration Platform</h3>
+                    <p>Launched our new research collaboration platform to facilitate community-driven innovation and knowledge sharing.</p>
+                    <a href="../research/platform/index.html">Explore platform →</a>
+                </div>
+
+                <div class="update-card">
+                    <span class="update-date">February 16, 2025</span>
+                    <h3>Developer Resources</h3>
+                    <p>New developer documentation and tools are now available to help you contribute to the rolodexter ecosystem.</p>
+                    <a href="../docs/developer/index.html">View resources →</a>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
         <div class="footer-content">
             <div class="footer-links">
                 <div class="footer-links-row">
+                    <a href="../knowledge-graph.html">Knowledge Graph</a><span class="separator">,</span>
                     <a href="../docs/CHANGELOG.html">Changelog</a><span class="separator">,</span>
                     <a href="../docs/VERSION.html">Version</a><span class="separator">,</span>
                     <a href="https://github.com/rolodexter3">GitHub</a>
@@ -87,33 +147,11 @@
                 </div>
             </div>
             <div class="footer-legal">
-                <p><img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
-                <p class="legal-text">By using this site, you agree to our <a href="../legal/privacy.html">Privacy Policy</a> and <a href="../legal/terms.html">Terms of Use</a>.</p>
+                <p><img src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" alt="rolodexter logo" class="site-logo" 
+                    data-light-src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" 
+                    data-dark-src="../assets/brand/logos/primary/DARK_LOGO.jpg"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
-    <script src="../assets/js/script.js"></script>
-
-    <div class="bottom-overlay" id="bottomOverlay">
-        <div class="overlay-header">
-            <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
-        </div>
-        <div class="overlay-content hidden" id="overlayContent">
-            <p class="overlay-section-title">Page Information</p>
-            <ul class="overlay-info">
-                <li><strong>Last Updated:</strong> 2025-02-17 21:15:00 UTC</li>
-                <li><strong>Authors:</strong> rolodexterVS</li>
-                <li><strong>File Location:</strong> C:/rolodexter3/community/index.html</li>
-            </ul>
-        </div>
-    </div>
-
-    <script>
-        function toggleOverlay() {
-            const content = document.getElementById("overlayContent");
-            content.classList.toggle("hidden");
-        }
-    </script>
 </body>
 </html>
