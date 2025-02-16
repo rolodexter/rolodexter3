@@ -413,6 +413,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize effects when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        const container = document.getElementById('knowledge-graph');
+        if (!container) {
+            console.error('Knowledge graph container not found');
+            return;
+        }
+
         const graph = new KnowledgeGraph('knowledge-graph');
         
         // Initialize controls first
@@ -423,16 +429,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (!success) {
             console.error('Failed to initialize knowledge graph');
+            container.innerHTML = `
+                <div class="error-container">
+                    <div class="error-message">
+                        <h3>Error Loading Knowledge Graph</h3>
+                        <p>Failed to initialize the graph. Please check the console for details.</p>
+                        <button onclick="location.reload()">Retry</button>
+                    </div>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('Error setting up knowledge graph:', error);
-        const loadingContainer = document.querySelector('.loading-container');
-        if (loadingContainer) {
-            loadingContainer.innerHTML = `
-                <div class="error-message">
-                    <h3>Error Loading Knowledge Graph</h3>
-                    <p>${error.message}</p>
-                    <button onclick="location.reload()">Retry</button>
+        const container = document.getElementById('knowledge-graph');
+        if (container) {
+            container.innerHTML = `
+                <div class="error-container">
+                    <div class="error-message">
+                        <h3>Error Loading Knowledge Graph</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()">Retry</button>
+                    </div>
                 </div>
             `;
         }

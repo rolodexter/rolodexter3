@@ -165,21 +165,28 @@ class PerformanceMonitor {
             const key = `metric_${Date.now()}`;
             try {
                 localStorage.setItem(key, JSON.stringify(metric));
+                // Keep only last 100 metrics
+                this.cleanupStorage('metric_', 100);
             } catch (error) {
-                console.debug('Local storage full, clearing old metrics');
-                this.clearOldMetrics();
+                console.debug('Local storage full or unavailable:', error);
             }
             return;
         }
 
         try {
-            await fetch('/api/monitor/performance', {
+            const response = await fetch('/api/monitor/performance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(metric)
             });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         } catch (error) {
             console.debug('Failed to log metric:', error);
+            // Fallback to local storage
+            this.storeLocally('metric', metric);
         }
     }
 
@@ -189,30 +196,46 @@ class PerformanceMonitor {
             const key = `session_${Date.now()}`;
             try {
                 localStorage.setItem(key, JSON.stringify(event));
+                // Keep only last 50 session events
+                this.cleanupStorage('session_', 50);
             } catch (error) {
-                console.debug('Local storage full, clearing old events');
-                this.clearOldMetrics();
+                console.debug('Local storage full or unavailable:', error);
             }
             return;
         }
 
         try {
-            await fetch('/api/monitor/session', {
+            const response = await fetch('/api/monitor/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(event)
             });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         } catch (error) {
             console.debug('Failed to log session event:', error);
+            // Fallback to local storage
+            this.storeLocally('session', event);
         }
     }
 
-    clearOldMetrics() {
-        // Keep only the last 100 metrics/events
+    storeLocally(type, data) {
+        try {
+            const key = `${type}_${Date.now()}`;
+            localStorage.setItem(key, JSON.stringify(data));
+            this.cleanupStorage(`${type}_`, type === 'metric' ? 100 : 50);
+        } catch (error) {
+            console.debug('Local storage full or unavailable:', error);
+        }
+    }
+
+    cleanupStorage(prefix, limit) {
         const keys = Object.keys(localStorage)
-            .filter(key => key.startsWith('metric_') || key.startsWith('session_'))
+            .filter(key => key.startsWith(prefix))
             .sort()
-            .slice(0, -100);
+            .slice(0, -limit);
         
         keys.forEach(key => localStorage.removeItem(key));
     }

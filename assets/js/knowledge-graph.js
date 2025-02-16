@@ -326,6 +326,18 @@ document.head.appendChild(style);
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('knowledge-graph');
     if (container) {
-        new KnowledgeGraph('#knowledge-graph');
+        const graph = new KnowledgeGraph('knowledge-graph');
+        graph.initGraph().catch(error => {
+            console.error('Failed to initialize graph:', error);
+            container.innerHTML = `
+                <div class="error-container">
+                    <div class="error-message">
+                        <h3>Error Loading Knowledge Graph</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()">Retry</button>
+                    </div>
+                </div>
+            `;
+        });
     }
 });
