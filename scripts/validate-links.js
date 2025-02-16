@@ -62,6 +62,12 @@ class LinkValidator {
                 await this.validateInternalLink(link, filePath);
             }
         }
+
+        // Add validation for deprecated content
+        if (this.isDeprecatedFile(filePath)) {
+            this.validateDeprecatedMetadata(filePath);
+            this.validateSuccessorLink(filePath);
+        }
     }
 
     extractLinks(content) {
@@ -121,6 +127,28 @@ class LinkValidator {
         }
     }
 
+    isDeprecatedFile(filePath) {
+        return filePath.includes('/deprecated/') || 
+               document.querySelector('meta[name="graph-status"][content="deprecated"]');
+    }
+
+    validateDeprecatedMetadata(filePath) {
+        const requiredMetaTags = [
+            'graph-status',
+            'graph-successor',
+            'graph-archived',
+            'graph-archive-date'
+        ];
+        // ...validation logic...
+    }
+
+    validateSuccessorLink(filePath) {
+        const successor = document.querySelector('meta[name="graph-successor"]')?.content;
+        if (successor) {
+            this.validateFileExists(successor);
+        }
+    }
+
     generateReport() {
         return {
             summary: {
@@ -166,4 +194,4 @@ if (require.main === module) {
             console.error('Error running link validation:', error);
             process.exit(1);
         });
-} 
+}

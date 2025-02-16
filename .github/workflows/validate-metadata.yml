@@ -1,4 +1,4 @@
-name: Validate Metadata
+name: Metadata Validation
 
 on:
   push:
@@ -13,21 +13,55 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for proper validation
     
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
+        cache: 'npm'
         
     - name: Install dependencies
-      run: npm install glob
+      run: npm ci || npm install
         
     - name: Run metadata validation
-      run: node scripts/update-metadata.js
-      
-    - name: Commit changes if any
+      id: validate
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add -A
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update metadata timestamps [skip ci]" && git push) 
+        OUTPUT=$(npm run validate)
+        echo "::set-output name=validation_output::$OUTPUT"
+        
+    - name: Check for warnings
+      if: success()
+      run: |
+        if echo "${{ steps.validate.outputs.validation_output }}" | grep -q "⚠️ Warnings:"; then
+          echo "::warning::Validation completed with warnings. Please review the validation report."
+        fi
+      
+    - name: Update timestamps if needed
+      if: success()
+      run: |
+        if [[ -n $(git status --porcelain) ]]; then
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Update metadata timestamps [skip ci]"
+          git push
+        fi
+        
+    - name: Add validation report to PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const output = process.env.VALIDATION_OUTPUT;
+          const body = `## Metadata Validation Report\n\n\`\`\`\n${output}\n\`\`\``;
+          
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            body: body
+          });
+      env:
+        VALIDATION_OUTPUT: ${{ steps.validate.outputs.validation_output }} 
