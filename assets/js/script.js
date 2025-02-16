@@ -1,6 +1,7 @@
 // Import performance monitor
 import { performanceMonitor } from './performance-tracker.js';
 import { KnowledgeGraph } from './knowledge-graph.js';
+import { MobileMenuHandler } from './components/mobile-menu.js';
 
 // Filter out third-party script errors
 window.onerror = function (message, source, lineno, colno, error) {
@@ -45,14 +46,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     
-    menuToggle?.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        performanceMonitor.logSessionEvent({
-            type: 'menu_toggle',
-            state: navLinks.classList.contains('active'),
-            timestamp: Date.now()
+    if (menuToggle && navLinks) {
+        const mobileMenu = new MobileMenuHandler(navLinks, menuToggle, {
+            swipeThreshold: 50,
+            preventScroll: true,
+            animationDuration: 300
         });
-    });
+
+        // Listen for menu state changes
+        navLinks.addEventListener('menuStateChange', (e) => {
+            const { isOpen } = e.detail;
+            menuToggle.setAttribute('aria-expanded', isOpen.toString());
+            menuToggle.classList.toggle('active', isOpen);
+            
+            performanceMonitor.logSessionEvent({
+                type: 'menu_toggle',
+                state: isOpen,
+                method: 'gesture',
+                timestamp: Date.now()
+            });
+        });
+
+        // Handle menu toggle button click
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.toggleMenu();
+            performanceMonitor.logSessionEvent({
+                type: 'menu_toggle',
+                state: navLinks.classList.contains('active'),
+                method: 'button',
+                timestamp: Date.now()
+            });
+        });
+    }
 
     // Track navigation interactions
     document.querySelectorAll('a').forEach(link => {
