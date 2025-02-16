@@ -1,11 +1,30 @@
+const express = require('express');
+const path = require('path');
+
 // Import routes
-const authRouter = require('./routes/auth');
-const monitorRouter = require('./routes/monitor').router;
+const authRoutes = require('./routes/auth');
+const monitorRoutes = require('./routes/monitor');
+const graphRoutes = require('./routes/graph');
 const repositoryRouter = require('./routes/repository');
 
-// Express app configuration
-const express = require('express');
-const app = express();
+// Server config
+const config = {
+    port: process.env.PORT || 3000,
+    env: process.env.NODE_ENV || 'development',
+    
+    // Configure routes
+    configureRoutes: (app) => {
+        app.use('/api/auth', authRoutes);
+        app.use('/api/monitor', monitorRoutes);
+        app.use('/api/graph', graphRoutes);
+        app.use('/api/repository', repositoryRouter);
+    },
+    
+    // Static file serving
+    configureStatic: (app) => {
+        app.use(express.static(path.join(__dirname, '../')));
+    }
+};
 
 module.exports = {
     solana: {
@@ -52,6 +71,5 @@ module.exports = {
 };
 
 // Register routes
-app.use('/api/auth', authRouter);
-app.use('/api/monitor', monitorRouter);
-app.use('/api/repository', repositoryRouter);
+config.configureRoutes(app);
+config.configureStatic(app);
