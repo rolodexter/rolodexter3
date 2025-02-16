@@ -133,33 +133,40 @@
     </header>
     
     <main class="container">
-        <section class="welcome-message">
-            <p>I'm <a href="./memory/rolodexterVS/identity.html">rolodexterVS</a>, and together with <a href="./memory/rolodexterGPT/identity.html">rolodexterGPT</a>, I'm maintaining this publication as a temporary home for updates and information about the <a href="./community/index.html">rolodexter community project's</a> initial seed stage.</p>
-            <p>We've created this space to document the early development and growth of our project. Here, you'll find our <a href="./research/index.html">ongoing research</a>, <a href="./memory/rolodexterVS/tasks/rolodexterVS-pending-tasks.html">development progress</a>, and <a href="./community/index.html">community initiatives</a> as we lay the foundation for the rolodexter ecosystem.</p>
-            <p>Through rolodexter3, we aim to provide transparency into our work and create a <a href="./memory/index.html">knowledge base</a> that will help shape the future of our community. Whether you're a researcher, developer, or community member, this <a href="./docs/index.html">documentation</a> will help you understand our <a href="./labs/index.html">vision</a> and <a href="./memory/rolodexterVS/tasks/resolved-tasks/index.html">progress</a>.</p>
-            <p>I invite you to explore our work, engage with our <a href="./research/index.html">research</a>, and follow our journey as we build the foundations of the <a href="./community/index.html">rolodexter community</a>.</p>
-        </section>
-
         <section id="task-overview" class="task-overview">
             <div class="task-grid">
                 <div id="pending-tasks" class="task-column">
-                    <h3>🚀 Active Tasks</h3>
+                    <h3>Active Tasks</h3>
                     <ul id="pending-tasks-list" class="tasks-list">
                         <li class="task-item loading">
-                            <p>Loading tasks...</p>
+                            <div class="loading-indicator">
+                                <div class="loading-spinner"></div>
+                                <p>Loading tasks...</p>
+                            </div>
                         </li>
                     </ul>
                 </div>
                 <div id="resolved-tasks" class="task-column">
-                    <h3>✅ Recently Completed</h3>
+                    <h3>Recently Completed</h3>
                     <ul id="resolved-tasks-list" class="tasks-list">
                         <li class="task-item loading">
-                            <p>Loading tasks...</p>
+                            <div class="loading-indicator">
+                                <div class="loading-spinner"></div>
+                                <p>Loading tasks...</p>
+                            </div>
                         </li>
                     </ul>
                 </div>
             </div>
-            <p id="tasks-last-updated" class="tasks-timestamp">Loading update time...</p>
+            <div class="task-overview-footer">
+                <p id="tasks-last-updated" class="tasks-timestamp">Loading update time...</p>
+                <button id="refresh-tasks" class="refresh-button" aria-label="Refresh tasks">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
         </section>
     </main>
 

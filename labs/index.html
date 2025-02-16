@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labs - rolodexter Labs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Labs - rolodexter3</title>
     
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
@@ -16,10 +16,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="../assets/css/style.css">
 
-    <!-- Graph Scripts -->
-    <script src="../assets/js/knowledge-graph.js" defer></script>
-    <script src="../assets/js/graph-metadata.js" defer></script>
-
+    <!-- Scripts -->
+    <script type="module" src="../assets/js/script.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    
+    <!-- Knowledge Graph Metadata -->
     <meta name="description" content="Labs and Experimental Projects - rolodexter Labs">
     <meta name="keywords" content="labs, experiments, innovation, development, prototypes">
     <meta name="graph-tags" content="labs, experiments, prototypes, development">
@@ -28,6 +29,8 @@
     <meta name="graph-created" content="2025-02-17T22:00:00Z">
     <meta name="graph-modified" content="2025-02-17T22:35:00Z">
     <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
+    <meta name="graph-priority" content="high">
 </head>
 <body>
     <button class="theme-toggle" aria-label="Toggle theme">
@@ -52,7 +55,9 @@
             <div class="nav-content">
                 <div class="nav-logo">
                     <a href="../" class="logo-link">
-                        <img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                        <img src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" alt="rolodexter logo" class="site-logo" 
+                            data-light-src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" 
+                            data-dark-src="../assets/brand/logos/primary/DARK_LOGO.jpg">
                         <span class="visually-hidden">rolodexter Labs</span>
                     </a>
                 </div>
@@ -73,22 +78,56 @@
     </header>
 
     <main class="container">
-        <h1>Labs</h1>
-        <div class="labs-content">
-            <section class="labs-projects">
-                <h2>Current Projects</h2>
-                <div class="project-grid">
-                    <!-- Project cards will be dynamically loaded -->
-                    <div class="loading-indicator">Loading lab projects...</div>
+        <section class="labs-welcome">
+            <h1>Labs</h1>
+            <p>Welcome to rolodexter Labs, our experimental workspace where we explore innovative ideas and prototype new features for the rolodexter ecosystem.</p>
+        </section>
+
+        <section class="labs-projects">
+            <h2>Current Projects</h2>
+            <div class="project-grid">
+                <div class="project-card">
+                    <h3>Knowledge Graph Visualization</h3>
+                    <p>Interactive visualization of project relationships and dependencies.</p>
+                    <a href="./demo.html" class="card-link">View Demo →</a>
                 </div>
-            </section>
-        </div>
+                <div class="project-card">
+                    <h3>Memory System</h3>
+                    <p>Advanced memory organization and retrieval system.</p>
+                    <a href="../memory/index.html" class="card-link">Learn More →</a>
+                </div>
+                <div class="project-card">
+                    <h3>Research Platform</h3>
+                    <p>Collaborative research and development environment.</p>
+                    <a href="../research/index.html" class="card-link">Explore →</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="labs-updates">
+            <h2>Latest Updates</h2>
+            <div class="updates-grid">
+                <div class="update-card">
+                    <span class="update-date">February 17, 2025</span>
+                    <h3>Knowledge Graph Beta</h3>
+                    <p>Released beta version of the knowledge graph visualization system.</p>
+                    <a href="./demo.html">Try it now →</a>
+                </div>
+                <div class="update-card">
+                    <span class="update-date">February 16, 2025</span>
+                    <h3>Memory System Enhancement</h3>
+                    <p>Improved memory organization with new metadata standards.</p>
+                    <a href="../memory/index.html">View changes →</a>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
         <div class="footer-content">
             <div class="footer-links">
                 <div class="footer-links-row">
+                    <a href="../knowledge-graph.html">Knowledge Graph</a><span class="separator">,</span>
                     <a href="../docs/CHANGELOG.html">Changelog</a><span class="separator">,</span>
                     <a href="../docs/VERSION.html">Version</a><span class="separator">,</span>
                     <a href="https://github.com/rolodexter3">GitHub</a>
@@ -101,33 +140,11 @@
                 </div>
             </div>
             <div class="footer-legal">
-                <p><img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
-                <p class="legal-text">By using this site, you agree to our <a href="../legal/privacy.html">Privacy Policy</a> and <a href="../legal/terms.html">Terms of Use</a>.</p>
+                <p><img src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" alt="rolodexter logo" class="site-logo" 
+                    data-light-src="../assets/brand/logos/primary/LIGHT_LOGO.jpg" 
+                    data-dark-src="../assets/brand/logos/primary/DARK_LOGO.jpg"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
-    <script src="../assets/js/script.js"></script>
-    
-    <div class="bottom-overlay" id="bottomOverlay">
-        <div class="overlay-header">
-            <button class="overlay-toggle" onclick="toggleOverlay()">Page Info ▾</button>
-        </div>
-        <div class="overlay-content hidden" id="overlayContent">
-            <p class="overlay-section-title">Page Information</p>
-            <ul class="overlay-info">
-                <li><strong>Last Updated:</strong> 2025-02-17 22:00:00 UTC</li>
-                <li><strong>Authors:</strong> rolodexterVS</li>
-                <li><strong>File Location:</strong> C:/rolodexter3/labs/index.html</li>
-            </ul>
-        </div>
-    </div>
-
-    <script>
-        function toggleOverlay() {
-            const content = document.getElementById("overlayContent");
-            content.classList.toggle("hidden");
-        }
-    </script>
 </body>
 </html>
