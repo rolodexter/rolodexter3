@@ -81,3 +81,14 @@ docs/
 - Use for body text and UI elements
 - Weight: 600 (Semi-Bold)
 - Maintain readability at all sizes
+
+## Layout & Navigation Guidelines
+
+### Footer Standards
+- Links should be comma-separated without spaces (e.g., "Privacy Policy,Terms of Use")
+- Two-row layout with resource links in first row
+- Legal links in second row
+- Left-aligned text and elements
+- Mobile-responsive with proper wrapping
+
+### Navigation
