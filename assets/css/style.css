@@ -127,7 +127,7 @@ section {
 
 /* Footer */
 footer {
-    padding: calc(var(--spacing-unit) * 2) var(--spacing-unit);
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
     border-top: 1px solid var(--border-color);
     background: var(--surface-color);
 }
@@ -139,8 +139,9 @@ footer {
 
 .footer-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: calc(var(--spacing-unit) * 2);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: calc(var(--spacing-unit) * 1.5);
+    margin-bottom: 1.5rem;
 }
 
 .footer-section ul {
@@ -157,21 +158,29 @@ footer {
 }
 
 .footer-section h3 {
-    margin: 1rem 0 0.5rem;
-    font-size: 0.95rem;
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
 }
 
 .footer-section a {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     white-space: nowrap;
 }
 
 .footer-legal {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
-    text-align: center;
-    font-size: 0.9rem;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer-legal p {
+    margin: 0;
 }
 
 /* Links */
@@ -500,4 +509,28 @@ input, textarea {
     width: 24px;
     height: 24px;
     margin-right: 0.25rem;
+}
+
+/* Responsive Footer Adjustments */
+@media (max-width: 768px) {
+    footer {
+        padding: var(--spacing-unit);
+    }
+
+    .footer-grid {
+        gap: var(--spacing-unit);
+    }
+    
+    .footer-section {
+        text-align: left;
+    }
+    
+    .footer-section ul {
+        justify-content: flex-start;
+    }
+    
+    .footer-legal {
+        margin-top: var(--spacing-unit);
+        padding-top: var(--spacing-unit);
+    }
 }
