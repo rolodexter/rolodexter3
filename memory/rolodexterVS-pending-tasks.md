@@ -99,6 +99,15 @@
   - [ ] Test force-directed layout improvements
   - [ ] Implement real-time update optimizations
 
+- [ ] **Knowledge Graph Implementation**
+  - [x] Create core D3.js visualization script (knowledge-graph.js)
+  - [x] Implement metadata extraction and graph data loader (graph-data-loader.js)
+  - [x] Add search functionality with indexing (search-graph.js)
+  - [ ] Test graph data flow with new API endpoints
+  - [ ] Add graph metadata to remaining files
+  - [ ] Implement real-time update optimizations
+  - [ ] Test force-directed layout improvements
+
 ## 🔄 In Progress
 
 - [ ] **Enhance the Knowledge Graph**
@@ -153,6 +162,7 @@
   - Apply client-side performance optimizations.
 
 ## 🔍 Recent Updates
+
 - Completed Labs section standardization
 - Fixed footer structure in demo page
 - Added missing meta tags and scripts
