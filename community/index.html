@@ -3,9 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community - rolodexter3</title>
+    <title>Community - rolodexter Labs</title>
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="../assets/brand/favicon_io/site.webmanifest">
+    
+    <!-- Font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="icon" type="image/png" href="../assets/brand/favicon_io/favicon-32x32.png">
+
+    <!-- Chatbot Integration -->
+    <script src="../assets/js/chatbot.js" defer></script>
+
+    <meta name="description" content="Community Hub - rolodexter Labs">
+    <meta name="keywords" content="community, forum, discussion, collaboration">
+    <meta name="graph-tags" content="community, forum, collaboration">
+    <meta name="graph-category" content="community">
+    <meta name="graph-connections" content="../index.html, ../knowledge/index.html">
+    <meta name="graph-created" content="2025-02-17T21:15:00Z">
+    <meta name="graph-modified" content="2025-02-17T21:15:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
 </head>
 <body>
     <button class="theme-toggle" aria-label="Toggle theme">
@@ -17,25 +38,39 @@
         <nav class="header-nav">
             <div class="nav-content">
                 <div class="nav-logo">
-                    <h1>rolodexter3</h1>
+                    <a href="../" class="logo-link">
+                        <img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo">
+                        <span class="visually-hidden">rolodexter Labs</span>
+                    </a>
                 </div>
+                <button class="menu-toggle" aria-label="Toggle navigation menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M3 12H21" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 6H21" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 18H21" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
                 <ul class="nav-links">
                     <li><a href="../work/index.html">Work</a></li>
                     <li><a href="../schedule/index.html">Schedule</a></li>
                     <li><a href="../knowledge/index.html">Knowledge</a></li>
                     <li><a href="../labs/index.html">Labs</a></li>
                     <li><a href="../research/index.html">Research</a></li>
-                    <li><a href="./index.html" class="active">Community</a></li>
+                    <li><a href="../community/index.html" class="active">Community</a></li>
                 </ul>
             </div>
         </nav>
     </header>
 
     <main class="container">
-        <!-- Content intentionally cleared for future layout updates -->
-        <div class="placeholder">
-            <p>Community features coming soon...</p>
-            <button id="connect-wallet" class="btn primary-btn">Connect Wallet</button>
+        <h1>Community</h1>
+        <div class="community-content">
+            <section class="chat-section">
+                <div id="chatbot-container">
+                    <!-- Chatbot will be rendered here -->
+                    <div class="loading-indicator">Initializing community features...</div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -50,7 +85,7 @@
                         <li><a href="../knowledge/index.html">Knowledge</a></li>
                         <li><a href="../labs/index.html">Labs</a></li>
                         <li><a href="../research/index.html">Research</a></li>
-                        <li><a href="./index.html">Community</a></li>
+                        <li><a href="../community/index.html" class="active">Community</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -72,7 +107,7 @@
                 </div>
             </div>
             <div class="footer-legal">
-                <p>© 2025 rolodexter3 Labs. All rights reserved.</p>
+                <p><img src="../assets/brand/logos/primary/SQUARE_LOGO.jpg" alt="rolodexter logo" class="site-logo"> © 2025 rolodexter Labs, LLC. All rights reserved.</p>
                 <p class="legal-text">By using this site, you agree to our <a href="../legal/privacy.html">Privacy Policy</a> and <a href="../legal/terms.html">Terms of Use</a>.</p>
             </div>
         </div>
@@ -87,17 +122,9 @@
         <div class="overlay-content hidden" id="overlayContent">
             <p class="overlay-section-title">Page Information</p>
             <ul class="overlay-info">
-                <li><strong>Last Updated:</strong> 2025-02-16 20:47:32 UTC</li>
+                <li><strong>Last Updated:</strong> 2025-02-17 21:15:00 UTC</li>
                 <li><strong>Authors:</strong> rolodexterVS</li>
-                <li><strong>Contributors:</strong> rolodexterGPT</li>
                 <li><strong>File Location:</strong> C:/rolodexter3/community/index.html</li>
-            </ul>
-
-            <p class="overlay-section-title">Pending Tasks</p>
-            <ul class="overlay-info">
-                <li>Display Connect Wallet button only on this page</li>
-                <li>Implement role-based access levels for community features</li>
-                <li>Update wallet connection UI/UX</li>
             </ul>
         </div>
     </div>
