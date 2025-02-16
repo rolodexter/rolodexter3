@@ -43,7 +43,8 @@ export const config = {
         logToConsole: true,
         logToUI: true,
         logPathResolution: true,
-        logCacheOperations: true
+        logCacheOperations: true,
+        validatePaths: true
     }
 };
 
@@ -53,18 +54,25 @@ function detectEnvironment() {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isGitHubPages = hostname.endsWith('github.io');
+    const isCustomDomain = !isLocalhost && !isGitHubPages;
     
-    if (config.environment.debug.showEnvironmentInfo) {
-        debugLog('Environment', {
+    if (config.debug.showEnvironmentInfo) {
+        debugLog('Environment Detection', {
             hostname,
             isLocalhost,
             isGitHubPages,
+            isCustomDomain,
             pathname: window.location.pathname,
-            origin: window.location.origin
+            origin: window.location.origin,
+            href: window.location.href,
+            userAgent: navigator.userAgent
         });
     }
     
-    return isLocalhost ? 'local' : isGitHubPages ? 'github-pages' : 'local';
+    if (isLocalhost) return 'local';
+    if (isGitHubPages) return 'github-pages';
+    if (isCustomDomain) return 'custom-domain';
+    return 'unknown';
 }
 
 export function setEnvironmentMode(mode) {
@@ -87,40 +95,107 @@ export function enableDebug(options = {}) {
 
 export function getBasePath() {
     if (config.environment.basePath) {
+        debugLog('Base Path', 'Using configured base path:', config.environment.basePath);
         return config.environment.basePath;
     }
 
     const mode = config.environment.forceMode || config.environment.mode;
     let basePath;
     
-    if (mode === 'github-pages') {
-        if (config.githubPages.autoDetectRepo) {
-            // Auto-detect repo from current path
-            const pathSegments = window.location.pathname.split('/');
-            // Remove empty segments and filename
-            const repoPath = pathSegments.filter(segment => segment && !segment.includes('.')).join('/');
-            basePath = `${window.location.origin}/${repoPath}`;
-        } else {
-            // Use configured repo
-            basePath = `${window.location.origin}/${config.githubPages.owner}/${config.githubPages.repo}`;
-        }
-    } else {
-        // For local development, use the current origin with no additional path
-        basePath = window.location.origin;
+    switch (mode) {
+        case 'github-pages':
+            basePath = resolveGitHubPagesPath();
+            break;
+        case 'custom-domain':
+            basePath = resolveCustomDomainPath();
+            break;
+        case 'local':
+            basePath = resolveLocalPath();
+            break;
+        default:
+            basePath = resolveFallbackPath();
     }
+
+    // Cache the resolved base path
+    config.environment.basePath = basePath;
     
-    if (config.environment.debug.showPathResolution) {
-        debugLog('Base Path', {
+    if (config.debug.logPathResolution) {
+        debugLog('Base Path Resolution', {
             mode,
-            detected: basePath,
-            configured: config.environment.basePath,
-            autoDetect: config.githubPages.autoDetectRepo,
+            resolved: basePath,
             origin: window.location.origin,
-            pathname: window.location.pathname
+            pathname: window.location.pathname,
+            fullUrl: new URL(basePath + '/').href
+        });
+    }
+
+    // Validate the resolved path if enabled
+    if (config.debug.validatePaths) {
+        validateBasePath(basePath).catch(error => {
+            debugLog('Base Path Validation', 'Warning: Base path validation failed', { error: error.message });
         });
     }
     
     return basePath;
+}
+
+function resolveGitHubPagesPath() {
+    if (config.githubPages.autoDetectRepo) {
+        const pathSegments = window.location.pathname.split('/');
+        // Remove empty segments, index.html, and other file names
+        const repoPath = pathSegments
+            .filter(segment => segment && !segment.includes('.'))
+            .join('/');
+        return `${window.location.origin}/${repoPath}`;
+    }
+    return `${window.location.origin}/${config.githubPages.owner}/${config.githubPages.repo}`;
+}
+
+function resolveCustomDomainPath() {
+    // For custom domains, use the pathname up to the last directory
+    const pathname = window.location.pathname;
+    const lastSlashIndex = pathname.lastIndexOf('/');
+    return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
+}
+
+function resolveLocalPath() {
+    // For local development, use the origin plus any base directory
+    const baseDir = window.location.pathname.split('/')[1];
+    return baseDir ? `${window.location.origin}/${baseDir}` : window.location.origin;
+}
+
+function resolveFallbackPath() {
+    // Default to current directory
+    const pathname = window.location.pathname;
+    const lastSlashIndex = pathname.lastIndexOf('/');
+    return window.location.origin + (lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '');
+}
+
+async function validateBasePath(basePath) {
+    try {
+        // Try to fetch the index file to validate the base path
+        const indexUrl = `${basePath}/${config.paths.index}`;
+        const response = await fetch(indexUrl, { method: 'HEAD' });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to validate base path: ${response.status} ${response.statusText}`);
+        }
+        
+        debugLog('Base Path Validation', 'Successfully validated base path', {
+            basePath,
+            indexUrl,
+            status: response.status
+        });
+        
+        return true;
+    } catch (error) {
+        debugLog('Base Path Validation', 'Failed to validate base path', {
+            basePath,
+            error: error.message
+        });
+        
+        return false;
+    }
 }
 
 // Enhanced debug logging utility
