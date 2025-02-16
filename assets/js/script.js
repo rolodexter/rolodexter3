@@ -1,5 +1,6 @@
 // Import performance monitor
 import { performanceMonitor } from './performance-tracker.js';
+import { KnowledgeGraph } from './knowledge-graph.js';
 
 // Add smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', () => {
@@ -410,89 +411,30 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Initialize effects when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize mobile menu
-    initMobileMenu();
-    
-    // Initialize glitch effects on headings
-    document.querySelectorAll('.glitch-effect').forEach(createGlitchEffect);
-    
-    // Initialize data flow animations
-    initDataFlowElements();
-    
-    // Initialize holographic card effects
-    initHoloCards();
-    
-    // Initialize matrix rain effect
-    createMatrixRain();
-    
-    // Add loading states to dynamic content sections
-    document.querySelectorAll('.holo-card').forEach(card => {
-        card.addEventListener('click', async () => {
-            await LoadingStateManager.loadContent(card, new Promise(resolve => setTimeout(resolve, 2000)));
-        });
-    });
-
-    // Initialize cookie consent
-    new CookieConsent();
-
-    console.log('ROLODEXTER interface initialized with cyberpunk effects');
-    
-    // Mobile Navigation
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    
-    menuToggle?.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        menuToggle.setAttribute('aria-expanded', 
-            menuToggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
-        );
-    });
-
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav-links') && !e.target.closest('.menu-toggle')) {
-            navLinks.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const graph = new KnowledgeGraph('knowledge-graph');
+        
+        // Initialize controls first
+        graph.initControls();
+        
+        // Then initialize the graph
+        const success = await graph.initGraph();
+        
+        if (!success) {
+            console.error('Failed to initialize knowledge graph');
         }
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-            navLinks.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
+    } catch (error) {
+        console.error('Error setting up knowledge graph:', error);
+        const loadingContainer = document.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.innerHTML = `
+                <div class="error-message">
+                    <h3>Error Loading Knowledge Graph</h3>
+                    <p>${error.message}</p>
+                    <button onclick="location.reload()">Retry</button>
+                </div>
+            `;
         }
-    });
-
-    // Initialize performance monitoring
-    if (window.location.pathname.includes('/media')) {
-        performanceTracker.metrics.media.set('pageLoad', performance.now());
     }
-    
-    // Track API interactions
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-        const startTime = performance.now();
-        try {
-            const response = await originalFetch(...args);
-            const duration = performance.now() - startTime;
-            
-            if (args[0].includes('/api/')) {
-                performanceTracker.metrics.api.set(args[0], {
-                    duration,
-                    status: response.status,
-                    timestamp: Date.now()
-                });
-            }
-            
-            return response;
-        } catch (error) {
-            performanceTracker.logWarning('API Request Failed', {
-                url: args[0],
-                error: error.message
-            });
-            throw error;
-        }
-    };
 });
