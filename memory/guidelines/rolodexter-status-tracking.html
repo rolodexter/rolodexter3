@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Tracking Guidelines - rolodexter Labs</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../assets/brand/favicon_io/favicon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/documentation.css">
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="Guidelines for standardized status tracking and file annotations">
+    <meta name="keywords" content="status tracking, annotations, documentation, standards">
+    <meta name="graph-tags" content="documentation, guidelines, status, tracking">
+    <meta name="graph-category" content="documentation">
+    <meta name="graph-connections" content="index.html, ../pending-tasks.html">
+    <meta name="graph-created" content="2025-02-17T16:00:00Z">
+    <meta name="graph-modified" content="2025-02-18T03:00:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
+</head>
+<body class="documentation-page">
+    <main class="container">
+        <article class="memory-content">
+            <h1>Status Tracking Guidelines</h1>
+            
+            <section class="overview">
+                <p>To ensure consistent tracking across all files, rolodexter uses a standardized status annotation system. This document outlines the format and implementation details.</p>
+            </section>
+
+            <section class="standard-format">
+                <h2>Standard Format</h2>
+                <h3>Status Block</h3>
+                <pre><code class="language-markdown">---
+## 📌 **Status**
+📝 **Updated by**: [rolodexterVS | rolodexterGPT]
+👤 **Oversight**: Human Executive Operator (Joe Maristela)
+📅 **Last Updated**: `[YYYY-MM-DD HH:MM:SS UTC]`
+✅ **Completed On**: `[YYYY-MM-DD HH:MM:SS UTC]` *(If applicable)*
+🔄 **Status**: `On-going | Completed | Needs Review | Awaiting Executive Approval`
+💬 **Comment**: `Brief status update or questions` *(Optional)*
+✍️ **Executive Notes**: `Notes from Joe Maristela` *(When applicable)*</code></pre>
+                <ul>
+                    <li>This block appears at the bottom of every file rolodexter reads or updates</li>
+                    <li>Helps track progress across legal docs, task files, research notes, and session history</li>
+                </ul>
+            </section>
+
+            <section class="example-updates">
+                <h2>Example Updates</h2>
+                
+                <h3>Example in pending-tasks.html</h3>
+                <pre><code class="language-html">&lt;footer class="task-footer"&gt;
+    &lt;div class="status-block"&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Updated by:&lt;/span&gt; rolodexterVS&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Oversight:&lt;/span&gt; Human Executive Operator (Joe Maristela)&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Last Updated:&lt;/span&gt; 2025-02-17 16:00:00 UTC&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Status:&lt;/span&gt; &lt;span class="status-ongoing"&gt;On-going&lt;/span&gt;&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Comment:&lt;/span&gt; Need clarification on task priority order&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/footer&gt;</code></pre>
+
+                <h3>Example in task files</h3>
+                <pre><code class="language-html">&lt;footer class="task-footer"&gt;
+    &lt;div class="status-block"&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Updated by:&lt;/span&gt; rolodexterVS&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Oversight:&lt;/span&gt; Human Executive Operator (Joe Maristela)&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Last Updated:&lt;/span&gt; 2025-02-17 16:00:00 UTC&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Completed On:&lt;/span&gt; -&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Status:&lt;/span&gt; &lt;span class="status-ongoing"&gt;On-going&lt;/span&gt;&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Comment:&lt;/span&gt; API access details needed for OpenRouter integration&lt;/p&gt;
+        &lt;p class="status-item"&gt;&lt;span class="status-label"&gt;Executive Notes:&lt;/span&gt; -&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/footer&gt;</code></pre>
+            </section>
+
+            <section class="automation">
+                <h2>Automation with GitHub Actions</h2>
+                <p>Status updates are automated using GitHub Actions to ensure consistency:</p>
+                <pre><code class="language-yaml">      - name: Update rolodexter's Status in HTML Files
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          for file in $(find . -name "*.html"); do
+            if grep -q "class=\"status-block\"" "$file"; then
+              sed -i "s|Last Updated:.*UTC|Last Updated: $TIMESTAMP UTC|" "$file"
+            fi
+          done</code></pre>
+            </section>
+
+            <section class="css-styling">
+                <h2>CSS Styling</h2>
+                <pre><code class="language-css">.status-block {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+}
+
+.status-item {
+    margin: 0.5rem 0;
+    line-height: 1.4;
+}
+
+.status-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.status-ongoing {
+    color: var(--status-ongoing);
+}
+
+.status-completed {
+    color: var(--status-completed);
+}
+
+.status-review {
+    color: var(--status-review);
+}
+
+.status-awaiting {
+    color: var(--status-awaiting);
+}</code></pre>
+            </section>
+
+            <section class="next-steps">
+                <h2>Next Steps</h2>
+                <ol>
+                    <li>Update all HTML files to include the standardized status block</li>
+                    <li>Implement automated status updates via GitHub Actions</li>
+                    <li>Add status block styling to the CSS framework</li>
+                    <li>Create documentation for status block usage</li>
+                </ol>
+            </section>
+
+            <footer class="task-footer">
+                <div class="status-block">
+                    <p class="status-item"><span class="status-label">Updated by:</span> rolodexterVS</p>
+                    <p class="status-item"><span class="status-label">Oversight:</span> Human Executive Operator (Joe Maristela)</p>
+                    <p class="status-item"><span class="status-label">Last Updated:</span> 2025-02-18 03:00 UTC</p>
+                    <p class="status-item"><span class="status-label">Status:</span> <span class="status-completed">Completed</span></p>
+                </div>
+            </footer>
+        </article>
+    </main>
+
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html> 

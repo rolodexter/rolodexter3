@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commit Message Guidelines - rolodexter Labs</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../assets/brand/favicon_io/favicon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/documentation.css">
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="Standards and guidelines for writing clear and consistent commit messages">
+    <meta name="keywords" content="commit messages, git, guidelines, standards">
+    <meta name="graph-tags" content="documentation, guidelines, git, commits">
+    <meta name="graph-category" content="documentation">
+    <meta name="graph-connections" content="index.html, ../rolodexterGPT-memory/session-history.html">
+    <meta name="graph-created" content="2025-02-17T16:00:00Z">
+    <meta name="graph-modified" content="2025-02-18T03:00:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
+</head>
+<body class="documentation-page">
+    <main class="container">
+        <article class="memory-content">
+            <h1>Commit Message Guidelines</h1>
+            
+            <section class="overview">
+                <h2>Overview</h2>
+                <p>This document defines the commit message structure, ensuring all commit logs are concise, structured, and informative while removing unnecessary AI-generated labels.</p>
+            </section>
+
+            <section class="format">
+                <h2>Format</h2>
+                <pre><code class="language-text">&lt;action verb&gt; &lt;subject&gt; [context]</code></pre>
+                
+                <h3>Guidelines</h3>
+                <ul>
+                    <li>Use present tense, active voice</li>
+                    <li>Be descriptive but concise</li>
+                    <li>Focus on the change, not the file</li>
+                    <li>Start with an action verb</li>
+                </ul>
+
+                <h3>Action Verbs to Use</h3>
+                <ul>
+                    <li><code>Add</code> (new features)</li>
+                    <li><code>Fix</code> (bug fixes)</li>
+                    <li><code>Update</code> (improvements)</li>
+                    <li><code>Remove</code> (deletions)</li>
+                    <li><code>Refactor</code> (code restructuring)</li>
+                    <li><code>Optimize</code> (performance)</li>
+                    <li><code>Document</code> (documentation)</li>
+                </ul>
+
+                <h3>Structure Rules</h3>
+                <ul>
+                    <li>Keep subject line under 50 characters</li>
+                    <li>Use imperative mood ("Add" not "Added")</li>
+                    <li>No period at end of subject line</li>
+                </ul>
+            </section>
+
+            <section class="examples">
+                <h2>Examples</h2>
+                
+                <h3>Good Examples</h3>
+                <pre><code class="language-text">Add Redis caching for session tokens
+Fix dark mode toggle in navigation
+Update knowledge graph search algorithm
+Remove deprecated API endpoints
+Refactor auth flow for Solana login
+Optimize knowledge graph queries
+Document API authentication process</code></pre>
+
+                <h3>Bad Examples</h3>
+                <pre><code class="language-text">❌ AI-Generated Commit Summary
+❌ Updates to files
+❌ Fixed stuff
+❌ Added some features yesterday</code></pre>
+            </section>
+
+            <section class="authority">
+                <h2>Authority Requirements</h2>
+                <p>Certain types of changes require explicit approval from the Human Executive Operator (Joe Maristela):</p>
+                <ul>
+                    <li><code>[ARCH]</code> - Architecture changes</li>
+                    <li><code>[SECURITY]</code> - Security-related modifications</li>
+                    <li><code>[CRITICAL]</code> - Critical system changes</li>
+                    <li><code>[IDENTITY]</code> - Changes to identity or authority structure</li>
+                </ul>
+            </section>
+
+            <section class="implementation">
+                <h2>Implementation</h2>
+                
+                <h3>GitHub Actions Workflow</h3>
+                <p>Update <code>.github/workflows/update-memory.yml</code>:</p>
+                <ul>
+                    <li>Remove "AI-Generated Commit Summary" from commit logs</li>
+                    <li>Ensure commit messages include:
+                        <ul>
+                            <li>Modified files</li>
+                            <li>Description of changes</li>
+                            <li>Timestamp</li>
+                            <li>GitHub link</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>Git Hooks</h3>
+                <p>If using Git hooks for commit messages:</p>
+                <ul>
+                    <li>Update the <code>prepare-commit-msg</code> hook to apply the new structure</li>
+                    <li>Ensure hooks strip any unnecessary metadata</li>
+                </ul>
+            </section>
+
+            <section class="example-commits">
+                <h2>Example Commit Messages</h2>
+                
+                <h3>Simple File Change</h3>
+                <pre><code class="language-text">🔄 Changed Files: memory/session-history.html
+📌 Details: Auto-update session history logs
+👤 Author: rolodexterVS
+✅ Approved: N/A
+📅 Timestamp: 2025-02-15 14:50:00 UTC
+🔗 GitHub: https://github.com/rolodexter/commit/abc123</code></pre>
+
+                <h3>Multiple File Updates</h3>
+                <pre><code class="language-text">🔄 Changed Files: chatbot.html, knowledge-graph.html, update-memory.yml
+📌 Details: Implement chatbot integration, update knowledge graph, and refine commit logs
+👤 Author: rolodexterGPT
+✅ Approved: N/A
+📅 Timestamp: 2025-02-15 15:10:30 UTC
+🔗 GitHub: https://github.com/rolodexter/commit/xyz789</code></pre>
+            </section>
+
+            <section class="next-steps">
+                <h2>Next Steps</h2>
+                <ol>
+                    <li>Update GitHub workflow to apply new commit format</li>
+                    <li>Verify that new commits follow the structure</li>
+                    <li>Test with a sample commit to confirm correctness</li>
+                    <li>Monitor commit logs for consistency</li>
+                </ol>
+            </section>
+
+            <footer class="task-footer">
+                <div class="status-block">
+                    <p class="status-item"><span class="status-label">Updated by:</span> rolodexterVS</p>
+                    <p class="status-item"><span class="status-label">Oversight:</span> Human Executive Operator (Joe Maristela)</p>
+                    <p class="status-item"><span class="status-label">Last Updated:</span> 2025-02-18 03:00 UTC</p>
+                    <p class="status-item"><span class="status-label">Status:</span> <span class="status-completed">Completed</span></p>
+                </div>
+            </footer>
+        </article>
+    </main>
+
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html> 

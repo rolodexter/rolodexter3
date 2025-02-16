@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footer Component Guidelines - rolodexter Labs</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../assets/brand/favicon_io/favicon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/documentation.css">
+    
+    <!-- Knowledge Graph Metadata -->
+    <meta name="description" content="Implementation guidelines for the standardized footer component">
+    <meta name="keywords" content="footer, component, guidelines, implementation">
+    <meta name="graph-tags" content="documentation, guidelines, footer, component">
+    <meta name="graph-category" content="documentation">
+    <meta name="graph-connections" content="index.html, ../resolved-tasks/footer-standardization.html">
+    <meta name="graph-created" content="2025-02-17T21:45:00Z">
+    <meta name="graph-modified" content="2025-02-18T03:00:00Z">
+    <meta name="graph-authors" content="rolodexterVS">
+    <meta name="graph-status" content="active">
+</head>
+<body class="documentation-page">
+    <main class="container">
+        <article class="memory-content">
+            <h1>Footer Component Guidelines</h1>
+
+            <section class="component-structure">
+                <h2>Structure</h2>
+                <pre><code class="language-html">&lt;div class="footer-links"&gt;
+    &lt;div class="footer-links-row"&gt;
+        &lt;a href="../docs/CHANGELOG.html"&gt;Changelog&lt;/a&gt;&lt;span class="separator"&gt;,&lt;/span&gt;
+        &lt;a href="../docs/VERSION.html"&gt;Version&lt;/a&gt;&lt;span class="separator"&gt;,&lt;/span&gt;
+        &lt;a href="https://github.com/rolodexter3"&gt;GitHub&lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div class="footer-links-row"&gt;
+        &lt;a href="../legal/privacy.html"&gt;Privacy Policy&lt;/a&gt;&lt;span class="separator"&gt;,&lt;/span&gt;
+        &lt;a href="../legal/terms.html"&gt;Terms of Use&lt;/a&gt;&lt;span class="separator"&gt;,&lt;/span&gt;
+        &lt;a href="../legal/cookies.html"&gt;Cookie Policy&lt;/a&gt;&lt;span class="separator"&gt;,&lt;/span&gt;
+        &lt;a href="../legal/ai-ethics.html"&gt;AI Ethics&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </section>
+
+            <section class="formatting-rules">
+                <h2>Formatting Rules</h2>
+                
+                <h3>1. Link and Comma Formatting</h3>
+                <ul>
+                    <li>No spaces between links and commas</li>
+                    <li>Example: <code>Privacy Policy,</code> NOT <code>Privacy Policy ,</code></li>
+                    <li>Commas wrapped in <code>&lt;span class="separator"&gt;,&lt;/span&gt;</code></li>
+                </ul>
+
+                <h3>2. Row Organization</h3>
+                <ul>
+                    <li>First row: Resource links (Changelog, Version, GitHub)</li>
+                    <li>Second row: Legal links (Privacy, Terms, Cookies, Ethics)</li>
+                </ul>
+
+                <h3>3. CSS Requirements</h3>
+                <ul>
+                    <li>Left-aligned text</li>
+                    <li>Proper wrapping on mobile</li>
+                    <li>Consistent spacing between rows</li>
+                    <li>Comma color using <code>--text-secondary</code></li>
+                </ul>
+            </section>
+
+            <section class="implementation-notes">
+                <h2>Implementation Notes</h2>
+                <ul>
+                    <li>Always use relative paths for internal links</li>
+                    <li>Maintain consistent order of links within rows</li>
+                    <li>Ensure all links are valid and accessible</li>
+                    <li>Include dark/light mode contrast support</li>
+                </ul>
+            </section>
+
+            <section class="example-css">
+                <h2>Example CSS</h2>
+                <pre><code class="language-css">.footer-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.35rem;
+    line-height: 1.6;
+}
+
+.footer-links-row span.separator {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+    padding-left: 0;
+}</code></pre>
+            </section>
+
+            <section class="accessibility">
+                <h2>Accessibility</h2>
+                <ul>
+                    <li>Links must be keyboard navigable</li>
+                    <li>Proper color contrast for both themes</li>
+                    <li>Clear visual separation between rows</li>
+                    <li>Ensure readable text size (0.85rem minimum)</li>
+                </ul>
+            </section>
+
+            <footer class="task-footer">
+                <p>Last Updated: 2025-02-18 03:00 UTC</p>
+                <p>Maintained by: rolodexterVS 🔧</p>
+            </footer>
+        </article>
+    </main>
+
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html> 
