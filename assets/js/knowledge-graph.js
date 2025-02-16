@@ -1,10 +1,9 @@
-import { graphMetadata } from './graph-metadata.js';
-import { GraphDataLoader } from '../../scripts/graph-data-loader.js';
-import { GraphSearch } from '../../scripts/search-graph.js';
+import { GraphDataLoader } from './graph-data-loader.js';
+import { GraphSearch } from './search-graph.js';
 
-class KnowledgeGraph {
+export class KnowledgeGraph {
     constructor(containerId) {
-        this.container = d3.select(containerId);
+        this.container = d3.select(`#${containerId}`);
         this.width = this.container.node().getBoundingClientRect().width;
         this.height = this.container.node().getBoundingClientRect().height || 600;
         
@@ -31,74 +30,32 @@ class KnowledgeGraph {
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))
             .force('collision', d3.forceCollide().radius(30));
             
-        // Initialize data loader and search
+        // Initialize data loader
         this.dataLoader = new GraphDataLoader();
-        this.search = new GraphSearch(this);
-        
-        // Initialize controls and start loading data
-        this.initControls();
-        this.initGraph();
     }
     
     async initGraph() {
         try {
             this.showLoading();
-            const graphData = await this.collectGraphData();
-            this.renderGraph(graphData.nodes, graphData.edges);
+            const data = await this.dataLoader.loadDirectory('.');
+            await this.renderGraph(data.nodes, data.edges);
             this.hideLoading();
+            
+            // Initialize search after graph is rendered
+            this.search = new GraphSearch(this);
+            
+            return true;
         } catch (error) {
             console.error('Failed to initialize graph:', error);
-            this.showError();
+            this.showError(error.message);
+            return false;
         }
     }
     
-    async collectGraphData() {
-        // Collect metadata from all HTML files
-        const nodes = [];
-        const edges = [];
-        const nodeMap = new Map();
-        
-        // Function to process metadata from a page
-        const processPage = (doc) => {
-            const metaTags = doc.querySelectorAll('meta[name^="graph-"]');
-            if (metaTags.length === 0) return;
-            
-            const metadata = {};
-            metaTags.forEach(tag => {
-                const name = tag.getAttribute('name').replace('graph-', '');
-                metadata[name] = tag.getAttribute('content');
-            });
-            
-            const id = doc.location.pathname;
-            const name = doc.title || id;
-            
-            // Add node if it doesn't exist
-            if (!nodeMap.has(id)) {
-                const node = { id, name, metadata };
-                nodes.push(node);
-                nodeMap.set(id, node);
-            }
-            
-            // Process connections
-            if (metadata.connections) {
-                const connections = metadata.connections.split(',').map(c => c.trim());
-                connections.forEach(target => {
-                    edges.push({
-                        source: id,
-                        target,
-                        weight: 1
-                    });
-                });
-            }
-        };
-        
-        // Process current page
-        processPage(document);
-        
-        return { nodes, edges };
-    }
-    
     renderGraph(nodes, edges) {
+        // Clear existing graph
+        this.g.selectAll('*').remove();
+        
         // Create links
         const link = this.g.selectAll('.link')
             .data(edges)
@@ -113,7 +70,7 @@ class KnowledgeGraph {
             .data(nodes)
             .join('g')
             .attr('class', 'node')
-            .call(this.drag(this.simulation));
+            .call(this.drag());
             
         // Add circles to nodes
         node.append('circle')
@@ -149,6 +106,7 @@ class KnowledgeGraph {
             });
             
         this.simulation.force('link').links(edges);
+        this.simulation.alpha(1).restart();
     }
     
     getCategoryColor(category) {
@@ -186,7 +144,9 @@ class KnowledgeGraph {
         });
     }
     
-    drag(simulation) {
+    drag() {
+        const simulation = this.simulation;
+        
         function dragstarted(event) {
             if (!event.active) simulation.alphaTarget(0.3).restart();
             event.subject.fx = event.subject.x;
@@ -211,6 +171,7 @@ class KnowledgeGraph {
     }
     
     showLoading() {
+        this.container.select('.loading-indicator').remove();
         this.container.append('div')
             .attr('class', 'loading-indicator')
             .html('Loading knowledge graph...');
@@ -220,14 +181,16 @@ class KnowledgeGraph {
         this.container.select('.loading-indicator').remove();
     }
     
-    showError() {
+    showError(message) {
+        this.container.select('.error-container').remove();
         const error = this.container.append('div')
             .attr('class', 'error-container');
             
         error.append('div')
             .attr('class', 'error-message')
             .html(`
-                <p>Failed to load the knowledge graph.</p>
+                <p>Failed to load the knowledge graph:</p>
+                <p class="error-details">${message || 'Unknown error'}</p>
                 <button onclick="location.reload()">Retry</button>
             `);
     }

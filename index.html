@@ -123,26 +123,25 @@
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module">
-        import { GraphDataLoader } from './assets/js/graph-data-loader.js';
-        import { GraphSearch } from './assets/js/search-graph.js';
         import { KnowledgeGraph } from './assets/js/knowledge-graph.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const graph = new KnowledgeGraph('knowledge-graph');
-                const dataLoader = new GraphDataLoader();
-                await dataLoader.loadDirectory('.');
-                const graphData = dataLoader.getGraphData();
-                await graph.renderGraph(graphData.nodes, graphData.edges);
                 
-                // Initialize search
-                const search = new GraphSearch(graph);
-                
-                // Initialize controls
+                // Initialize controls first
                 graph.initControls();
+                
+                // Then initialize the graph
+                const success = await graph.initGraph();
+                
+                if (!success) {
+                    console.error('Failed to initialize knowledge graph');
+                }
             } catch (error) {
-                console.error('Failed to initialize knowledge graph:', error);
-                document.querySelector('.loading-indicator').textContent = 'Error loading knowledge graph. Please try again.';
+                console.error('Error setting up knowledge graph:', error);
+                document.querySelector('.loading-indicator').textContent = 
+                    'Error loading knowledge graph. Please check the console for details.';
             }
         });
     </script>
