@@ -9,6 +9,9 @@ export class GraphDataLoader {
         this.retryDelay = 1000; // 1 second
         this.lastLoadAttempt = null;
         this.minRetryInterval = 5000; // 5 seconds between manual retries
+        this.loadPromise = null; // Cache for ongoing load
+        this.cachedData = null; // Cache for loaded data
+        this.cacheTimestamp = null; // When the cache was last updated
         
         // Create and attach the reload button
         this.createReloadButton();
@@ -92,6 +95,47 @@ export class GraphDataLoader {
         try {
             this.lastLoadAttempt = Date.now();
             
+            // Check if we have a cached load in progress
+            if (this.loadPromise) {
+                debugLog('GraphDataLoader', 'Using existing load promise');
+                return this.loadPromise;
+            }
+
+            // Check if we have valid cached data
+            if (this.isValidCache()) {
+                debugLog('GraphDataLoader', 'Using cached data');
+                return this.cachedData;
+            }
+            
+            // Start new load
+            this.loadPromise = this._loadData();
+            const data = await this.loadPromise;
+            
+            // Cache the result
+            this.cachedData = data;
+            this.cacheTimestamp = Date.now();
+            
+            // Clear the load promise
+            this.loadPromise = null;
+            
+            return data;
+        } catch (error) {
+            this.loadPromise = null; // Clear on error
+            throw error;
+        }
+    }
+
+    isValidCache() {
+        if (!this.cachedData || !this.cacheTimestamp) return false;
+        
+        const cacheAge = Date.now() - this.cacheTimestamp;
+        const maxAge = config.cache?.expiry || 300000; // 5 minutes default
+        
+        return cacheAge < maxAge && !config.cache?.forceRefresh;
+    }
+
+    async _loadData() {
+        try {
             // First try to load from local data directory
             debugLog('GraphDataLoader', 'Attempting to load from local data directory');
             const data = await this.loadGraphData();
@@ -116,7 +160,7 @@ export class GraphDataLoader {
                 this.retryCount++;
                 this.logWarning(`Retrying data load (${this.retryCount}/${this.maxRetries})`);
                 await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-                return this.loadDirectory();
+                return this._loadData();
             }
 
             // Show error UI and reload button
